@@ -1,0 +1,49 @@
+name: Update market breadth data
+
+on:
+  schedule:
+    # 08:45 UTC = 15:45 giờ VN (UTC+7), sau khi phiên chiều HOSE/HNX/UPCOM đóng cửa
+    - cron: "45 8 * * 1-5"
+  workflow_dispatch: {}   # cho phép bấm chạy tay từ tab Actions
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Restore OHLC cache
+        uses: actions/cache@v4
+        with:
+          path: data/ohlc_cache
+          key: ohlc-cache-${{ github.run_id }}
+          restore-keys: |
+            ohlc-cache-
+
+      - name: Run fetch + compute
+        env:
+          SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
+          SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+        run: python scripts/fetch_and_compute.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "chore: update market breadth data $(date -u +'%Y-%m-%d')"
+          git push
