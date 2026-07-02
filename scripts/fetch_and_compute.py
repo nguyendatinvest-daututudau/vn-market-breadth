@@ -204,18 +204,34 @@ def append_history(snapshots_by_market: dict) -> None:
     HISTORY_JSON.parent.mkdir(parents=True, exist_ok=True)
     history = []
     if HISTORY_JSON.exists():
-        history = json.loads(HISTORY_JSON.read_text(encoding="utf-8"))
+        try:
+            history = json.loads(HISTORY_JSON.read_text(encoding="utf-8"))
+        except:
+            history = []
 
     today_date = snapshots_by_market["ALL"]["date"]
+
+    # Xóa bản ghi cũ nếu có (tránh trùng)
     history = [h for h in history if h.get("date") != today_date]
+
+    # Thêm dữ liệu mới
     history.append({"date": today_date, "markets": snapshots_by_market})
-    history = history[-120:]
+
+    # Sắp xếp theo ngày giảm dần
+    history.sort(key=lambda x: datetime.strptime(x["date"], "%d/%m/%Y"), reverse=True)
+
+    # Giữ tối đa 120 phiên
+    history = history[:120]
+
     HISTORY_JSON.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Updated history with {len(history)} records")
 
 
 def main():
     client = SSIClient()
     today = vn_today()
+
+    print(f"Starting update for date: {today.strftime('%d/%m/%Y')}")
 
     snapshots_by_market = {}
     per_market_list = []
@@ -236,10 +252,10 @@ def main():
         ),
         encoding="utf-8",
     )
-    print(f"Wrote {LATEST_JSON}")
+    print(f"Wrote latest data {LATEST_JSON}")
 
     append_history(snapshots_by_market)
-    print(f"Updated {HISTORY_JSON}")
+    print("Update completed successfully")
 
 
 if __name__ == "__main__":
