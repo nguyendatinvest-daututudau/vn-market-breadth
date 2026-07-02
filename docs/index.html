@@ -126,19 +126,21 @@ let LATEST = null, HISTORY = null;
 
 async function loadData(){
   try {
-    const [latestRes, historyRes] = await Promise.all([
-      fetch('../data/breadth_latest.json').then(r => { if(!r.ok) throw new Error('latest not found'); return r.json(); }),
-      fetch('../data/breadth_history.json').then(r => r.ok ? r.json() : []).catch(() => [])
-    ]);
-    LATEST = latestRes;
-    HISTORY = historyRes;
+    const latestRes = await fetch('https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_latest.json?' + Date.now());
+    if (!latestRes.ok) throw new Error('latest not found');
+    LATEST = await latestRes.json();
+
+    const historyRes = await fetch('https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_history.json?' + Date.now());
+    HISTORY = historyRes.ok ? await historyRes.json() : [];
+
     document.getElementById('metaLine').textContent =
       `Cập nhật: ${new Date(LATEST.generated_at).toLocaleString('vi-VN')} · Ngày dữ liệu: ${LATEST.markets.ALL.date}`;
+
     renderTabs();
     render();
   } catch (e) {
     document.getElementById('content').innerHTML =
-      `<div class="err">Không tải được dữ liệu (data/breadth_latest.json). Hãy chắc chắn GitHub Actions đã chạy ít nhất 1 lần và file đã được commit.<br><br>Lỗi: ${e.message}</div>`;
+      `<div class="err">Không tải được dữ liệu (data/breadth_latest.json).<br><br>Lỗi: ${e.message}</div>`;
   }
 }
 
