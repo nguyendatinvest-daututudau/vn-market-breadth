@@ -126,11 +126,12 @@ let LATEST = null, HISTORY = null;
 
 async function loadData(){
   try {
-    const latestRes = await fetch('https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_latest.json?' + Date.now());
+    const timestamp = Date.now();
+    const latestRes = await fetch(`https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_latest.json?t=${timestamp}`);
     if (!latestRes.ok) throw new Error('latest not found');
     LATEST = await latestRes.json();
 
-    const historyRes = await fetch('https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_history.json?' + Date.now());
+    const historyRes = await fetch(`https://raw.githubusercontent.com/0deathislife0-design/vn-market-breadth/main/data/breadth_history.json?t=${timestamp}`);
     HISTORY = historyRes.ok ? await historyRes.json() : [];
 
     document.getElementById('metaLine').textContent =
@@ -139,11 +140,15 @@ async function loadData(){
     renderTabs();
     render();
   } catch (e) {
-    document.getElementById('content').innerHTML =
-      `<div class="err">Không tải được dữ liệu (data/breadth_latest.json).<br><br>Lỗi: ${e.message}</div>`;
+    console.error(e);
+    document.getElementById('content').innerHTML = `
+      <div class="err">
+        ❌ Không tải được dữ liệu<br><br>
+        Lỗi: ${e.message}<br><br>
+        <small>Hãy thử Ctrl + Shift + R để refresh mạnh.</small>
+      </div>`;
   }
 }
-
 function renderTabs(){
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
