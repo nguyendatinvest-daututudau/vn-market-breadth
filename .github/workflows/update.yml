@@ -3,7 +3,7 @@ name: Update market breadth data
 on:
   schedule:
     # 08:45 UTC = 15:45 giờ VN, chỉ chạy từ Thứ 2 đến Thứ 6
-    - cron: "45 8 * * 1-5"
+    - cron: "0 8 * * 1-5"
   workflow_dispatch: {}   # Cho phép chạy thủ công
 
 permissions:
