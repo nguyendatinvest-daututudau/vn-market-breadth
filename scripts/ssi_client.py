@@ -47,7 +47,7 @@ class SSIClient:
 
     # ---------------- Endpoints ----------------
     def securities(self, market: str, page_size: int = 1000) -> list[dict]:
-        """Danh sách mã theo sàn: HOSE | HNX | UPCOM"""
+        """Danh sách mã theo sàn: HOSE | HNX | UPCOM (bao gồm cả CW/ETF/Bond, dùng securities_details() để lọc)"""
         out, page = [], 1
         while True:
             data = self._get("Securities", {"market": market, "pageIndex": page, "pageSize": page_size})
@@ -59,6 +59,32 @@ class SSIClient:
             if page > 10:  # SSI giới hạn pageIndex 1..10
                 break
         return out
+
+    def securities_details(self, market: str, page_size: int = 1000) -> list[dict]:
+        """Danh sách mã kèm SecType (ST=cổ phiếu thường, CW=chứng quyền, EF/FU=ETF/Fund, BO=trái phiếu...)"""
+        out, page = [], 1
+        while True:
+            data = self._get(
+                "SecuritiesDetails", {"market": market, "pageIndex": page, "pageSize": page_size}
+            )
+            rows = data.get("data", [])
+            out.extend(rows)
+            if len(rows) < page_size:
+                break
+            page += 1
+            if page > 10:
+                break
+        return out
+
+    def common_stock_symbols(self, market: str) -> list[str]:
+        """Chỉ lấy mã cổ phiếu thường (loại bỏ chứng quyền/ETF/trái phiếu/quỹ)."""
+        rows = self.securities_details(market)
+        stock_types = {"ST", "S"}  # SSI trả về không nhất quán "ST" hoặc "S" tuỳ thời điểm
+        symbols = [
+            r["Symbol"] for r in rows
+            if r.get("Symbol") and str(r.get("SecType", "")).upper() in stock_types
+        ]
+        return symbols
 
     def daily_ohlc(self, symbol: str, from_date: str, to_date: str, page_size: int = 1000) -> list[dict]:
         """OHLCV theo ngày. Định dạng ngày: dd/mm/yyyy"""
