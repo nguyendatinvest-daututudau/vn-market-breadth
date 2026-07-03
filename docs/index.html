@@ -108,6 +108,7 @@
   .chip{font-family:var(--font-mono); font-size:11px; background:var(--panel-tint); border:1px solid var(--border); border-radius:999px; padding:4px 10px; color:var(--muted); font-weight:500;}
   .chip.up{color:var(--up); border-color:rgba(240,71,62,0.25); background:rgba(240,71,62,0.07);}
   .chip.down{color:var(--down); border-color:rgba(15,174,114,0.25); background:rgba(15,174,114,0.07);}
+  .chip.dual{background:linear-gradient(135deg,#a855f7,#d946ef);color:#fff;border-color:#c084fc;box-shadow:0 0 10px #a855f7,0 0 20px #d946ef;}
   .empty-note{font-size:12px; color:var(--faint); font-style:italic;}
 </style>
 </head>
@@ -192,10 +193,23 @@ function deltaStr(cur, prev, rev){
   return `<span class="delta ${cls}">${sign}${Number(d).toFixed(typeof d === 'number' && Number.isInteger(d) ? 0 : 2)}</span>`;
 }
 
-function renderChips(list, kind){
+function renderChipsDual(list, otherList){
+  const dual = new Set(otherList.filter(x => list.includes(x)));
+  return renderChips(list, 'neutral', dual);
+}
+
+function renderChips(list, kind, dualSet){
   if (!list || list.length === 0) return '<span class="empty-note">Không có mã nào</span>';
-  const cls = kind === 'up' ? 'chip up' : kind === 'down' ? 'chip down' : 'chip';
-  return list.map(sym => `<span class="${cls}">${sym}</span>`).join('');
+  let cls;
+  if (kind === 'up') cls = 'chip up';
+  else if (kind === 'down') cls = 'chip down';
+  else if (kind === 'dual') cls = 'chip dual';
+  else cls = 'chip';
+  return list.map(sym => {
+    const isDual = dualSet && dualSet.has(sym);
+    const finalCls = isDual ? 'chip dual' : cls;
+    return `<span class="${finalCls}">${sym}</span>`;
+  }).join('');
 }
 
 function cmpHTML(){
@@ -339,11 +353,11 @@ function render(){
       <div class="signal-grid" style="grid-template-columns:1fr 1fr;">
         <div class="signal-col">
           <div class="signal-title">Trên MA20 (${(m.above_ma20_symbols||[]).length} mã)</div>
-          <div class="chip-wrap">${renderChips(m.above_ma20_symbols, 'neutral')}</div>
+          <div class="chip-wrap">${renderChipsDual(m.above_ma20_symbols, m.above_ma50_symbols)}</div>
         </div>
         <div class="signal-col">
           <div class="signal-title">Trên MA50 (${(m.above_ma50_symbols||[]).length} mã)</div>
-          <div class="chip-wrap">${renderChips(m.above_ma50_symbols, 'neutral')}</div>
+          <div class="chip-wrap">${renderChipsDual(m.above_ma50_symbols, m.above_ma20_symbols)}</div>
         </div>
       </div>
     </div>
