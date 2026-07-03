@@ -147,6 +147,7 @@ class SSIClient:
         exclude = {"CW", "ETF", "BOND", "BO", "FU", "MF", "OF", "EF", "FUND"}
         symbols = []
         skipped_digit = 0
+        skipped_long = 0
         for r in out:
             symbol = str(r.get("Symbol") or r.get("symbol") or "").strip()
             sec_type = str(r.get("SecType") or r.get("secType") or r.get("type") or "").strip().upper()
@@ -157,8 +158,11 @@ class SSIClient:
             if re.search(r"\d", symbol):
                 skipped_digit += 1
                 continue
+            if len(symbol) > 3:
+                skipped_long += 1
+                continue
             symbols.append(symbol)
-        print("[" + market + "] Bỏ " + str(skipped_digit) + " mã có chữ số trong tên")
+        print("[" + market + "] Bỏ " + str(skipped_digit) + " mã có chữ số + " + str(skipped_long) + " mã >3 ký tự")
         print("[" + market + "] Sau lọc còn: " + str(len(symbols)) + " mã")
         return symbols
 
