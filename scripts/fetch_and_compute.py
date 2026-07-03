@@ -118,13 +118,15 @@ def cache_max_date(symbol: str) -> datetime | None:
 
 def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame:
     cached = load_cache(symbol)
+    cached_historical = pd.DataFrame()
     if cached.empty:
         from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
     else:
-        # Nếu cache đã có dữ liệu đến hôm nay thì không cần gọi API
         latest_cached = cached["TradingDate"].max()
-        if latest_cached is not None and latest_cached.date() >= today.date():
+        if latest_cached is not None and latest_cached.date() > today.date():
             return cached
+        # Luôn fetch data hôm nay (cho phép midday + closing cùng ngày)
+        cached_historical = cached[cached["TradingDate"].dt.date < today.date()]
         from_date = today - timedelta(days=INCREMENTAL_LOOKBACK)
 
     rows = client.daily_ohlc(
@@ -162,12 +164,12 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
 
             # Align columns truoc khi concat
             for col in ["Volume"]:
-                if col in cached.columns and col not in new_df.columns:
+                if col in cached_historical.columns and col not in new_df.columns:
                     new_df[col] = float("nan")
-                if col in new_df.columns and col not in cached.columns:
-                    cached[col] = float("nan")
+                if col in new_df.columns and col not in cached_historical.columns:
+                    cached_historical[col] = float("nan")
 
-            merged = pd.concat([cached, new_df], ignore_index=True)
+            merged = pd.concat([cached_historical, new_df], ignore_index=True)
         else:
             tqdm.write(f"  [WARN] {symbol}: khong tim thay cot TradingDate/Close")
             merged = cached
