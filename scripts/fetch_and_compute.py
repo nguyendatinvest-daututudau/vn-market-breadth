@@ -51,6 +51,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from ssi_client import SSIClient
+from market_commentary import generate_commentary
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -59,6 +60,8 @@ DOCS_DATA_DIR = ROOT / "docs" / "data"
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 MIDDAY_JSON = DATA_DIR / "breadth_midday.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
+COMMENTARY_JSON = DATA_DIR / "market_commentary.json"
+DOCS_COMMENTARY_JSON = DOCS_DATA_DIR / "market_commentary.json"
 
 MARKETS = ["HOSE", "HNX"]
 MARKET_INDEX_ID = {
@@ -424,7 +427,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Đồng bộ dữ liệu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json", "market_commentary.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -485,6 +488,14 @@ def main():
     append_history(markets_dict)
     _sync_docs_data()
     print(f"Da cap nhat history.")
+
+    # Generate market commentary
+    try:
+        generate_commentary(output)
+        print("Da sinh nhan xet thi truong.")
+    except Exception as e:
+        print(f"Loi sinh nhan xet: {e}")
+
     print("\nHoan tat.")
 
 

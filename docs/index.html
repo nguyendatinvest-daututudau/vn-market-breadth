@@ -132,7 +132,7 @@
 <script>
 let MARKETS = ['ALL'];
 let activeMarket = 'HOSE';
-let LATEST = null, HISTORY = null, MIDDAY = null;
+let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null;
 
 async function loadData(){
   try {
@@ -150,6 +150,9 @@ async function loadData(){
     if (MIDDAY && MIDDAY.markets.ALL.date !== LATEST.markets.ALL.date) {
       MIDDAY = null;
     }
+
+    const commentaryRes = await fetch(`./data/market_commentary.json?t=${timestamp}`);
+    COMMENTARY = commentaryRes.ok ? await commentaryRes.json() : null;
 
     const sessionLabel = LATEST.session === 'midday'
       ? '<span class="session-badge midday">Phiên sáng 11:30</span>'
@@ -174,9 +177,11 @@ async function loadData(){
 function renderTabs(){
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
-  MARKETS.forEach(m => {
+  const tabs = [...MARKETS];
+  if (COMMENTARY) tabs.push('NHAN_DINH');
+  tabs.forEach(m => {
     const btn = document.createElement('button');
-    btn.textContent = m;
+    btn.textContent = m === 'NHAN_DINH' ? 'Nhận định' : m;
     if (m === activeMarket) btn.classList.add('active');
     btn.onclick = () => { activeMarket = m; renderTabs(); render(); };
     tabsEl.appendChild(btn);
@@ -252,6 +257,10 @@ function cmpHTML(){
 }
 
 function render(){
+  if (activeMarket === 'NHAN_DINH') {
+    renderCommentary();
+    return;
+  }
   const m = LATEST.markets[activeMarket];
   const contentEl = document.getElementById('content');
 
@@ -375,6 +384,23 @@ function render(){
       </div>
     </div>
   `;
+}
+
+function renderCommentary(){
+  const contentEl = document.getElementById('content');
+  if (!COMMENTARY || !COMMENTARY.content) {
+    contentEl.innerHTML = `<div class="panel"><h2>Nhận định phiên</h2><div class="loading">Chưa có dữ liệu nhận định.</div></div>`;
+    return;
+  }
+  const md = COMMENTARY.content;
+  // Simple markdown to HTML for basic formatting
+  const html = md
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  contentEl.innerHTML = `<div class="panel"><h2>Nhận định phiên</h2><div class="commentary">${html}</div></div>`;
 }
 
 loadData();
