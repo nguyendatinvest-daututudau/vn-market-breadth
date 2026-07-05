@@ -50,7 +50,7 @@ MAX_BASE_RANGE_PCT = 8.0
 MIN_AVG_VOLUME = 300_000
 
 
-    return pd.DataFrame(columns=["TradingDate", "Close", "Volume", "High", "Low"])
+
 
 
 def detect_base_quality(df: pd.DataFrame) -> dict:
