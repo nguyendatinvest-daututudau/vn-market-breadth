@@ -119,6 +119,36 @@
 .chart-wrap{position:relative;width:100%;}
 .chart-wrap canvas{width:100%;display:block;border-radius:12px;}
 .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:11.5px;box-shadow:var(--shadow-md);font-family:var(--font-mono);display:none;white-space:nowrap;line-height:1.5;}
+
+/* COMPACT LAYOUT */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;}
+.kpi-card{border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;background:var(--panel);}
+.kpi-card .lab{font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:var(--faint);font-weight:600;}
+.kpi-card .num{font-family:var(--font-mono);font-size:22px;font-weight:700;margin-top:3px;letter-spacing:-0.02em;}
+.kpi-card .sub{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.kpi-card.primary .num{color:var(--accent-1);}
+.kpi-card.up .num{color:var(--up);}
+.kpi-card.down .num{color:var(--down);}
+.kpi-card.neutral .num{color:var(--neutral);}
+.kpi-trend{display:flex;gap:8px;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;margin-top:2px;}
+.section-title{font-family:var(--font-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:#3A4270;margin-bottom:12px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.two-col .panel{margin-bottom:0;}
+@media (max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.two-col{grid-template-columns:1fr;}}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;}
+.tag-row .chip{font-size:10px;padding:3px 8px;}
+.sec-compact{margin-bottom:12px;}
+.sec-compact .section-title{margin-bottom:8px;}
+
+/* ENSEMBLE WEIGHTED */
+.weight-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;margin:6px 0 10px;gap:2px;}
+.weight-bar span{height:100%;border-radius:4px;}
+.weight-label{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-bottom:4px;}
+.signal-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+.sig-stat{border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;background:var(--panel-tint);}
+.sig-stat .lab{font-size:9.5px;text-transform:uppercase;letter-spacing:0.03em;color:var(--faint);font-weight:600;}
+.sig-stat .num{font-family:var(--font-mono);font-size:20px;font-weight:700;margin-top:2px;}
+.sig-stat .pct{font-size:10px;color:var(--muted);margin-top:1px;}
 </style>
 </head>
 <body>
@@ -135,13 +165,13 @@
     <div class="loading">Đang tải dữ liệu…</div>
   </div>
 
-  <footer>Dữ liệu: SSI FastConnect · Cập nhật tự động qua GitHub Actions</footer>
+  <footer>Dữ liệu: SSI FastConnect · Cập nhật tự động qua GitHub Actions<br><span style="color:#141834;font-weight:600;font-size:12px;">nguyendat.invest2026</span></footer>
 </div>
 
 <script>
 let MARKETS = ['ALL'];
 let activeMarket = 'HOSE';
-let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null, SIGNALS = null, ENSEMBLE = null;
+let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null, SIGNALS = null, ENSEMBLE = null, ENSEMBLE_WEIGHTS = null;
 
 async function loadData(){
   try {
@@ -168,6 +198,9 @@ async function loadData(){
 
     const ensembleRes = await fetch(`./data/ensemble_signals.json?t=${timestamp}`);
     ENSEMBLE = ensembleRes.ok ? await ensembleRes.json() : null;
+
+    const weightsRes = await fetch(`./data/backtest_weights.json?t=${timestamp}`);
+    ENSEMBLE_WEIGHTS = weightsRes.ok ? await weightsRes.json() : null;
 
     const sessionLabel = LATEST.session === 'midday'
       ? '<span class="session-badge midday">Phiên sáng 11:30</span>'
@@ -297,125 +330,146 @@ function render(){
 
   const hist = (HISTORY || []).slice(-6).reverse();
 
+  // AD ratio description
+  let adNote = '';
+  if (m.ad_ratio !== null) {
+    if (m.ad_ratio >= 1.5) adNote = 'Tien lan toa rong, tam ly lac quan.';
+    else if (m.ad_ratio >= 1.2) adNote = 'Tien lan toa tot, so ma tang vuot giam ro ret.';
+    else if (m.ad_ratio >= 1.0) adNote = 'So ma tang nhinh hon giam, can bang nghieng tang.';
+    else if (m.ad_ratio >= 0.8) adNote = 'Can bang, tien chua co huong ro.';
+    else adNote = 'Tien rut lai, ban ap dao.';
+  }
+
   contentEl.innerHTML = `
-    <div class="panel">
-      <h2>Phân bố tăng-giảm giá — ${total} mã ${activeMarket} (${m.date})</h2>
-      <div class="stat-grid">
-        <div class="stat up"><div class="lab">Tăng giá</div><div class="num">${m.advances}</div><div class="pct">${fmt1(m.advances_pct)}%</div></div>
-        <div class="stat flat"><div class="lab">Không đổi</div><div class="num">${m.unchanged}</div><div class="pct">${fmt1(m.unchanged_pct)}%</div></div>
-        <div class="stat down"><div class="lab">Giảm giá</div><div class="num">${m.declines}</div><div class="pct">${fmt1(m.declines_pct)}%</div></div>
+    <div class="sec-compact">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="lab">TANG</div>
+          <div class="num" style="color:var(--up);">${m.advances}</div>
+          <div class="sub">${fmt1(m.advances_pct)}% / ${total} ma</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lab">GIAM</div>
+          <div class="num" style="color:var(--down);">${m.declines}</div>
+          <div class="sub">${fmt1(m.declines_pct)}% / ${total} ma</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lab">A/D RATIO</div>
+          <div class="num" style="color:${m.ad_ratio >= 1 ? 'var(--up)' : m.ad_ratio !== null ? 'var(--down)' : 'var(--neutral)'};">${m.ad_ratio ?? '—'}</div>
+          <div class="sub">${adNote}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lab">KHONG DOI</div>
+          <div class="num" style="color:var(--neutral);">${m.unchanged}</div>
+          <div class="sub">${fmt1(m.unchanged_pct)}%</div>
+        </div>
       </div>
-      <div class="bar-labels" style="margin-top:16px;">
-        <span class="up-l">Tăng: ${m.advances} (${fmt1(m.advances_pct)}%)</span>
-        <span>Không đổi: ${m.unchanged}</span>
-        <span class="down-l">Giảm: ${m.declines} (${fmt1(m.declines_pct)}%)</span>
+
+      <div class="breadth-bar" style="margin-bottom:14px;">
+        <span style="width:${upW}%; background:var(--up);">${upW > 12 ? fmt1(upW) + '%' : ''}</span>
+        <span style="width:${flatW}%; background:var(--neutral);">${flatW > 10 ? fmt1(flatW) + '%' : ''}</span>
+        <span style="width:${downW}%; background:var(--down);">${downW > 12 ? fmt1(downW) + '%' : ''}</span>
       </div>
-      <div class="breadth-bar">
-        <span style="width:${upW}%; background:var(--up);"></span>
-        <span style="width:${flatW}%; background:var(--neutral);"></span>
-        <span style="width:${downW}%; background:var(--down);"></span>
+    </div>
+
+    <div class="section-title">ÐO RONG — % TREN DUONG TRUNG BINH</div>
+    <div class="kpi-grid" style="margin-bottom:14px;">
+      <div class="kpi-card primary">
+        <div class="lab">MA20 (ngan han)</div>
+        <div class="num">${fmt1(m.pct_above_ma20)}%</div>
+        <div class="sub">${m.above_ma20_count} ma</div>
       </div>
-      <div class="note">
-        <b>A/D Ratio: ${m.ad_ratio ?? '—'}</b> — tỉ lệ số mã tăng trên số mã giảm phiên ${m.date}.
-        ${m.ad_ratio !== null && m.ad_ratio > 1 ? 'Số mã tăng đang vượt số mã giảm.' : m.ad_ratio !== null ? 'Số mã giảm đang chiếm ưu thế.' : ''}
+      <div class="kpi-card primary">
+        <div class="lab">MA50 (trung han)</div>
+        <div class="num">${fmt1(m.pct_above_ma50)}%</div>
+        <div class="sub">${m.above_ma50_count} ma</div>
+      </div>
+      <div class="kpi-card">
+        <div class="lab">MA200 (dai han)</div>
+        <div class="num" style="color:var(--accent-2);">${fmt1(m.pct_above_ma200)}%</div>
+        <div class="sub">${m.above_ma200_count} ma</div>
+      </div>
+      <div class="kpi-card">
+        <div class="lab">VOLUME BREAKOUT</div>
+        <div class="num" style="color:var(--up);">${m.volume_breakout_count || 0}</div>
+        <div class="sub">ma KL dot bien</div>
       </div>
     </div>
 
     ${cmpHTML()}
 
     <div class="panel">
-      <h2>% cổ phiếu ${activeMarket} trên đường trung bình — so sánh các mốc</h2>
-      <div class="ma-grid">
-        <div class="ma-stat"><div class="lab">Trên MA20 (ngắn hạn)</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub2">${m.above_ma20_count} / ${m.ma_total_symbols} mã</div></div>
-        <div class="ma-stat"><div class="lab">Trên MA50 (trung hạn)</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub2">${m.above_ma50_count} / ${m.ma_total_symbols} mã</div></div>
-        <div class="ma-stat"><div class="lab">Trên MA200 (dài hạn)</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub2">${m.above_ma200_count} / ${m.ma_total_symbols} mã</div></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Lịch sử % cổ phiếu trên đường trung bình — ${activeMarket}</h2>
+      <div class="section-title">BIEU DO LICH SU — % TREN MA20 / MA50 / MA200</div>
       <div class="chart-wrap" id="chartWrap">
         <canvas id="breadthChart"></canvas>
         <div class="chart-tooltip" id="chartTooltip"></div>
       </div>
     </div>
 
+    <div class="section-title">TIN HIEU MOI TRONG PHIEN — ${activeMarket} (${m.date})</div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;color:var(--up);">↑ Vua vuot len MA20 (${(m.newly_above_ma20||[]).length})</div>
+        <div class="tag-row">${renderChips(m.newly_above_ma20, 'up') || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;color:var(--down);">↓ Vua rot xuong MA20 (${(m.newly_below_ma20||[]).length})</div>
+        <div class="tag-row">${renderChips(m.newly_below_ma20, 'down') || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:14px;">
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;color:var(--up);">↑ Vua vuot len MA50 (${(m.newly_above_ma50||[]).length})</div>
+        <div class="tag-row">${renderChips(m.newly_above_ma50, 'up') || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;color:var(--down);">↓ Vua rot xuong MA50 (${(m.newly_below_ma50||[]).length})</div>
+        <div class="tag-row">${renderChips(m.newly_below_ma50, 'down') || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+    </div>
+
+    <div class="section-title">TOAN BO MA TREN MA20 / MA50</div>
+    <div class="two-col" style="margin-bottom:14px;">
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;">Tren MA20 (${(m.above_ma20_symbols||[]).length} ma)</div>
+        <div class="tag-row">${renderChipsDual(m.above_ma20_symbols, m.above_ma50_symbols) || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+      <div class="panel">
+        <div class="section-title" style="font-size:11px;">Tren MA50 (${(m.above_ma50_symbols||[]).length} ma)</div>
+        <div class="tag-row">${renderChipsDual(m.above_ma50_symbols, m.above_ma20_symbols) || '<span class="empty-note">Khong co</span>'}</div>
+      </div>
+    </div>
+
     <div class="panel">
-      <h2>Chuỗi độ rộng thị trường ${activeMarket} — các phiên gần nhất</h2>
+      <div class="section-title">Breakout volume — ${activeMarket}</div>
+      <div class="tag-row">${renderChips(m.volume_breakout_symbols, 'up') || '<span class="empty-note">Khong co ma breakout volume</span>'}</div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Chuoi do rong — cac phien gan nhat</div>
       <table>
-        <thead><tr><th>Phiên</th><th>Tăng</th><th>Giảm</th><th>A/D Ratio</th><th>Nhận xét</th></tr></thead>
+        <thead><tr><th>Phien</th><th>Tang</th><th>Giam</th><th>A/D</th><th>MA20%</th><th>MA50%</th><th>NX</th></tr></thead>
         <tbody>
           ${hist.map(h => {
             const row = h.markets[activeMarket];
             if (!row) return '';
             const ratio = row.ad_ratio;
-            let tagClass = 'mixed', tagText = 'Trung tính';
+            let tagClass = 'mixed', tagText = 'TB';
             if (ratio !== null) {
-              if (ratio >= 1.2) { tagClass = 'good'; tagText = 'Tích cực'; }
-              else if (ratio <= 0.8) { tagClass = 'weak'; tagText = 'Yếu'; }
+              if (ratio >= 1.2) { tagClass = 'good'; tagText = 'Tot'; }
+              else if (ratio <= 0.8) { tagClass = 'weak'; tagText = 'Yeu'; }
             }
-            return `<tr>
-              <td>${row.date}</td>
-              <td class="mono up-txt">${row.advances}</td>
-              <td class="mono down-txt">${row.declines}</td>
-              <td class="mono">${ratio ?? '—'}</td>
-              <td><span class="tag ${tagClass}">${tagText}</span></td>
-            </tr>`;
+            return '<tr>'
+              + '<td>' + row.date + '</td>'
+              + '<td class="mono up-txt">' + row.advances + '</td>'
+              + '<td class="mono down-txt">' + row.declines + '</td>'
+              + '<td class="mono">' + (ratio ?? '—') + '</td>'
+              + '<td class="mono">' + fmt1(row.pct_above_ma20) + '%</td>'
+              + '<td class="mono">' + fmt1(row.pct_above_ma50) + '%</td>'
+              + '<td><span class="tag ' + tagClass + '">' + tagText + '</span></td></tr>';
           }).join('')}
         </tbody>
       </table>
-    </div>
-
-    <div class="panel">
-      <h2>Mã cổ phiếu vừa chuyển tín hiệu — ${activeMarket} (${m.date})</h2>
-      <div class="signal-grid">
-        <div class="signal-col">
-          <div class="signal-title up-txt">↑ Vừa vượt lên MA20 (${(m.newly_above_ma20||[]).length})</div>
-          <div class="chip-wrap">${renderChips(m.newly_above_ma20, 'up')}</div>
-        </div>
-        <div class="signal-col">
-          <div class="signal-title down-txt">↓ Vừa rớt xuống MA20 (${(m.newly_below_ma20||[]).length})</div>
-          <div class="chip-wrap">${renderChips(m.newly_below_ma20, 'down')}</div>
-        </div>
-        <div class="signal-col">
-          <div class="signal-title up-txt">↑ Vừa vượt lên MA50 (${(m.newly_above_ma50||[]).length})</div>
-          <div class="chip-wrap">${renderChips(m.newly_above_ma50, 'up')}</div>
-        </div>
-        <div class="signal-col">
-          <div class="signal-title down-txt">↓ Vừa rớt xuống MA50 (${(m.newly_below_ma50||[]).length})</div>
-          <div class="chip-wrap">${renderChips(m.newly_below_ma50, 'down')}</div>
-        </div>
-      </div>
-      <div class="note" style="margin-top:14px;">
-        "Vừa vượt lên/rớt xuống" nghĩa là mã đó <b>mới đổi trạng thái so với phiên trước</b> — hôm qua còn ở dưới đường MA, hôm nay đã lên trên (hoặc ngược lại). Đây là tín hiệu sớm cho thấy dòng tiền đang cải thiện hoặc suy yếu ở mã đó.
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Toàn bộ mã đang trên MA20 / MA50 — ${activeMarket}</h2>
-      <div class="signal-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="signal-col">
-          <div class="signal-title">Trên MA20 (${(m.above_ma20_symbols||[]).length} mã)</div>
-          <div class="chip-wrap">${renderChipsDual(m.above_ma20_symbols, m.above_ma50_symbols)}</div>
-        </div>
-        <div class="signal-col">
-          <div class="signal-title">Trên MA50 (${(m.above_ma50_symbols||[]).length} mã)</div>
-          <div class="chip-wrap">${renderChipsDual(m.above_ma50_symbols, m.above_ma20_symbols)}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Breakout volume — ${activeMarket} (${m.date})</h2>
-      <div class="note" style="margin-bottom:12px;">
-        Mã ≥ MA20 và khối lượng vượt ngưỡng: ${LATEST.session === 'midday' ? '50%' : '130%'} trung bình 20 phiên.
-        Hiện có <b>${m.volume_breakout_count || 0}</b> mã.
-      </div>
-      <div class="signal-grid" style="grid-template-columns:1fr;">
-        <div class="signal-col">
-          <div class="chip-wrap">${renderChips(m.volume_breakout_symbols, 'up')}</div>
-        </div>
-      </div>
     </div>
   `;
   requestAnimationFrame(renderBreadthChart);
@@ -496,10 +550,11 @@ function renderEnsemble(){
     if (row.pullback) sigs.push('PB');
     if (row.breakout) sigs.push('BO');
     if (row.momentum) sigs.push('ROC');
-    const cls = row.total_score >= 3 ? 'good' : 'mixed';
-    const label = row.total_score >= 3 ? 'Strong' : 'Weak';
+    const cls = row.total_score >= 0.65 ? 'good' : (row.total_score >= 0.35 ? 'mixed' : 'weak');
+    const label = row.total_score >= 0.65 ? 'Strong' : 'Weak';
+    const scorePct = (row.total_score * 100).toFixed(0) + '%';
     return '<tr><td class="mono" style="font-weight:700;">' + row.symbol + '</td>'
-      + '<td class="mono">' + row.total_score + '/4</td>'
+      + '<td class="mono">' + scorePct + '</td>'
       + '<td class="mono">' + (sigs.join('+') || '\u2014') + '</td>'
       + '<td class="mono">' + (row.rsi14 != null ? row.rsi14.toFixed(1) : '\u2014') + '</td>'
       + '<td class="mono">' + (row.vol_ratio != null ? row.vol_ratio.toFixed(1) + 'x' : '\u2014') + '</td>'
@@ -513,25 +568,39 @@ function renderEnsemble(){
   const boC = all.filter(r => r.breakout).length;
   const rocC = all.filter(r => r.momentum).length;
 
+  const w = ENSEMBLE_WEIGHTS && ENSEMBLE_WEIGHTS.weights ? ENSEMBLE_WEIGHTS.weights : {ma_crossover:0.30,pullback:0.14,breakout:0.28,momentum:0.27};
+
   el.innerHTML = '<div class="panel">'
     + '<h2>Ensemble Strategy \u2014 ' + s.date + '</h2>'
     + '<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;">'
-    + '<div class="stat good" style="flex:1;min-width:120px;"><div class="lab">Strong (3-4/4)</div><div class="num" style="font-size:22px;">' + s.strong_buy + '</div></div>'
-    + '<div class="stat flat" style="flex:1;min-width:120px;"><div class="lab">Weak (2/4)</div><div class="num" style="font-size:22px;">' + s.weak_buy + '</div></div>'
+    + '<div class="stat good" style="flex:1;min-width:120px;"><div class="lab">Strong (\u22650.65)</div><div class="num" style="font-size:22px;">' + s.strong_buy + '</div></div>'
+    + '<div class="stat flat" style="flex:1;min-width:120px;"><div class="lab">Weak (\u22650.35)</div><div class="num" style="font-size:22px;">' + s.weak_buy + '</div></div>'
     + '<div style="flex:1;min-width:120px;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;background:var(--panel-tint);">'
     + '<div class="lab">Tong</div><div class="num" style="font-size:22px;color:var(--accent-1);">' + s.total_signals + '</div>'
     + '<div class="sub2" style="font-size:11px;color:var(--faint);margin-top:3px;">/' + s.total_symbols_analyzed + ' ma</div></div></div></div>'
 
+    + '<div class="panel"><h2>Trong so tin hieu</h2>'
+    + '<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">'
+    + '<div style="flex:1;min-width:130px;"><div class="lab" style="font-size:11px;color:var(--faint);">MA ' + (w.ma_crossover*100).toFixed(0) + '%</div><div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px;"><div style="width:' + (w.ma_crossover*100) + '%;height:100%;background:#8884d8;"></div></div></div>'
+    + '<div style="flex:1;min-width:130px;"><div class="lab" style="font-size:11px;color:var(--faint);">BO ' + (w.breakout*100).toFixed(0) + '%</div><div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px;"><div style="width:' + (w.breakout*100) + '%;height:100%;background:#82ca9d;"></div></div></div>'
+    + '<div style="flex:1;min-width:130px;"><div class="lab" style="font-size:11px;color:var(--faint);">ROC ' + (w.momentum*100).toFixed(0) + '%</div><div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px;"><div style="width:' + (w.momentum*100) + '%;height:100%;background:#ffc658;"></div></div></div>'
+    + '<div style="flex:1;min-width:130px;"><div class="lab" style="font-size:11px;color:var(--faint);">PB ' + (w.pullback*100).toFixed(0) + '%</div><div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px;"><div style="width:' + (w.pullback*100) + '%;height:100%;background:#ff8042;"></div></div></div>'
+    + '</div></div>'
+
     + '<div class="panel"><h2>Danh sach \u2014 ' + all.length + ' ma</h2>'
     + '<div class="note" style="margin-bottom:14px;">'
-    + '<b>4 tin hieu</b> moi cai +1: MA Crossover (MA10>MA50+RSI>50), Pullback (uptrend+gan MA50+RSI>45), '
-    + 'Breakout (20d high+vol>1.5x avg), Momentum (ROC10>ROC20+vol tang).'
-    + ' <b>Strong Buy >= 3/4, Weak Buy = 2/4.</b></div>'
+    + '<b>4 tin hieu</b> trong so backtest: MA ' + (w.ma_crossover*100).toFixed(0) + '%, BO ' + (w.breakout*100).toFixed(0) + '%, ROC ' + (w.momentum*100).toFixed(0) + '%, PB ' + (w.pullback*100).toFixed(0) + '%.'
+    + ' <b>Strong Buy \u2265 0.65, Weak Buy \u2265 0.35.</b></div>'
     + '<table><thead><tr><th>Ma</th><th>Score</th><th>Signals</th><th>RSI</th><th>Vol</th><th>ROC10</th><th>Gia</th><th>Muc</th></tr></thead>'
     + '<tbody>' + tbody + '</tbody></table></div>'
 
     + '<div class="panel"><h2>Phan bo theo loai</h2>'
-    + '<div class="note"><b>MA:</b> ' + maC + ' &middot; <b>PB:</b> ' + pbC + ' &middot; <b>BO:</b> ' + boC + ' &middot; <b>ROC:</b> ' + rocC + '</div></div>';
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;">'
+    + '<div class="stat" style="border-left:3px solid #8884d8;"><div class="lab">MA Crossover</div><div class="num" style="font-size:20px;">' + maC + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">weight ' + (w.ma_crossover*100).toFixed(0) + '%</div></div>'
+    + '<div class="stat" style="border-left:3px solid #82ca9d;"><div class="lab">Breakout</div><div class="num" style="font-size:20px;">' + boC + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">weight ' + (w.breakout*100).toFixed(0) + '%</div></div>'
+    + '<div class="stat" style="border-left:3px solid #ffc658;"><div class="lab">Momentum ROC</div><div class="num" style="font-size:20px;">' + rocC + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">weight ' + (w.momentum*100).toFixed(0) + '%</div></div>'
+    + '<div class="stat" style="border-left:3px solid #ff8042;"><div class="lab">Pullback</div><div class="num" style="font-size:20px;">' + pbC + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">weight ' + (w.pullback*100).toFixed(0) + '%</div></div>'
+    + '</div></div>';
 }
 
 
