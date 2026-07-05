@@ -11,6 +11,7 @@ Pipeline chinh: chay hang ngay qua GitHub Actions.
 from __future__ import annotations
 
 import json
+import os
 import time
 import warnings
 from datetime import datetime, timedelta, timezone
@@ -55,6 +56,7 @@ from cache_utils import load_cache as _load_cache
 from market_commentary import generate_commentary
 from strategy_signals import main as run_strategy_signals
 from ensemble_signals import main as run_ensemble_signals
+from backtest_weights import main as run_backtest_weights
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -181,7 +183,9 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
-    volume_threshold = 0.5 if session == "midday" else 1.3
+    _mid_thresh = os.environ.get("VOLUME_BREAKOUT_MIDDAY", "0.5")
+    _close_thresh = os.environ.get("VOLUME_BREAKOUT_CLOSE", "1.3")
+    volume_threshold = float(_mid_thresh) if session == "midday" else float(_close_thresh)
 
     bar = tqdm(
         symbols,
@@ -413,7 +417,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Đồng bộ dữ liệu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -497,6 +501,12 @@ def main():
             print(f"Da ghi tin hieu pre-breakout.\n")
         except Exception as e:
             print(f"Loi sinh tin hieu pre-breakout: {e}")
+
+        try:
+            run_backtest_weights()
+            print(f"Da cap nhat backtest weights.\n")
+        except Exception as e:
+            print(f"Loi backtest weights: {e}")
 
         try:
             run_ensemble_signals()

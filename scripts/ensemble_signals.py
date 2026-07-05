@@ -15,6 +15,8 @@ from pathlib import Path
 from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
+import json
+from pathlib import Path
 import pandas as pd
 try:
     from tqdm import tqdm
@@ -38,12 +40,27 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
+WEIGHTS_PATH = DATA_DIR / "backtest_weights.json"
+DATA_DIR = ROOT / "data"
 CACHE_DIR = DATA_DIR / "ohlc_cache"
 DOCS_DATA_DIR = ROOT / "docs" / "data"
 SIGNALS_JSON = DATA_DIR / "ensemble_signals.json"
 DOCS_SIGNALS_JSON = DOCS_DATA_DIR / "ensemble_signals.json"
 
 MIN_AVG_VOLUME = 300_000
+
+
+DEFAULT_WEIGHTS = {"ma_crossover": 0.30, "pullback": 0.14, "breakout": 0.28, "momentum": 0.27}
+
+
+def _load_weights() -> dict:
+    """Load backtest weights, fallback to defaults."""
+    try:
+        data = json.loads(WEIGHTS_PATH.read_text(encoding="utf-8"))
+        w = data.get("weights", DEFAULT_WEIGHTS)
+        return {k: w.get(k, DEFAULT_WEIGHTS[k]) for k in DEFAULT_WEIGHTS}
+    except Exception:
+        return dict(DEFAULT_WEIGHTS)
 
 
 def compute_ma_crossover(df: pd.DataFrame) -> dict:
@@ -106,7 +123,7 @@ def compute_momentum(df: pd.DataFrame) -> dict:
 
 
 def analyze_symbol(symbol: str) -> dict | None:
-    df = _load_cache(symbol)
+    df = _load_cache(symbol, CACHE_DIR)
     if len(df) < 210:
         return None
     if "Volume" in df.columns:
@@ -119,14 +136,15 @@ def analyze_symbol(symbol: str) -> dict | None:
     bo = compute_breakout(df)
     mo = compute_momentum(df)
 
-    total = ma["signal"] + pb["signal"] + bo["signal"] + mo["signal"]
+    weights = _load_weights()
+    total = weights["ma_crossover"] * ma["signal"] + weights["pullback"] * pb["signal"] + weights["breakout"] * bo["signal"] + weights["momentum"] * mo["signal"]
 
-    if total < 2:
+    if total < 0.35:
         return None
 
     return {
         "symbol": symbol,
-        "total_score": total,
+        "total_score": round(total, 3),
         "ma_crossover": ma["signal"],
         "pullback": pb["signal"],
         "breakout": bo["signal"],
@@ -150,7 +168,7 @@ def get_filtered_symbols() -> list[str]:
             continue
         if sym.startswith("FU") or sym.startswith("E1"):
             continue
-        df = _load_cache(sym)
+        df = _load_cache(sym, CACHE_DIR)
         if len(df) < 20:
             continue
         if "Volume" in df.columns:
@@ -180,8 +198,8 @@ def main():
     signals.sort(key=lambda x: x["total_score"], reverse=True)
 
     now = datetime.now(timezone.utc) + timedelta(hours=7)
-    strong = [s for s in signals if s["total_score"] >= 3]
-    weak = [s for s in signals if s["total_score"] == 2]
+    strong = [s for s in signals if s["total_score"] >= 0.65]
+    weak = [s for s in signals if s["total_score"] >= 0.35 and s["total_score"] < 0.65]
 
     output = {
         "generated_at": now.isoformat(),
@@ -211,7 +229,7 @@ def main():
             if s["pullback"]: parts.append("PB")
             if s["breakout"]: parts.append("BO")
             if s["momentum"]: parts.append("ROC")
-            tqdm.write(f"  {s['symbol']:6s} | Score: {s['total_score']}/4 | {'+'.join(parts):12s} | Price: {s['last_price']:.0f}")
+            tqdm.write(f"  {s['symbol']:6s} | Score: {s['total_score']:.2f} | {'+'.join(parts):12s} | Price: {s['last_price']:.0f}")
 
 
 if __name__ == "__main__":
