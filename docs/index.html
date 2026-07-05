@@ -171,7 +171,8 @@
 <script>
 let MARKETS = ['ALL'];
 let activeMarket = 'HOSE';
-let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null, SIGNALS = null, ENSEMBLE = null, ENSEMBLE_WEIGHTS = null;
+let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null, SIGNALS = null, ENSEMBLE = null, ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null;
+let activeSignalsDate = null;
 
 async function loadData(){
   try {
@@ -201,6 +202,12 @@ async function loadData(){
 
     const weightsRes = await fetch(`./data/backtest_weights.json?t=${timestamp}`);
     ENSEMBLE_WEIGHTS = weightsRes.ok ? await weightsRes.json() : null;
+
+    const signalsHistRes = await fetch(`./data/signals_history.json?t=${timestamp}`);
+    SIGNALS_HISTORY = signalsHistRes.ok ? await signalsHistRes.json() : null;
+    if (SIGNALS_HISTORY && SIGNALS_HISTORY.length > 0) {
+      activeSignalsDate = SIGNALS_HISTORY[SIGNALS_HISTORY.length - 1].date;
+    }
 
     const sessionLabel = LATEST.session === 'midday'
       ? '<span class="session-badge midday">Phiên sáng 11:30</span>'
@@ -266,6 +273,30 @@ function renderChips(list, kind, dualSet){
     const finalCls = isDual ? 'chip dual' : cls;
     return `<span class="${finalCls}">${sym}</span>`;
   }).join('');
+}
+
+function signalsDateOptions(){
+  if (!SIGNALS_HISTORY) return '';
+  return SIGNALS_HISTORY.map(h => {
+    const sel = h.date === activeSignalsDate ? 'selected' : '';
+    return `<option value="${h.date}" ${sel}>${h.date}</option>`;
+  }).join('');
+}
+
+function onSignalsDateChange(date){
+  activeSignalsDate = date;
+  if (activeMarket === 'TIN_HIEU') renderSignals();
+  else if (activeMarket === 'DONG_THUAT') renderEnsemble();
+}
+
+function renderDateSelector(){
+  if (!SIGNALS_HISTORY || SIGNALS_HISTORY.length < 2) return '';
+  return `<div class="date-selector" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <label style="font-size:13px;color:var(--faint);">Xem ngày:</label>
+    <select onchange="onSignalsDateChange(this.value)" style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-size:13px;cursor:pointer;">
+      ${signalsDateOptions()}
+    </select>
+  </div>`;
 }
 
 function cmpHTML(){
@@ -538,7 +569,11 @@ window.addEventListener('resize',()=>{clearTimeout(_crt);_crt=setTimeout(renderB
 
 function renderEnsemble(){
   const el = document.getElementById('content');
-  if (!ENSEMBLE || !ENSEMBLE.all_signals) {
+  const src = activeSignalsDate && SIGNALS_HISTORY
+    ? SIGNALS_HISTORY.find(h => h.date === activeSignalsDate)
+    : null;
+  const s = (src && src.ensemble) || ENSEMBLE;
+  if (!s || !s.all_signals) {
     el.innerHTML = '<div class="panel"><h2>Ensemble Strategy</h2><div class="loading">Chua co du lieu.</div></div>';
     return;
   }
@@ -570,7 +605,9 @@ function renderEnsemble(){
 
   const w = ENSEMBLE_WEIGHTS && ENSEMBLE_WEIGHTS.weights ? ENSEMBLE_WEIGHTS.weights : {ma_crossover:0.30,pullback:0.14,breakout:0.28,momentum:0.27};
 
-  el.innerHTML = '<div class="panel">'
+  const selHtml = renderDateSelector();
+
+  el.innerHTML = selHtml + '<div class="panel">'
     + '<h2>Ensemble Strategy \u2014 ' + s.date + '</h2>'
     + '<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;">'
     + '<div class="stat good" style="flex:1;min-width:120px;"><div class="lab">Strong (\u22650.65)</div><div class="num" style="font-size:22px;">' + s.strong_buy + '</div></div>'
@@ -606,11 +643,14 @@ function renderEnsemble(){
 
 function renderSignals(){
   const el = document.getElementById('content');
-  if (!SIGNALS || !SIGNALS.all_signals) {
+  const src = activeSignalsDate && SIGNALS_HISTORY
+    ? SIGNALS_HISTORY.find(h => h.date === activeSignalsDate)
+    : null;
+  const s = (src && src.strategy) || SIGNALS;
+  if (!s || !s.all_signals) {
     el.innerHTML = `<div class="panel"><h2>Pre-Breakout Signals</h2><div class="loading">Chưa có dữ liệu tín hiệu.</div></div>`;
     return;
   }
-  const s = SIGNALS;
   const all = s.all_signals || [];
   const tbody = all.map(row => {
     const cls = row.composite_score >= 75 ? 'good' : row.composite_score >= 60 ? 'mixed' : 'weak';
@@ -628,6 +668,7 @@ function renderSignals(){
   }).join('');
 
   el.innerHTML = `
+    ${renderDateSelector()}
     <div class="panel">
       <h2>Pre-Breakout Signals — ${s.date}</h2>
       <div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;">

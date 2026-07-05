@@ -67,6 +67,8 @@ MIDDAY_JSON = DATA_DIR / "breadth_midday.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
 COMMENTARY_JSON = DATA_DIR / "market_commentary.json"
 DOCS_COMMENTARY_JSON = DOCS_DATA_DIR / "market_commentary.json"
+SIGNALS_HISTORY_JSON = DATA_DIR / "signals_history.json"
+DOCS_SIGNALS_HISTORY_JSON = DOCS_DATA_DIR / "signals_history.json"
 
 MARKETS = ["HOSE", "HNX"]
 MARKET_INDEX_ID = {
@@ -440,6 +442,42 @@ def append_history(markets_dict: dict) -> None:
     _write_json(HISTORY_JSON, history)
 
 
+def append_signals_history() -> None:
+    strategy_path = DATA_DIR / "strategy_signals.json"
+    ensemble_path = DATA_DIR / "ensemble_signals.json"
+    if not strategy_path.exists() and not ensemble_path.exists():
+        return
+
+    history = []
+    if SIGNALS_HISTORY_JSON.exists():
+        try:
+            history = json.loads(SIGNALS_HISTORY_JSON.read_text(encoding="utf-8"))
+        except Exception:
+            history = []
+
+    entry = {"date": "", "strategy": None, "ensemble": None}
+    if strategy_path.exists():
+        data = json.loads(strategy_path.read_text(encoding="utf-8"))
+        entry["date"] = data.get("date", "")
+        entry["strategy"] = data
+    if ensemble_path.exists():
+        data = json.loads(ensemble_path.read_text(encoding="utf-8"))
+        entry["date"] = entry["date"] or data.get("date", "")
+        entry["ensemble"] = data
+
+    if not entry["date"]:
+        return
+
+    history = [h for h in history if h.get("date") != entry["date"]]
+    history.append(entry)
+    history = history[-365:]
+
+    _write_json(SIGNALS_HISTORY_JSON, history)
+    DOCS_SIGNALS_HISTORY_JSON.parent.mkdir(parents=True, exist_ok=True)
+    DOCS_SIGNALS_HISTORY_JSON.write_bytes(SIGNALS_HISTORY_JSON.read_bytes())
+    print(f"Da cap nhat signals_history.json ({len(history)} ngay).")
+
+
 # --- Main ---------------------------------------------------------------------
 
 def main():
@@ -513,6 +551,8 @@ def main():
             print(f"Da ghi tin hieu ensemble.\n")
         except Exception as e:
             print(f"Loi sinh tin hieu ensemble: {e}")
+
+        append_signals_history()
     else:
         print(f"Bo qua strategy signals (midday session).")
 
