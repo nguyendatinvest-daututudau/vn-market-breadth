@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -502,7 +502,7 @@ function renderSignals(){
     </div>
 
     <div class="panel">
-      <h2>Danh sách tín hiệu — xếp hạng theo Composite Score</h2>
+      <h2>Danh sách tín hiệu — <span style="color:var(--accent-1);font-weight:700;">${all.length} mã</span> xếp hạng theo Composite Score</h2>
       <div class="note" style="margin-bottom:14px;">
         <b>Composite Score</b> = 40% Base + 30% Money Flow + 30% Vol Gradient.
         Base: accumulation base detection (range + higher lows + volume dry-up).
@@ -565,3 +565,4 @@ loadData();
 </script>
 </body>
 </html>
+
