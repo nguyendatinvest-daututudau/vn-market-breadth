@@ -116,6 +116,9 @@
   .commentary h3{font-size:14px;font-weight:600;margin:16px 0 8px;color:var(--text);}
   .commentary strong{color:var(--text);}
   .commentary br{margin-bottom:6px;}
+.chart-wrap{position:relative;width:100%;}
+.chart-wrap canvas{width:100%;display:block;border-radius:12px;}
+.chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:11.5px;box-shadow:var(--shadow-md);font-family:var(--font-mono);display:none;white-space:nowrap;line-height:1.5;}
 </style>
 
 <script>
@@ -164,6 +167,303 @@ async function loadData(){
 }
 
 
+function renderTabs(){
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  const tabs = [...MARKETS];
+  if (COMMENTARY) tabs.push('NHAN_DINH');
+  tabs.forEach(m => {
+    const btn = document.createElement('button');
+    btn.textContent = m === 'NHAN_DINH' ? 'Nhận định' : m;
+    if (m === activeMarket) btn.classList.add('active');
+    btn.onclick = () => { activeMarket = m; renderTabs(); render(); };
+    tabsEl.appendChild(btn);
+  });
+}
+
+function fmt1(n){ return (n === null || n === undefined) ? '—' : Number(n).toFixed(1); }
+function deltaStr(cur, prev, rev){
+  if (cur === null || cur === undefined || prev === null || prev === undefined) return '';
+  const d = cur - prev;
+  if (Math.abs(d) < 0.01) return '<span class="delta flat">0</span>';
+  const cls = rev ? (d < 0 ? 'up' : 'down') : (d > 0 ? 'up' : 'down');
+  const sign = d > 0 ? '+' : '';
+  return `<span class="delta ${cls}">${sign}${Number(d).toFixed(typeof d === 'number' && Number.isInteger(d) ? 0 : 2)}</span>`;
+}
+
+function renderChipsDual(list, otherList){
+  const dual = new Set(otherList.filter(x => list.includes(x)));
+  return renderChips(list, 'neutral', dual);
+}
+
+function renderChips(list, kind, dualSet){
+  if (!list || list.length === 0) return '<span class="empty-note">Không có mã nào</span>';
+  let cls;
+  if (kind === 'up') cls = 'chip up';
+  else if (kind === 'down') cls = 'chip down';
+  else if (kind === 'dual') cls = 'chip dual';
+  else cls = 'chip';
+  return list.map(sym => {
+    const isDual = dualSet && dualSet.has(sym);
+    const finalCls = isDual ? 'chip dual' : cls;
+    return `<span class="${finalCls}">${sym}</span>`;
+  }).join('');
+}
+
+function cmpHTML(){
+  if (!MIDDAY || LATEST.session !== 'close') return '';
+  const mm = MIDDAY.markets[activeMarket];
+  const m = LATEST.markets[activeMarket];
+  if (!mm || !m || mm.date !== m.date) return '';
+  const d = (v) => v === null || v === undefined ? 0 : v;
+  const advDelta = d(m.advances) - d(mm.advances);
+  const decDelta = d(m.declines) - d(mm.declines);
+  const adDelta = d(m.ad_ratio) - d(mm.ad_ratio);
+  const ma20Delta = d(m.pct_above_ma20) - d(mm.pct_above_ma20);
+  const advCls = advDelta > 0 ? 'up' : advDelta < 0 ? 'down' : 'flat';
+  const decCls = decDelta < 0 ? 'up' : decDelta > 0 ? 'down' : 'flat';
+  const adCls = adDelta > 0 ? 'up' : adDelta < 0 ? 'down' : 'flat';
+  const maCls = ma20Delta > 0 ? 'up' : ma20Delta < 0 ? 'down' : 'flat';
+  return `<div class="panel">
+    <h2>So sánh với phiên sáng — ${activeMarket}</h2>
+    <div class="cmp-grid">
+      <div class="cmp-card">
+        <div class="lab">Tăng / Giảm</div>
+        <div class="row"><span>11:30</span><span class="val">${mm.advances} / ${mm.declines}</span></div>
+        <div class="row"><span>15:10</span><span class="val">${m.advances} / ${m.declines}</span></div>
+        <div class="row"><span>Δ</span><span class="val"><span class="delta ${advCls}">${advDelta > 0 ? '+' : ''}${advDelta}</span> / <span class="delta ${decCls}">${decDelta > 0 ? '+' : ''}${decDelta}</span></span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="lab">A/D Ratio</div>
+        <div class="row"><span>11:30</span><span class="val">${fmt1(mm.ad_ratio)}</span></div>
+        <div class="row"><span>15:10</span><span class="val">${fmt1(m.ad_ratio)}</span></div>
+        <div class="row"><span>Δ</span><span class="val"><span class="delta ${adCls}">${adDelta > 0 ? '+' : ''}${fmt1(adDelta)}</span></span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="lab">% trên MA20</div>
+        <div class="row"><span>11:30</span><span class="val">${fmt1(mm.pct_above_ma20)}%</span></div>
+        <div class="row"><span>15:10</span><span class="val">${fmt1(m.pct_above_ma20)}%</span></div>
+        <div class="row"><span>Δ</span><span class="val"><span class="delta ${maCls}">${ma20Delta > 0 ? '+' : ''}${fmt1(ma20Delta)}%</span></span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  if (activeMarket === 'NHAN_DINH') {
+    renderCommentary();
+    return;
+  }
+  const m = LATEST.markets[activeMarket];
+  const contentEl = document.getElementById('content');
+
+  const total = m.total_symbols || 0;
+  const upW = total ? (m.advances_pct) : 0;
+  const flatW = total ? (m.unchanged_pct) : 0;
+  const downW = total ? (m.declines_pct) : 0;
+
+  const hist = (HISTORY || []).slice(-6).reverse();
+
+  contentEl.innerHTML = `
+    <div class="panel">
+      <h2>Phân bố tăng-giảm giá — ${total} mã ${activeMarket} (${m.date})</h2>
+      <div class="stat-grid">
+        <div class="stat up"><div class="lab">Tăng giá</div><div class="num">${m.advances}</div><div class="pct">${fmt1(m.advances_pct)}%</div></div>
+        <div class="stat flat"><div class="lab">Không đổi</div><div class="num">${m.unchanged}</div><div class="pct">${fmt1(m.unchanged_pct)}%</div></div>
+        <div class="stat down"><div class="lab">Giảm giá</div><div class="num">${m.declines}</div><div class="pct">${fmt1(m.declines_pct)}%</div></div>
+      </div>
+      <div class="bar-labels" style="margin-top:16px;">
+        <span class="up-l">Tăng: ${m.advances} (${fmt1(m.advances_pct)}%)</span>
+        <span>Không đổi: ${m.unchanged}</span>
+        <span class="down-l">Giảm: ${m.declines} (${fmt1(m.declines_pct)}%)</span>
+      </div>
+      <div class="breadth-bar">
+        <span style="width:${upW}%; background:var(--up);"></span>
+        <span style="width:${flatW}%; background:var(--neutral);"></span>
+        <span style="width:${downW}%; background:var(--down);"></span>
+      </div>
+      <div class="note">
+        <b>A/D Ratio: ${m.ad_ratio ?? '—'}</b> — tỉ lệ số mã tăng trên số mã giảm phiên ${m.date}.
+        ${m.ad_ratio !== null && m.ad_ratio > 1 ? 'Số mã tăng đang vượt số mã giảm.' : m.ad_ratio !== null ? 'Số mã giảm đang chiếm ưu thế.' : ''}
+      </div>
+    </div>
+
+    ${cmpHTML()}
+
+    <div class="panel">
+      <h2>% cổ phiếu ${activeMarket} trên đường trung bình — so sánh các mốc</h2>
+      <div class="ma-grid">
+        <div class="ma-stat"><div class="lab">Trên MA20 (ngắn hạn)</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub2">${m.above_ma20_count} / ${m.ma_total_symbols} mã</div></div>
+        <div class="ma-stat"><div class="lab">Trên MA50 (trung hạn)</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub2">${m.above_ma50_count} / ${m.ma_total_symbols} mã</div></div>
+        <div class="ma-stat"><div class="lab">Trên MA200 (dài hạn)</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub2">${m.above_ma200_count} / ${m.ma_total_symbols} mã</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Lịch sử % cổ phiếu trên đường trung bình — ${activeMarket}</h2>
+      <div class="chart-wrap" id="chartWrap">
+        <canvas id="breadthChart"></canvas>
+        <div class="chart-tooltip" id="chartTooltip"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Chuỗi độ rộng thị trường ${activeMarket} — các phiên gần nhất</h2>
+      <table>
+        <thead><tr><th>Phiên</th><th>Tăng</th><th>Giảm</th><th>A/D Ratio</th><th>Nhận xét</th></tr></thead>
+        <tbody>
+          ${hist.map(h => {
+            const row = h.markets[activeMarket];
+            if (!row) return '';
+            const ratio = row.ad_ratio;
+            let tagClass = 'mixed', tagText = 'Trung tính';
+            if (ratio !== null) {
+              if (ratio >= 1.2) { tagClass = 'good'; tagText = 'Tích cực'; }
+              else if (ratio <= 0.8) { tagClass = 'weak'; tagText = 'Yếu'; }
+            }
+            return `<tr>
+              <td>${row.date}</td>
+              <td class="mono up-txt">${row.advances}</td>
+              <td class="mono down-txt">${row.declines}</td>
+              <td class="mono">${ratio ?? '—'}</td>
+              <td><span class="tag ${tagClass}">${tagText}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Mã cổ phiếu vừa chuyển tín hiệu — ${activeMarket} (${m.date})</h2>
+      <div class="signal-grid">
+        <div class="signal-col">
+          <div class="signal-title up-txt">↑ Vừa vượt lên MA20 (${(m.newly_above_ma20||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_above_ma20, 'up')}</div>
+        </div>
+        <div class="signal-col">
+          <div class="signal-title down-txt">↓ Vừa rớt xuống MA20 (${(m.newly_below_ma20||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_below_ma20, 'down')}</div>
+        </div>
+        <div class="signal-col">
+          <div class="signal-title up-txt">↑ Vừa vượt lên MA50 (${(m.newly_above_ma50||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_above_ma50, 'up')}</div>
+        </div>
+        <div class="signal-col">
+          <div class="signal-title down-txt">↓ Vừa rớt xuống MA50 (${(m.newly_below_ma50||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_below_ma50, 'down')}</div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px;">
+        "Vừa vượt lên/rớt xuống" nghĩa là mã đó <b>mới đổi trạng thái so với phiên trước</b> — hôm qua còn ở dưới đường MA, hôm nay đã lên trên (hoặc ngược lại). Đây là tín hiệu sớm cho thấy dòng tiền đang cải thiện hoặc suy yếu ở mã đó.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Toàn bộ mã đang trên MA20 / MA50 — ${activeMarket}</h2>
+      <div class="signal-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="signal-col">
+          <div class="signal-title">Trên MA20 (${(m.above_ma20_symbols||[]).length} mã)</div>
+          <div class="chip-wrap">${renderChipsDual(m.above_ma20_symbols, m.above_ma50_symbols)}</div>
+        </div>
+        <div class="signal-col">
+          <div class="signal-title">Trên MA50 (${(m.above_ma50_symbols||[]).length} mã)</div>
+          <div class="chip-wrap">${renderChipsDual(m.above_ma50_symbols, m.above_ma20_symbols)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Breakout volume — ${activeMarket} (${m.date})</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Mã ≥ MA20 và khối lượng vượt ngưỡng: ${LATEST.session === 'midday' ? '50%' : '130%'} trung bình 20 phiên.
+        Hiện có <b>${m.volume_breakout_count || 0}</b> mã.
+      </div>
+      <div class="signal-grid" style="grid-template-columns:1fr;">
+        <div class="signal-col">
+          <div class="chip-wrap">${renderChips(m.volume_breakout_symbols, 'up')}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(renderBreadthChart);
+}
+function renderBreadthChart(){
+  const cv=document.getElementById('breadthChart'),tt=document.getElementById('chartTooltip'),wr=document.getElementById('chartWrap');
+  if(!cv||!tt||!wr)return;
+  const pts=((HISTORY||[]).map(h=>{const m=h.markets[activeMarket];return m&&m.pct_above_ma20!=null?{date:h.date,v20:m.pct_above_ma20,v50:m.pct_above_ma50,v200:m.pct_above_ma200}:null;}).filter(Boolean));
+  if(pts.length<2){wr.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--faint);font-size:13px;">Chưa đủ dữ liệu lịch sử để vẽ biểu đồ.</div>';return;}
+  pts.sort((a,b)=>{const da=a.date.split('/'),db=b.date.split('/');return da[2]-db[2]||da[1]-db[1]||da[0]-db[0];});
+  const dpr=window.devicePixelRatio||1,w=wr.clientWidth,h=300;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const P={t:34,r:16,b:42,l:50},cw=w-P.l-P.r,ch=h-P.t-P.b;
+  const xp=i=>P.l+(i/(pts.length-1))*cw,yp=v=>P.t+ch-(v/100)*ch;
+  const lines=[{k:'v20',c:'#4F46E5',l:'MA20'},{k:'v50',c:'#F5A524',l:'MA50'},{k:'v200',c:'#06B6D4',l:'MA200'}];
+
+  function drw(idx){
+    ctx.clearRect(0,0,w,h);
+    [0,25,50,75,100].forEach(pct=>{
+      const y=yp(pct);
+      ctx.save();ctx.strokeStyle='#E4E9F7';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(w-P.r,y);ctx.stroke();ctx.restore();
+      ctx.fillStyle='#6B7395';ctx.font='10px JetBrains Mono,monospace';
+      ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(pct+'%',P.l-8,y);
+    });
+    lines.forEach(s=>{
+      ctx.strokeStyle=s.c;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';
+      ctx.beginPath();pts.forEach((p,i)=>{const x=xp(i),y=yp(p[s.k]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+      ctx.stroke();
+      const lx=xp(pts.length-1),ly=yp(pts[pts.length-1][s.k]);
+      ctx.fillStyle='#fff';ctx.strokeStyle=s.c;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);ctx.fill();ctx.stroke();
+    });
+    ctx.fillStyle='#6B7395';ctx.font='9.5px JetBrains Mono,monospace';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    const step=Math.max(1,Math.floor(pts.length/Math.max(1,Math.floor(cw/55))));
+    pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1){const d=p.date.split('/');ctx.fillText(d[0]+'/'+d[1],xp(i),h-P.b+10);}});
+    ctx.strokeStyle='#E4E9F7';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(P.l,h-P.b);ctx.lineTo(w-P.r,h-P.b);ctx.stroke();
+    lines.forEach((s,i)=>{
+      const lx=P.l+i*110,ly=16;
+      ctx.strokeStyle=s.c;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(lx+20,ly);ctx.stroke();
+      ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(lx+10,ly,3.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#3A4270';ctx.font='11px Inter,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s.l,lx+28,ly);
+    });
+    if(idx>=0&&idx<pts.length){
+      const p=pts[idx],x=xp(idx);
+      ctx.save();ctx.strokeStyle='rgba(27,33,64,0.18)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,P.t+ch);ctx.stroke();ctx.restore();
+      lines.forEach(s=>{const dy=yp(p[s.k]);ctx.fillStyle='#fff';ctx.strokeStyle=s.c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,dy,5,0,Math.PI*2);ctx.fill();ctx.stroke();});
+      tt.style.display='block';
+      tt.innerHTML=`<div style="font-weight:700;margin-bottom:5px;color:#1B2140;font-size:12px;font-family:Inter,sans-serif;">${p.date}</div><div style="display:flex;gap:16px;"><span><span style="color:#4F46E5;font-weight:700;">●</span> MA20: <strong>${p.v20.toFixed(1)}%</strong></span><span><span style="color:#F5A524;font-weight:700;">●</span> MA50: <strong>${p.v50.toFixed(1)}%</strong></span><span><span style="color:#06B6D4;font-weight:700;">●</span> MA200: <strong>${p.v200.toFixed(1)}%</strong></span></div>`;
+      const tw=tt.offsetWidth;let tx=Math.round(x-tw/2);
+      if(tx<4)tx=4;if(tx+tw>w-4)tx=w-tw-4;
+      tt.style.left=tx+'px';tt.style.top=Math.max(4,P.t-52)+'px';
+    }else tt.style.display='none';
+  }
+  let hi=-1;drw(-1);
+  cv.onmousemove=function(e){const cr=cv.getBoundingClientRect(),mx=e.clientX-cr.left;let cl=0,md=Infinity;pts.forEach((_,i)=>{const d=Math.abs(xp(i)-mx);if(d<md){md=d;cl=i;}});if(cl!==hi){hi=cl;drw(cl);}};
+  cv.onmouseleave=function(){if(hi!==-1){hi=-1;drw(-1);}};
+}
+let _crt;
+window.addEventListener('resize',()=>{clearTimeout(_crt);_crt=setTimeout(renderBreadthChart,150);});
+
+function renderCommentary(){
+  const contentEl = document.getElementById('content');
+  if (!COMMENTARY || !COMMENTARY.content) {
+    contentEl.innerHTML = `<div class="panel"><h2>Nhận định phiên</h2><div class="loading">Chưa có dữ liệu nhận định.</div></div>`;
+    return;
+  }
+  const md = COMMENTARY.content;
+  // Simple markdown to HTML for basic formatting
+  const html = md
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  contentEl.innerHTML = `<div class="panel"><h2>Nhận định phiên</h2><div class="commentary">${html}</div></div>`;
+}
 
 loadData();
 </script>

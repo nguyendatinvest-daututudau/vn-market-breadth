@@ -50,18 +50,18 @@ new_func = """async function loadData(){
 
 if old_marker in html:
     idx = html.index(old_marker)
-    # Tìm kết thúc hàm: dòng "loadData();" ngay trước "</script>"
-    end_marker = "loadData();\n</script>"
-    end_idx = html.index(end_marker, idx)
-    # Kết thúc thay thế sau dấu } cuối cùng của hàm (trước loadData();)
-    # Tìm } cuối trước end_marker
-    before_end = html[idx:end_idx]
-    # Lấy dấu } cuối cùng trong đoạn
-    last_brace = before_end.rfind("}")
-    if last_brace != -1:
-        actual_end = idx + last_brace + 1
-    else:
-        actual_end = end_idx
+    # Đếm brace để tìm đúng dấu } đóng hàm loadData
+    rest = html[idx:]
+    brace_count = 0
+    actual_end = idx
+    for i, ch in enumerate(rest):
+        if ch == '{':
+            brace_count += 1
+        elif ch == '}':
+            brace_count -= 1
+            if brace_count == 0:
+                actual_end = idx + i + 1
+                break
     html = html[:idx] + new_func + "\n\n" + html[actual_end:]
 
 OUT_HTML.write_text(html, encoding="utf-8")

@@ -116,6 +116,9 @@
   .commentary h3{font-size:14px;font-weight:600;margin:16px 0 8px;color:var(--text);}
   .commentary strong{color:var(--text);}
   .commentary br{margin-bottom:6px;}
+.chart-wrap{position:relative;width:100%;}
+.chart-wrap canvas{width:100%;display:block;border-radius:12px;}
+.chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:11.5px;box-shadow:var(--shadow-md);font-family:var(--font-mono);display:none;white-space:nowrap;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -313,6 +316,14 @@ function render(){
     </div>
 
     <div class="panel">
+      <h2>Lịch sử % cổ phiếu trên đường trung bình — ${activeMarket}</h2>
+      <div class="chart-wrap" id="chartWrap">
+        <canvas id="breadthChart"></canvas>
+        <div class="chart-tooltip" id="chartTooltip"></div>
+      </div>
+    </div>
+
+    <div class="panel">
       <h2>Chuỗi độ rộng thị trường ${activeMarket} — các phiên gần nhất</h2>
       <table>
         <thead><tr><th>Phiên</th><th>Tăng</th><th>Giảm</th><th>A/D Ratio</th><th>Nhận xét</th></tr></thead>
@@ -390,7 +401,68 @@ function render(){
       </div>
     </div>
   `;
+  requestAnimationFrame(renderBreadthChart);
 }
+function renderBreadthChart(){
+  const cv=document.getElementById('breadthChart'),tt=document.getElementById('chartTooltip'),wr=document.getElementById('chartWrap');
+  if(!cv||!tt||!wr)return;
+  const pts=((HISTORY||[]).map(h=>{const m=h.markets[activeMarket];return m&&m.pct_above_ma20!=null?{date:h.date,v20:m.pct_above_ma20,v50:m.pct_above_ma50,v200:m.pct_above_ma200}:null;}).filter(Boolean));
+  if(pts.length<2){wr.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--faint);font-size:13px;">Chưa đủ dữ liệu lịch sử để vẽ biểu đồ.</div>';return;}
+  pts.sort((a,b)=>{const da=a.date.split('/'),db=b.date.split('/');return da[2]-db[2]||da[1]-db[1]||da[0]-db[0];});
+  const dpr=window.devicePixelRatio||1,w=wr.clientWidth,h=300;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const P={t:34,r:16,b:42,l:50},cw=w-P.l-P.r,ch=h-P.t-P.b;
+  const xp=i=>P.l+(i/(pts.length-1))*cw,yp=v=>P.t+ch-(v/100)*ch;
+  const lines=[{k:'v20',c:'#4F46E5',l:'MA20'},{k:'v50',c:'#F5A524',l:'MA50'},{k:'v200',c:'#06B6D4',l:'MA200'}];
+
+  function drw(idx){
+    ctx.clearRect(0,0,w,h);
+    [0,25,50,75,100].forEach(pct=>{
+      const y=yp(pct);
+      ctx.save();ctx.strokeStyle='#E4E9F7';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(w-P.r,y);ctx.stroke();ctx.restore();
+      ctx.fillStyle='#6B7395';ctx.font='10px JetBrains Mono,monospace';
+      ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(pct+'%',P.l-8,y);
+    });
+    lines.forEach(s=>{
+      ctx.strokeStyle=s.c;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';
+      ctx.beginPath();pts.forEach((p,i)=>{const x=xp(i),y=yp(p[s.k]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+      ctx.stroke();
+      const lx=xp(pts.length-1),ly=yp(pts[pts.length-1][s.k]);
+      ctx.fillStyle='#fff';ctx.strokeStyle=s.c;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);ctx.fill();ctx.stroke();
+    });
+    ctx.fillStyle='#6B7395';ctx.font='9.5px JetBrains Mono,monospace';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    const step=Math.max(1,Math.floor(pts.length/Math.max(1,Math.floor(cw/55))));
+    pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1){const d=p.date.split('/');ctx.fillText(d[0]+'/'+d[1],xp(i),h-P.b+10);}});
+    ctx.strokeStyle='#E4E9F7';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(P.l,h-P.b);ctx.lineTo(w-P.r,h-P.b);ctx.stroke();
+    lines.forEach((s,i)=>{
+      const lx=P.l+i*110,ly=16;
+      ctx.strokeStyle=s.c;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(lx+20,ly);ctx.stroke();
+      ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(lx+10,ly,3.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#3A4270';ctx.font='11px Inter,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s.l,lx+28,ly);
+    });
+    if(idx>=0&&idx<pts.length){
+      const p=pts[idx],x=xp(idx);
+      ctx.save();ctx.strokeStyle='rgba(27,33,64,0.18)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,P.t+ch);ctx.stroke();ctx.restore();
+      lines.forEach(s=>{const dy=yp(p[s.k]);ctx.fillStyle='#fff';ctx.strokeStyle=s.c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,dy,5,0,Math.PI*2);ctx.fill();ctx.stroke();});
+      tt.style.display='block';
+      tt.innerHTML=`<div style="font-weight:700;margin-bottom:5px;color:#1B2140;font-size:12px;font-family:Inter,sans-serif;">${p.date}</div><div style="display:flex;gap:16px;"><span><span style="color:#4F46E5;font-weight:700;">●</span> MA20: <strong>${p.v20.toFixed(1)}%</strong></span><span><span style="color:#F5A524;font-weight:700;">●</span> MA50: <strong>${p.v50.toFixed(1)}%</strong></span><span><span style="color:#06B6D4;font-weight:700;">●</span> MA200: <strong>${p.v200.toFixed(1)}%</strong></span></div>`;
+      const tw=tt.offsetWidth;let tx=Math.round(x-tw/2);
+      if(tx<4)tx=4;if(tx+tw>w-4)tx=w-tw-4;
+      tt.style.left=tx+'px';tt.style.top=Math.max(4,P.t-52)+'px';
+    }else tt.style.display='none';
+  }
+  let hi=-1;drw(-1);
+  cv.onmousemove=function(e){const cr=cv.getBoundingClientRect(),mx=e.clientX-cr.left;let cl=0,md=Infinity;pts.forEach((_,i)=>{const d=Math.abs(xp(i)-mx);if(d<md){md=d;cl=i;}});if(cl!==hi){hi=cl;drw(cl);}};
+  cv.onmouseleave=function(){if(hi!==-1){hi=-1;drw(-1);}};
+}
+let _crt;
+window.addEventListener('resize',()=>{clearTimeout(_crt);_crt=setTimeout(renderBreadthChart,150);});
 
 function renderCommentary(){
   const contentEl = document.getElementById('content');
