@@ -7,6 +7,8 @@ LATEST_JSON = ROOT / "data" / "breadth_latest.json"
 HISTORY_JSON = ROOT / "data" / "breadth_history.json"
 MIDDAY_JSON = ROOT / "data" / "breadth_midday.json"
 COMMENTARY_JSON = ROOT / "data" / "market_commentary.json"
+SIGNALS_JSON = ROOT / "data" / "strategy_signals.json"
+ENSEMBLE_JSON = ROOT / "data" / "ensemble_signals.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
 
@@ -14,6 +16,8 @@ latest = json.loads(LATEST_JSON.read_text(encoding="utf-8"))
 history = json.loads(HISTORY_JSON.read_text(encoding="utf-8") if HISTORY_JSON.exists() else "[]")
 midday = json.loads(MIDDAY_JSON.read_text(encoding="utf-8")) if MIDDAY_JSON.exists() else None
 commentary = json.loads(COMMENTARY_JSON.read_text(encoding="utf-8")) if COMMENTARY_JSON.exists() else None
+signals = json.loads(SIGNALS_JSON.read_text(encoding="utf-8")) if SIGNALS_JSON.exists() else None
+ensemble = json.loads(ENSEMBLE_JSON.read_text(encoding="utf-8")) if ENSEMBLE_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
 
@@ -24,6 +28,8 @@ const EMBEDDED_LATEST = {json.dumps(latest, ensure_ascii=False)};
 const EMBEDDED_HISTORY = {json.dumps(history, ensure_ascii=False)};
 const EMBEDDED_MIDDAY = {json.dumps(midday, ensure_ascii=False)};
 const EMBEDDED_COMMENTARY = {json.dumps(commentary, ensure_ascii=False)};
+const EMBEDDED_SIGNALS = {json.dumps(signals, ensure_ascii=False)};
+const EMBEDDED_ENSEMBLE = {json.dumps(ensemble, ensure_ascii=False)};
 </script>
 """
 
@@ -37,6 +43,8 @@ new_func = """async function loadData(){
   HISTORY = EMBEDDED_HISTORY || [];
   MIDDAY = EMBEDDED_MIDDAY;
   COMMENTARY = EMBEDDED_COMMENTARY;
+  SIGNALS = EMBEDDED_SIGNALS;
+  ENSEMBLE = EMBEDDED_ENSEMBLE;
   if (MIDDAY && MIDDAY.markets && MIDDAY.markets.ALL.date !== LATEST.markets.ALL.date) { MIDDAY = null; }
   const sessionLabel = LATEST.session === 'midday'
     ? '<span class="session-badge midday">Phiên sáng 11:30</span>'

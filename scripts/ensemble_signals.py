@@ -12,6 +12,7 @@ import json
 import warnings
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
 import pandas as pd
@@ -45,37 +46,6 @@ DOCS_SIGNALS_JSON = DOCS_DATA_DIR / "ensemble_signals.json"
 MIN_AVG_VOLUME = 300_000
 
 
-def load_cache(symbol: str) -> pd.DataFrame:
-    path = CACHE_DIR / f"{symbol}.csv"
-    if path.exists():
-        try:
-            df = pd.read_csv(path)
-            df["TradingDate"] = pd.to_datetime(df["TradingDate"], format="mixed", dayfirst=True, errors="coerce")
-            df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-            if "Volume" in df.columns:
-                df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")
-            else:
-                df["Volume"] = float("nan")
-            return df.dropna(subset=["Close"])
-        except Exception:
-            pass
-    return pd.DataFrame(columns=["TradingDate", "Close", "Volume"])
-
-
-def compute_rsi(series: np.ndarray, period: int = 14) -> float:
-    if len(series) < period + 1:
-        return 50.0
-    deltas = np.diff(series)
-    gains = np.where(deltas > 0, deltas, 0)
-    losses = np.where(deltas < 0, -deltas, 0)
-    avg_gain = gains[-period:].mean()
-    avg_loss = losses[-period:].mean()
-    if avg_loss == 0:
-        return 100.0
-    rs = avg_gain / avg_loss
-    return 100.0 - (100.0 / (1.0 + rs))
-
-
 def compute_ma_crossover(df: pd.DataFrame) -> dict:
     """MA Crossover: MA10 > MA50, Close > MA10, RSI14 > 50."""
     close = df["Close"].values
@@ -83,7 +53,7 @@ def compute_ma_crossover(df: pd.DataFrame) -> dict:
         return {"signal": 0, "ma10": None, "ma50": None, "rsi14": None}
     ma10 = close[-10:].mean()
     ma50 = close[-50:].mean()
-    rsi14 = compute_rsi(close, 14)
+    rsi14 = compute_rsi_numpy(close, 14)
     signal = 1 if (ma10 > ma50 and close[-1] > ma10 and rsi14 > 50) else 0
     return {"signal": signal, "ma10": round(ma10, 1), "ma50": round(ma50, 1), "rsi14": round(rsi14, 1)}
 
@@ -98,8 +68,8 @@ def compute_pullback(df: pd.DataFrame) -> dict:
         return {"signal": 0, "ma50": None, "ma200": None, "rsi14": None}
     ma50 = close[-50:].mean()
     ma200 = close[-200:].mean()
-    rsi14 = compute_rsi(close, 14)
-    near_ma50 = 0.97 <= close[-1] / ma50 <= 1.00 if ma50 > 0 else False
+    rsi14 = compute_rsi_numpy(close, 14)
+    near_ma50 = 0.93 <= close[-1] / ma50 <= 1.00 if ma50 > 0 else False
     signal = 1 if (close[-1] > ma200 and near_ma50 and rsi14 > 45) else 0
     return {"signal": signal, "ma50": round(ma50, 1), "ma200": round(ma200, 1), "rsi14": round(rsi14, 1)}
 
@@ -136,7 +106,7 @@ def compute_momentum(df: pd.DataFrame) -> dict:
 
 
 def analyze_symbol(symbol: str) -> dict | None:
-    df = load_cache(symbol)
+    df = _load_cache(symbol)
     if len(df) < 210:
         return None
     if "Volume" in df.columns:
@@ -180,7 +150,7 @@ def get_filtered_symbols() -> list[str]:
             continue
         if sym.startswith("FU") or sym.startswith("E1"):
             continue
-        df = load_cache(sym)
+        df = _load_cache(sym)
         if len(df) < 20:
             continue
         if "Volume" in df.columns:

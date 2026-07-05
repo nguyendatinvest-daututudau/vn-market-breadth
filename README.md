@@ -3,23 +3,44 @@
 Dashboard độ rộng thị trường chứng khoán Việt Nam (A/D Ratio, % cổ phiếu trên MA20/50/200),
 lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua GitHub Actions, hiển thị qua GitHub Pages.
 
+## Tính năng
+
+- **Breadth Overview**: A/D Ratio, % trên MA20/MA50/MA200, breadth bar, newly above/below MA
+- **Historical Chart**: Biểu đồ Canvas % trên MA20/MA50 theo thời gian với hover tooltip
+- **Volume Breakout**: Phát hiện mã có volume đột biến (>=MA20 + KL > 1.3x TB20)
+- **Pre-Breakout Signals**: Phát hiện cổ phiếu tích lũy sắp breakout (base score + OBV momentum + vol gradient)
+- **Ensemble Signals**: 4-signal voting strategy (MA Crossover + Pullback + Breakout + Momentum)
+- **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
+- **Session Compare**: So sánh phiên sáng vs đóng cửa
+
 ## Cấu trúc repo
 
 ```
 scripts/
   ssi_client.py           # client gọi SSI FastConnect Data API
-  fetch_and_compute.py    # pipeline chính: lấy dữ liệu -> tính breadth -> ghi JSON
+  cache_utils.py          # shared: load_cache + compute_rsi_wilder
+  fetch_and_compute.py    # pipeline chính: fetch -> compute -> ghi JSON
+  strategy_signals.py     # Pre-breakout detection (base + OBV + vol)
+  ensemble_signals.py     # 4-signal voting strategy
+  market_commentary.py    # Nhận định thị trường (breadth + technical)
+  embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
 data/
-  breadth_latest.json     # snapshot mới nhất (được Actions ghi đè mỗi ngày)
-  breadth_history.json    # lịch sử ~120 phiên gần nhất
-  ohlc_cache/              # cache OHLC từng mã (không commit, dùng actions/cache)
+  breadth_latest.json     # snapshot breadth mới nhất
+  breadth_history.json    # lịch sử ~120 phiên
+  breadth_midday.json     # snapshot phiên sáng
+  strategy_signals.json   # tín hiệu pre-breakout
+  ensemble_signals.json   # tín hiệu ensemble
+  market_commentary.json  # nhận định thị trường
+  ohlc_cache/             # cache OHLC (không commit, dùng actions/cache)
 docs/
-  index.html               # dashboard, host qua GitHub Pages, đọc 2 file JSON ở trên
-.github/workflows/update.yml   # cron job chạy script mỗi ngày sau giờ đóng cửa
+  index.html              # dashboard source (fetch JSON từ data/)
+  dashboard.html          # embedded version (mở trực tiếp không cần server)
+  data/                   # JSON copies cho GitHub Pages
+.github/workflows/update.yml  # cron: 11:30 & 15:10 VN (T2-T6)
 ```
 
-## 1. Chạy thử ở máy local
+## Chạy local
 
 ```bash
 cd scripts
@@ -30,56 +51,45 @@ export SSI_CONSUMER_SECRET="..."
 python fetch_and_compute.py
 ```
 
-Sau khi chạy xong, `data/breadth_latest.json` và `data/breadth_history.json` sẽ được tạo/cập nhật.
-Mở `docs/index.html` bằng Live Server (VSCode extension) hoặc `python -m http.server` trong thư mục gốc
-repo để dashboard fetch được 2 file JSON qua đường dẫn tương đối `../data/...`.
+Sau khi chạy:
+- `data/breadth_latest.json` — breadth snapshot
+- `data/strategy_signals.json` — pre-breakout signals
+- `data/ensemble_signals.json` — ensemble signals
+- `data/market_commentary.json` — nhận định thị trường
 
-**Lưu ý:** mở trực tiếp `index.html` bằng cách double-click file (`file://`) sẽ bị chặn bởi CORS khi
-`fetch()` file JSON. Luôn chạy qua local server khi test.
+Mở `docs/index.html` qua Live Server (VSCode) hoặc `python -m http.server`.
+Mở `docs/dashboard.html` trực tiếp bằng double-click (file://) — đã embed data.
 
-## 2. Đưa lên GitHub
+## Dashboard tabs
 
-```bash
-git init
-git add .
-git commit -m "init: vn market breadth dashboard"
-git branch -M main
-git remote add origin https://github.com/<username>/<repo>.git
-git push -u origin main
-```
+| Tab | Nội dung |
+|-----|----------|
+| ALL / HOSE / HNX | Breadth overview: A/D, MA stats, breadth bar, newly above/below |
+| Lịch sử | Biểu đồ Canvas % trên MA20/MA50 theo thời gian |
+| Breakout | Volume breakout symbols |
+| Nhận định | Market commentary (breadth + VN-Index technical) |
+| Pre-Breakout | Cổ phiếu tích lũy sắp breakout (base + OBV + vol gradient) |
+| Ensemble | 4-signal voting: MA Crossover + Pullback + Breakout + Momentum |
 
-## 3. Khai báo Secrets cho GitHub Actions
+## Triển khai GitHub
 
-Vào repo trên GitHub → **Settings → Secrets and variables → Actions → New repository secret**, thêm:
+1. Push lên GitHub
+2. Settings → Secrets: `SSI_CONSUMER_ID`, `SSI_CONSUMER_SECRET`
+3. Settings → Pages: branch `main`, folder `/docs`
+4. Actions → Run workflow lần đầu
 
-- `SSI_CONSUMER_ID`
-- `SSI_CONSUMER_SECRET`
+## Strategy Details
 
-Workflow trong `.github/workflows/update.yml` sẽ đọc 2 secret này khi chạy, KHÔNG bao giờ hardcode
-key vào code.
+### Pre-Breakout (strategy_signals.py)
+- Base detection: 25-session window, max range 8%, price in top 25%
+- OBV momentum: 5/10/21-day OBV trend
+- Volume regime: short/long volatility ratio + gradient
+- Composite: 50% base + 30% OBV + 20% vol gradient
+- Threshold: composite >= 60, OBV5 > 0, price near high <= 3%
 
-## 4. Bật GitHub Pages
-
-Settings → Pages → Source: chọn branch `main`, thư mục `/docs` → Save.
-
-Sau vài phút, dashboard sẽ có tại: `https://<username>.github.io/<repo>/`
-
-## 5. Chạy thử workflow lần đầu
-
-Vào tab **Actions** trên GitHub → chọn workflow "Update market breadth data" → **Run workflow**
-(chạy tay lần đầu, không cần chờ tới lịch cron) để tạo `data/breadth_latest.json` thật từ SSI.
-
-Sau đó workflow sẽ tự chạy theo lịch cron đã đặt (15:45 giờ VN các ngày thứ 2–6, sau giờ đóng cửa).
-
-## Ghi chú quan trọng
-
-- **Rate limit**: script tính MA breadth phải gọi API `DailyOhlc` cho *từng mã* trong danh sách sàn
-  (~400 mã HOSE, tương tự HNX/UPCOM). Lần chạy đầu tiên sẽ chậm vì phải tải ~250 phiên lịch sử cho
-  mỗi mã. Các lần sau chỉ tải bổ sung vài phiên gần nhất nhờ cơ chế cache
-  (`data/ohlc_cache/`, được khôi phục giữa các lần chạy Actions qua `actions/cache`).
-- Nếu SSI trả lỗi 401 giữa chừng, client sẽ tự lấy lại access token 1 lần trước khi báo lỗi.
-- Cấu trúc JSON output (`breadth_latest.json`) độc lập với dashboard — có thể tái sử dụng cho
-  Excel, Google Sheets, hoặc bot Telegram/Zalo nếu muốn mở rộng sau này.
-- `data/breadth_latest.json` và `data/breadth_history.json` hiện đang chứa **dữ liệu mẫu** (khớp với
-  ảnh chụp màn hình gốc, phiên 29/06/2026) để bạn xem trước giao diện ngay khi mới clone repo. Chạy
-  `Run workflow` lần đầu trên GitHub Actions (mục 5 bên dưới) sẽ ghi đè bằng dữ liệu thật từ SSI.
+### Ensemble (ensemble_signals.py)
+- **MA Crossover**: MA10 > MA50 + Close > MA10 + RSI14 > 50
+- **Pullback to Support**: uptrend (Close > MA200) + near MA50 (93-100%) + RSI > 45
+- **Breakout**: new 20-day high + volume > 1.5x avg
+- **Momentum ROC**: ROC10 > ROC20 + positive volume slope
+- **Voting**: >= 3/4 = Strong Buy, 2/4 = Weak Buy

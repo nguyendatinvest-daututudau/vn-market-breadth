@@ -51,6 +51,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from ssi_client import SSIClient
+from cache_utils import load_cache as _load_cache
 from market_commentary import generate_commentary
 from strategy_signals import main as run_strategy_signals
 from ensemble_signals import main as run_ensemble_signals
@@ -84,23 +85,6 @@ def vn_today() -> datetime:
 
 # --- Cache OHLC ---------------------------------------------------------------
 
-def load_cache(symbol: str) -> pd.DataFrame:
-    path = CACHE_DIR / f"{symbol}.csv"
-    if path.exists():
-        try:
-            df = pd.read_csv(path)
-            df["TradingDate"] = pd.to_datetime(df["TradingDate"], format="mixed", dayfirst=True, errors="coerce")
-            df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-            if "Volume" in df.columns:
-                df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")
-            else:
-                df["Volume"] = float("nan")
-            return df.dropna(subset=["Close"])
-        except Exception:
-            pass
-    return pd.DataFrame(columns=["TradingDate", "Close", "Volume"])
-
-
 def save_cache(symbol: str, df: pd.DataFrame) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     df = df.sort_values("TradingDate").drop_duplicates("TradingDate")
@@ -123,7 +107,7 @@ def cache_max_date(symbol: str) -> datetime | None:
 
 
 def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame:
-    cached = load_cache(symbol)
+    cached = _load_cache(symbol)
     cached_historical = pd.DataFrame()
     if cached.empty:
         from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
@@ -506,12 +490,21 @@ def main():
     except Exception as e:
         print(f"Loi sinh nhan xet: {e}")
 
-    # Generate strategy signals (post-session only, can midday)
-    try:
-        run_strategy_signals()
-        print(f"Da ghi tin hieu chien luoc.\n")
-    except Exception as e:
-        print(f"Loi sinh tin hieu: {e}")
+    # Generate strategy signals (close session only — needs full day data)
+    if session == "close":
+        try:
+            run_strategy_signals()
+            print(f"Da ghi tin hieu pre-breakout.\n")
+        except Exception as e:
+            print(f"Loi sinh tin hieu pre-breakout: {e}")
+
+        try:
+            run_ensemble_signals()
+            print(f"Da ghi tin hieu ensemble.\n")
+        except Exception as e:
+            print(f"Loi sinh tin hieu ensemble: {e}")
+    else:
+        print(f"Bo qua strategy signals (midday session).")
 
     print("\nHoan tat.")
 

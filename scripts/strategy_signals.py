@@ -13,6 +13,7 @@ import json
 import warnings
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
 import pandas as pd
@@ -49,24 +50,6 @@ MAX_BASE_RANGE_PCT = 8.0
 MIN_AVG_VOLUME = 300_000
 
 
-def load_cache(symbol: str) -> pd.DataFrame:
-    path = CACHE_DIR / f"{symbol}.csv"
-    if path.exists():
-        try:
-            df = pd.read_csv(path)
-            df["TradingDate"] = pd.to_datetime(df["TradingDate"], format="mixed", dayfirst=True, errors="coerce")
-            df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-            if "Volume" in df.columns:
-                df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")
-            else:
-                df["Volume"] = float("nan")
-            if "High" not in df.columns or df["High"].isna().all():
-                df["High"] = float("nan")
-            if "Low" not in df.columns or df["Low"].isna().all():
-                df["Low"] = float("nan")
-            return df.dropna(subset=["Close"])
-        except Exception:
-            pass
     return pd.DataFrame(columns=["TradingDate", "Close", "Volume", "High", "Low"])
 
 
@@ -202,7 +185,7 @@ def compute_vol_regime(df: pd.DataFrame) -> dict:
 
 def analyze_symbol(symbol: str) -> dict | None:
     """Phan tich 1 symbol, tra ve signal data neu dat, None neu khong."""
-    df = load_cache(symbol)
+    df = _load_cache(symbol)
     if len(df) < 63:
         return None
 
@@ -262,7 +245,7 @@ def get_filtered_symbols() -> list[str]:
         sym = path.stem
         if sym == ".gitkeep":
             continue
-        df = load_cache(sym)
+        df = _load_cache(sym)
         if len(df) < 20:
             continue
         if "Volume" in df.columns:
