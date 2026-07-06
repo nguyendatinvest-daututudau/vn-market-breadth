@@ -4,6 +4,7 @@ Dung chung cho fetch_and_compute, strategy_signals, ensemble_signals, market_com
 """
 from __future__ import annotations
 import logging
+import warnings
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -17,7 +18,9 @@ def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
     if path.exists():
         try:
             df = pd.read_csv(path)
-            df["TradingDate"] = pd.to_datetime(df["TradingDate"], format="%d/%m/%Y", errors="coerce")
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                df["TradingDate"] = pd.to_datetime(df["TradingDate"], dayfirst=True, errors="coerce")
             df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
             if "Volume" in df.columns:
                 df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")

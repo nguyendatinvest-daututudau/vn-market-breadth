@@ -72,7 +72,7 @@ def cache_max_date(symbol: str) -> datetime | None:
         return None
     try:
         dates = pd.read_csv(path, usecols=["TradingDate"])["TradingDate"]
-        max_dt = pd.to_datetime(dates, format="%d/%m/%Y", errors="coerce").max()
+        max_dt = pd.to_datetime(dates, dayfirst=True, errors="coerce").max()
         if pd.isna(max_dt):
             return None
         return max_dt

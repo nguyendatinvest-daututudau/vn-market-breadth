@@ -8,6 +8,7 @@ import warnings
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 # --- Paths ---
 ROOT = Path(__file__).resolve().parent.parent
@@ -66,7 +67,6 @@ def list_symbols(cache_dir: Path = CACHE_DIR, min_history: int = 20,
                  min_volume: int | None = None, skip_prefix: tuple[str, ...] = ("FU", "E1")) -> list[str]:
     """List sorted symbols from ohlc_cache, filtered by history length and volume."""
     from cache_utils import load_cache as _load_cache
-    import pandas as pd
     symbols = []
     for path in sorted(cache_dir.glob("*.csv")):
         sym = path.stem
