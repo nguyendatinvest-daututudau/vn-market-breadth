@@ -47,8 +47,8 @@ MARKET_INDEX_ID = {
 }
 MA_WINDOWS = [20, 50, 200]
 HISTORY_DAYS_LOOKBACK = 380   # du ~260 phien de tinh MA200
-INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tra╠ünh thi├¬╠üu sau ky╠Ç nghi╠ë da╠Çi)
-REQUEST_SLEEP_SEC = 0.5       # ch╞í╠Ç gi╞░╠âa ca╠üc l├ó╠Çn go╠úi API ─æ├¬╠ë tra╠ünh rate limit
+INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tranh thieu sau ky nghi dai)
+REQUEST_SLEEP_SEC = 0.5       # cho giua cac lan goi API de tranh rate limit                                                         
 DATE_FMT = "%d/%m/%Y"
 MIN_AVG_VOLUME = 300_000      # loc thanh khoan: TB 20 phien >= 300,000 cp
 
@@ -66,7 +66,7 @@ def save_cache(symbol: str, df: pd.DataFrame) -> None:
 
 
 def cache_max_date(symbol: str) -> datetime | None:
-    """Tra╠ë v├¬╠Ç nga╠Çy giao di╠úch g├ó╠Çn nh├ó╠üt trong cache cu╠ëa symbol, None n├¬╠üu ch╞░a co╠ü."""
+    """Tra ve ngay giao dich gan nhat trong cache cua symbol, None neu chua co."""
     path = CACHE_DIR / f"{symbol}.csv"
     if not path.exists():
         return None
@@ -206,7 +206,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                 if is_above:
                     counts[w] += 1
                     above_syms[w].append(sym)
-                    # Volume breakout: >= MA20 + volume > ng╞░╞í╠âng * TB 20 phi├¬n
+                                        # Volume breakout: >= MA20 + volume > nguong * TB 20 phien
                     if w == 20 and avg_vol is not None and volume_today is not None and avg_vol > 0 and volume_today > avg_vol * volume_threshold:
                         volume_breakout.append(sym)
 
@@ -292,7 +292,14 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
 
     symbols = client.common_stock_symbols(market)
     if not symbols:
-        print(f"[{market}] WARN: khong lay duoc ma nao!")
+        print(f"[{market}] WARN: API Securities tra ve 0 ma, fallback sang cache...")
+        from _shared import list_symbols as _list_symbols
+        cached = _list_symbols(CACHE_DIR, min_history=20)
+        symbols = [s for s in cached if not any(c.isdigit() for c in s) and len(s) <= 3]
+        if symbols:
+            print(f"[{market}] Fallback: lay {len(symbols)} ma tu cache")
+        else:
+            print(f"[{market}] WARN: cache cung khong co ma hop le!")
 
     ad = get_advance_decline(client, market, today)
     print(f"[{market}] A/D: adv={ad['advances']} dec={ad['declines']} unc={ad['unchanged']}")
@@ -389,7 +396,7 @@ def _write_json(path: Path, data) -> None:
 
 
 def _sync_docs_data():
-    """─É├┤╠Çng b├┤╠ú d╞░╠â li├¬╠úu sang docs/data/ cho GitHub Pages."""
+    """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
     for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json"):
         src = DATA_DIR / f

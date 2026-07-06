@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>─Éß╗Ö rß╗Öng thß╗ï tr╞░ß╗¥ng ΓÇö TTCK Viß╗çt Nam</title>
+<title>Độ rộng thị trường — TTCK Việt Nam</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -168,15 +168,15 @@ const EMBEDDED_SIGNALS_HISTORY = [{"date": "05/07/2026", "strategy": {"generated
 <div class="wrap">
   <header>
     <div>
-      <h1>─Éß╗Ö rß╗Öng thß╗ï tr╞░ß╗¥ng <small>TTCK Viß╗çt Nam</small></h1>
-      <div class="sub" id="metaLine">─Éang tß║úi...</div>
+      <h1>Độ rộng thị trường <small>TTCK Việt Nam</small></h1>
+      <div class="sub" id="metaLine">Đang tải...</div>
     </div>
     <div class="market-tabs" id="marketTabs"></div>
   </header>
 
   <div id="content"></div>
 
-  <footer>Dß╗» liß╗çu: SSI FastConnect ┬╖ Cß║¡p nhß║¡t tß╗▒ ─æß╗Öng qua GitHub Actions<br><span style="color:#141834;font-weight:600;">nguyendat.invest2026</span></footer>
+  <footer>Dữ liệu: SSI FastConnect · Cập nhật tự động qua GitHub Actions<br><span style="color:#141834;font-weight:600;">nguyendat.invest2026</span></footer>
 </div>
 
 <script>
@@ -224,7 +224,7 @@ function fmt1(n){ return (n === null || n === undefined) ? '\u2014' : Number(n).
 
 function render(){
   const m = LATEST.markets[activeMarket];
-  if (!m) { document.getElementById('content').innerHTML = '<div class="loading">Chß╗ìn thß╗ï tr╞░ß╗¥ng</div>'; return; }
+  if (!m) { document.getElementById('content').innerHTML = '<div class="loading">Chọn thị trường</div>'; return; }
   const el = document.getElementById('content');
   const total = m.total_symbols || 0;
   const upW = total ? m.advances_pct : 0;
@@ -242,7 +242,7 @@ function render(){
     <div class="summary-bar">
       <div class="summary-top">
         <div>
-          <span class="summary-count">${summary.totalSignals} t├¡n hiß╗çu ┬╖ ${summary.uniqueSymbols} m├ú duy nhß║Ñt</span>
+          <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
         </div>
         <div class="summary-badges">
           ${summary.badges.map(b => `<span class="s-badge ${b.cls}" data-filter="${b.filter}">${b.label}</span>`).join('')}
@@ -251,12 +251,12 @@ function render(){
     </div>
 
     <div class="kpi-grid">
-      <div class="kpi-card up"><div class="lab">T─âng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
-      <div class="kpi-card down"><div class="lab">Giß║úm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
+      <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
+      <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
       <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
-      <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} m├ú</div></div>
-      <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} m├ú</div></div>
-      <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} m├ú</div></div>
+      <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
+      <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
+      <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
     </div>
 
     <div class="breadth-bar">
@@ -266,18 +266,18 @@ function render(){
     </div>
 
     <div class="panel">
-      <h2>T├¡n hiß╗çu giao dß╗ïch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} t├¡n hiß╗çu)</span></h2>
+      <h2>Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} tín hiệu)</span></h2>
       <div class="filter-bar">
         <select id="filterSelect" onchange="activeFilter=this.value;renderSignalTable()">
-          <option value="all">ΓÜí Tß║Ñt cß║ú</option>
-          <option value="strong">≡ƒƒó Strong</option>
-          <option value="watch">≡ƒƒí Watch</option>
-          <option value="pre-breakout">≡ƒö╡ Pre-Breakout</option>
-          <option value="ensemble-strong">≡ƒƒú Ensemble Strong</option>
-          <option value="ensemble-weak">ΓÜ¬ Ensemble Weak</option>
+          <option value="all">⚡ Tất cả</option>
+          <option value="strong">🟢 Strong</option>
+          <option value="watch">🟡 Watch</option>
+          <option value="pre-breakout">🔵 Pre-Breakout</option>
+          <option value="ensemble-strong">🟣 Ensemble Strong</option>
+          <option value="ensemble-weak">⚪ Ensemble Weak</option>
         </select>
-        <input id="searchInput" type="text" placeholder="≡ƒöì T├¼m m├ú..." oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
-        <button class="btn-copy" id="copyBtn" onclick="copySymbols()">≡ƒôï Copy DS</button>
+        <input id="searchInput" type="text" placeholder="🔍 Tìm mã..." oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
+        <button class="btn-copy" id="copyBtn" onclick="copySymbols()">📋 Copy DS</button>
       </div>
       <div id="signalTableContainer">${signalsHTML}</div>
     </div>
@@ -302,11 +302,11 @@ function render(){
 
 function adRatioNote(r){
   if (r === null) return '';
-  if (r >= 1.5) return 'Tiß╗ün lan tß╗Åa rß╗Öng';
-  if (r >= 1.2) return 'Tiß╗ün lan tß╗Åa tß╗æt';
-  if (r >= 1.0) return 'Nghi├¬ng t─âng';
-  if (r >= 0.8) return 'C├ón bß║▒ng';
-  return 'B├ín ├íp ─æß║úo';
+  if (r >= 1.5) return 'Tiền lan tỏa rộng';
+  if (r >= 1.2) return 'Tiền lan tỏa tốt';
+  if (r >= 1.0) return 'Nghiêng tăng';
+  if (r >= 0.8) return 'Cân bằng';
+  return 'Bán áp đảo';
 }
 
 // --- Build summary badges from all strategies ---
@@ -339,11 +339,11 @@ function buildSummary(){
   }
 
   let badges = [];
-  if (strongCount) badges.push({cls:'str', label:`≡ƒƒó Strong ${strongCount}`, filter:'strong'});
-  if (watchCount) badges.push({cls:'wat', label:`≡ƒƒí Watch ${watchCount}`, filter:'watch'});
-  if (preCount) badges.push({cls:'pre', label:`≡ƒö╡ Pre-Breakout ${preCount}`, filter:'pre-breakout'});
-  if (ensStrong) badges.push({cls:'ens', label:`≡ƒƒú Ensemble ${ensStrong}`, filter:'ensemble-strong'});
-  if (ensWeak) badges.push({cls:'ensw', label:`ΓÜ¬ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
+  if (strongCount) badges.push({cls:'str', label:`🟢 Strong ${strongCount}`, filter:'strong'});
+  if (watchCount) badges.push({cls:'wat', label:`🟡 Watch ${watchCount}`, filter:'watch'});
+  if (preCount) badges.push({cls:'pre', label:`🔵 Pre-Breakout ${preCount}`, filter:'pre-breakout'});
+  if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
+  if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
 
   return { totalSignals: strongCount+watchCount+preCount+ensStrong+ensWeak, uniqueSymbols: symbols.size, badges };
 }
@@ -351,7 +351,7 @@ function buildSummary(){
 // --- Unified signal table ---
 function buildSignalHub(){
   let rows = collectAllSignals();
-  if (!rows.length) return '<div class="note" style="margin-bottom:0;">Ch╞░a c├│ t├¡n hiß╗çu n├áo h├┤m nay.</div>';
+  if (!rows.length) return '<div class="note" style="margin-bottom:0;">Chưa có tín hiệu nào hôm nay.</div>';
 
   // Get previous signals for repeat detection
   let prevSymbols = new Set();
@@ -369,7 +369,7 @@ function buildSignalHub(){
   let wrWatch = MOMENTUM_BT?.stats?.['watch_T+5']?.win_rate;
 
   rows = rows.map(r => {
-    let repeat = prevSymbols.has(r.symbol) ? '<span class="badge-repeat">≡ƒöÑ Lß║╖p</span>' : '';
+    let repeat = prevSymbols.has(r.symbol) ? '<span class="badge-repeat">🔥 Lặp</span>' : '';
     return { ...r, repeat };
   });
 
@@ -379,7 +379,7 @@ function buildSignalHub(){
       if (r.signalType === 'strong') { typeTag = '<span class="tag str">Strong</span>'; winrateStr = wrStrong ? `<span class="winrate">~${(wrStrong*100).toFixed(0)}%</span>` : ''; }
       else { typeTag = '<span class="tag wat">Watch</span>'; winrateStr = wrWatch ? `<span class="winrate">~${(wrWatch*100).toFixed(0)}%</span>` : ''; }
     } else if (r.source === 'pre-breakout') {
-      typeTag = r.score >= 75 ? '<span class="tag str">Mß║ính</span>' : '<span class="tag wat">TB</span>';
+      typeTag = r.score >= 75 ? '<span class="tag str">Mạnh</span>' : '<span class="tag wat">TB</span>';
     } else if (r.source === 'ensemble') {
       typeTag = r.signalType === 'strong' ? '<span class="tag ens">Strong</span>' : '<span class="tag ens-w">Weak</span>';
     }
@@ -404,11 +404,11 @@ function buildSignalHub(){
     </tr>`;
   }).join('');
 
-  if (!tbody) return '<div class="note" style="margin-bottom:0;">Kh├┤ng c├│ t├¡n hiß╗çu ph├╣ hß╗úp.</div>';
+  if (!tbody) return '<div class="note" style="margin-bottom:0;">Không có tín hiệu phù hợp.</div>';
 
   return `<table>
     <thead><tr>
-      <th>M├ú</th><th>Score</th><th>Loß║íi</th><th>Chi tiß║┐t</th><th>Nguß╗ôn</th><th>RSI</th><th>ADX</th><th>Vol</th><th>Gi├í</th>
+      <th>Mã</th><th>Score</th><th>Loại</th><th>Chi tiết</th><th>Nguồn</th><th>RSI</th><th>ADX</th><th>Vol</th><th>Giá</th>
     </tr></thead>
     <tbody>${tbody}</tbody>
   </table>`;
@@ -511,14 +511,14 @@ function copySymbols(){
   let text = filtered.map(r => r.symbol).join(', ');
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBtn');
-    if (btn) { btn.textContent = 'Γ£à Copied!'; setTimeout(() => { btn.textContent = '≡ƒôï Copy DS'; }, 2000); }
+    if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy DS'; }, 2000); }
   }).catch(() => {});
 }
 
 // --- Chart ---
 function buildChartSection(){
   return `<div class="panel">
-    <h2 class="accordion" onclick="toggleAccordion(this)">Biß╗âu ─æß╗ô lß╗ïch sß╗¡ ΓÇö % tr├¬n MA20 / MA50 / MA200</h2>
+    <h2 class="accordion" onclick="toggleAccordion(this)">Biểu đồ lịch sử — % trên MA20 / MA50 / MA200</h2>
     <div class="accordion-body collapsed">
       <div class="chart-wrap" id="chartWrap">
         <canvas id="breadthChart"></canvas>
@@ -543,7 +543,7 @@ function renderBreadthChart(m){
   const cv = document.getElementById('breadthChart'), tt = document.getElementById('chartTooltip'), wr = document.getElementById('chartWrap');
   if (!cv || !tt || !wr) return;
   const pts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
-  if (pts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Ch╞░a ─æß╗º dß╗» liß╗çu lß╗ïch sß╗¡.</div>'; return; }
+  if (pts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Chưa đủ dữ liệu lịch sử.</div>'; return; }
   pts.sort((a,b) => { const da = a.date.split('/'), db = b.date.split('/'); return da[2]-db[2] || da[1]-db[1] || da[0]-db[0]; });
   const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, h = 260;
   cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
@@ -602,7 +602,7 @@ function buildCommentarySection(){
   const md = COMMENTARY.content;
   const html = md.replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^# (.*$)/gm, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
   return `<div class="panel">
-    <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Nhß║¡n ─æß╗ïnh phi├¬n</h2>
+    <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Nhận định phiên</h2>
     <div class="accordion-body collapsed">
       <div class="commentary">${html}</div>
     </div>
@@ -668,7 +668,7 @@ function toggleHistoryDetail(tr){
 function buildAppendixSection(m){
   if (!m) return '';
   const renderChips = (list, kind, dualSet) => {
-    if (!list || !list.length) return '<span class="empty-note">Kh├┤ng c├│</span>';
+    if (!list || !list.length) return '<span class="empty-note">Không có</span>';
     return list.map(s => {
       const isDual = dualSet && dualSet.has(s);
       const cls = isDual ? 'chip dual' : (kind === 'up' ? 'chip up' : kind === 'down' ? 'chip down' : 'chip');
@@ -678,28 +678,28 @@ function buildAppendixSection(m){
   const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
 
   return `<div class="panel">
-    <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Phß╗Ñ lß╗Ñc ΓÇö Mß╗¢i v╞░ß╗út/rß╗¢t MA + Danh s├ích ─æß║ºy ─æß╗º</h2>
+    <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Phụ lục — Mới vượt/rớt MA + Danh sách đầy đủ</h2>
     <div class="accordion-body collapsed">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">Γåæ Mß╗¢i v╞░ß╗út MA20 (${(m.newly_above_ma20||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">↑ Mới vượt MA20 (${(m.newly_above_ma20||[]).length})</div>
           <div class="chip-wrap">${renderChips(m.newly_above_ma20, 'up')}</div></div>
-        <div><div style="font-size:11px;font-weight:600;color:var(--down);margin-bottom:4px;">Γåô Mß╗¢i rß╗¢t MA20 (${(m.newly_below_ma20||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--down);margin-bottom:4px;">↓ Mới rớt MA20 (${(m.newly_below_ma20||[]).length})</div>
           <div class="chip-wrap">${renderChips(m.newly_below_ma20, 'down')}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">Γåæ Mß╗¢i v╞░ß╗út MA50 (${(m.newly_above_ma50||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">↑ Mới vượt MA50 (${(m.newly_above_ma50||[]).length})</div>
           <div class="chip-wrap">${renderChips(m.newly_above_ma50, 'up')}</div></div>
-        <div><div style="font-size:11px;font-weight:600;color:var(--down);margin-bottom:4px;">Γåô Mß╗¢i rß╗¢t MA50 (${(m.newly_below_ma50||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--down);margin-bottom:4px;">↓ Mới rớt MA50 (${(m.newly_below_ma50||[]).length})</div>
           <div class="chip-wrap">${renderChips(m.newly_below_ma50, 'down')}</div></div>
       </div>
       <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Tr├¬n MA20 (${(m.above_ma20_symbols||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Trên MA20 (${(m.above_ma20_symbols||[]).length})</div>
           <div class="chip-wrap" style="max-height:120px;overflow-y:auto;">${renderChips(m.above_ma20_symbols, 'neutral', dualSet)}</div></div>
-        <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Tr├¬n MA50 (${(m.above_ma50_symbols||[]).length})</div>
+        <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Trên MA50 (${(m.above_ma50_symbols||[]).length})</div>
           <div class="chip-wrap" style="max-height:120px;overflow-y:auto;">${renderChips(m.above_ma50_symbols, 'neutral', dualSet)}</div></div>
       </div>
       ${(m.volume_breakout_symbols||[]).length ? `
-      <div style="margin-top:14px;"><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">≡ƒôè Volume Breakout (${m.volume_breakout_symbols.length})</div>
+      <div style="margin-top:14px;"><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">📊 Volume Breakout (${m.volume_breakout_symbols.length})</div>
         <div class="chip-wrap">${renderChips(m.volume_breakout_symbols, 'up')}</div></div>` : ''}
     </div>
   </div>`;
