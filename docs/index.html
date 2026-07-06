@@ -172,6 +172,7 @@
 let MARKETS = ['ALL'];
 let activeMarket = 'HOSE';
 let LATEST = null, HISTORY = null, MIDDAY = null, COMMENTARY = null, SIGNALS = null, ENSEMBLE = null, ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null;
+let MOMENTUM = null;
 let activeSignalsDate = null;
 
 async function loadData(){
@@ -209,6 +210,9 @@ async function loadData(){
       activeSignalsDate = SIGNALS_HISTORY[SIGNALS_HISTORY.length - 1].date;
     }
 
+    const momentumRes = await fetch(`./data/momentum_signals.json?t=${timestamp}`);
+    MOMENTUM = momentumRes.ok ? await momentumRes.json() : null;
+
     const sessionLabel = LATEST.session === 'midday'
       ? '<span class="session-badge midday">Phiên sáng 11:30</span>'
       : '<span class="session-badge close">Đóng cửa 15:10</span>';
@@ -236,9 +240,10 @@ function renderTabs(){
   if (SIGNALS) tabs.push('TIN_HIEU');
   if (ENSEMBLE) tabs.push('DONG_THUAT');
   if (COMMENTARY) tabs.push('NHAN_DINH');
+  if (MOMENTUM) tabs.push('BREAK_OUT');
   tabs.forEach(m => {
     const btn = document.createElement('button');
-    const labels = { NHAN_DINH: 'Nhận định', TIN_HIEU: 'Pre-Breakout', DONG_THUAT: 'Ensemble' };
+    const labels = { NHAN_DINH: 'Nhận định', TIN_HIEU: 'Pre-Breakout', DONG_THUAT: 'Ensemble', BREAK_OUT: 'Break out!' };
     btn.textContent = labels[m] || m;
     if (m === activeMarket) btn.classList.add('active');
     btn.onclick = () => { activeMarket = m; renderTabs(); render(); };
@@ -287,6 +292,7 @@ function onSignalsDateChange(date){
   activeSignalsDate = date;
   if (activeMarket === 'TIN_HIEU') renderSignals();
   else if (activeMarket === 'DONG_THUAT') renderEnsemble();
+  else if (activeMarket === 'BREAK_OUT') renderMomentum();
 }
 
 function renderDateSelector(){
@@ -349,6 +355,10 @@ function render(){
   }
   if (activeMarket === 'DONG_THUAT') {
     renderEnsemble();
+    return;
+  }
+  if (activeMarket === 'BREAK_OUT') {
+    renderMomentum();
     return;
   }
   const m = LATEST.markets[activeMarket];
@@ -732,6 +742,91 @@ function renderSignals(){
       </div>
     </div>
   `;
+}
+
+function renderMomentum(){
+  const el = document.getElementById('content');
+  const src = activeSignalsDate && SIGNALS_HISTORY
+    ? SIGNALS_HISTORY.find(h => h.date === activeSignalsDate)
+    : null;
+  const s = (src && src.momentum) || MOMENTUM;
+  if (!s || !s.all_signals) {
+    el.innerHTML = '<div class="panel"><h2>Break out!</h2><div class="loading">Chua co du lieu.</div></div>';
+    return;
+  }
+  const all = s.all_signals || [];
+  const tbody = all.map(row => {
+    const stratList = row.strategies || [];
+    const bonusList = row.bonuses || [];
+    const stratStr = stratList.map(st => {
+      const labels = {ma_crossover:'MA', breakout:'BO', roc_momentum:'ROC', hybrid:'HY'};
+      return labels[st] || st;
+    }).join('+') || '\u2014';
+    const bonusStr = bonusList.map(b => {
+      const labels = {vol_surge:'Vx2', adx_strong:'ADX>28', rsi_gold:'RSI\u2605'};
+      return labels[b] || b;
+    }).join('+') || '';
+
+    const cls = row.signal_type === 'strong' ? 'good' : 'mixed';
+    const label = row.signal_type === 'strong' ? 'Strong' : 'QS';
+
+    const hasMA = row.details?.ma_crossover?.signal;
+    const hasBO = row.details?.breakout?.signal;
+    const hasROC = row.details?.roc_momentum?.signal;
+    const hasHY = row.details?.hybrid?.signal;
+
+    return '<tr>'
+      + '<td class="mono" style="font-weight:700;">' + row.symbol + '</td>'
+      + '<td class="mono" style="font-weight:700;">' + row.score + '</td>'
+      + '<td class="mono">' + stratStr + '</td>'
+      + '<td class="mono">' + (bonusStr || '\u2014') + '</td>'
+      + '<td class="mono">' + (row.rsi14 != null ? row.rsi14.toFixed(1) : '\u2014') + '</td>'
+      + '<td class="mono">' + (row.adx14 != null ? row.adx14.toFixed(1) : '\u2014') + '</td>'
+      + '<td class="mono">' + (row.vol_ratio != null ? row.vol_ratio.toFixed(1) + 'x' : '\u2014') + '</td>'
+      + '<td class="mono">' + (row.last_price || 0).toLocaleString('vi-VN') + '</td>'
+      + '<td><span class="tag ' + cls + '">' + label + '</span></td></tr>';
+  }).join('');
+
+  const sigBreakdown = {ma_crossover:0, breakout:0, roc_momentum:0, hybrid:0};
+  all.forEach(r => {
+    const d = r.details || {};
+    if (d.ma_crossover?.signal) sigBreakdown.ma_crossover++;
+    if (d.breakout?.signal) sigBreakdown.breakout++;
+    if (d.roc_momentum?.signal) sigBreakdown.roc_momentum++;
+    if (d.hybrid?.signal) sigBreakdown.hybrid++;
+  });
+
+  el.innerHTML = '<div class="panel">'
+    + '<h2>Break out! — ' + s.date + '</h2>'
+    + '<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;">'
+    + '<div class="stat good" style="flex:1;min-width:120px;"><div class="lab">Strong Buy (\u226560)</div><div class="num" style="font-size:22px;">' + s.strong_buy + '</div></div>'
+    + '<div class="stat flat" style="flex:1;min-width:120px;"><div class="lab">Quan sat (35-59)</div><div class="num" style="font-size:22px;">' + (s.watch_count ?? 0) + '</div></div>'
+    + '<div style="flex:1;min-width:120px;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;background:var(--panel-tint);">'
+    + '<div class="lab">Tong tin hieu</div><div class="num" style="font-size:22px;color:var(--accent-1);">' + s.total_signals + '</div>'
+    + '<div class="sub2" style="font-size:11px;color:var(--faint);margin-top:3px;">/' + s.total_symbols_analyzed + ' ma</div></div></div></div>'
+
+    + '<div class="panel"><h2>Phan bo chien luoc</h2>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;">'
+    + '<div class="stat" style="border-left:3px solid #8884d8;"><div class="lab">MA Crossover</div><div class="num" style="font-size:20px;">' + sigBreakdown.ma_crossover + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">30d</div></div>'
+    + '<div class="stat" style="border-left:3px solid #82ca9d;"><div class="lab">Breakout</div><div class="num" style="font-size:20px;">' + sigBreakdown.breakout + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">35d</div></div>'
+    + '<div class="stat" style="border-left:3px solid #ffc658;"><div class="lab">ROC Momentum</div><div class="num" style="font-size:20px;">' + sigBreakdown.roc_momentum + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">25d</div></div>'
+    + '<div class="stat" style="border-left:3px solid #d946ef;"><div class="lab">Hybrid</div><div class="num" style="font-size:20px;">' + sigBreakdown.hybrid + '</div><div class="sub2" style="font-size:11px;color:var(--faint);">40d</div></div>'
+    + '</div></div>'
+
+    + '<div class="panel"><h2>Danh sach — ' + all.length + ' ma</h2>'
+    + '<div class="note" style="margin-bottom:14px;">'
+    + '<b>Score</b> = tong base chien luoc + bonuses (Vol>2x +15, ADX>28 +10, RSI 50-68 +10).'
+    + ' <b>Strong \u2265 60</b> | <b>Quan sat 35-59</b>.</div>'
+    + '<table><thead><tr><th>Ma</th><th>Score</th><th>Chien luoc</th><th>Bonus</th><th>RSI</th><th>ADX</th><th>Vol</th><th>Gia</th><th>Muc</th></tr></thead>'
+    + '<tbody>' + tbody + '</tbody></table></div>'
+
+    + '<div class="panel"><h2>Phan loai</h2>'
+    + '<div class="signal-grid">'
+    + '<div class="signal-col"><div class="signal-title up-txt">Strong Buy \u2014 ' + s.strong_buy + ' ma</div>'
+    + '<div class="chip-wrap">' + renderChips((s.strong||[]).map(r => r.symbol), 'up') + '</div></div>'
+    + '<div class="signal-col"><div class="signal-title" style="color:#B9760F;">Quan sat \u2014 ' + (s.watch_count ?? 0) + ' ma</div>'
+    + '<div class="chip-wrap">' + renderChips((s.watch||[]).map(r => r.symbol)) + '</div></div>'
+    + '</div></div>';
 }
 
 function renderCommentary(){

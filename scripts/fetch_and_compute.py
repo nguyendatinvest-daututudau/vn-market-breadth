@@ -57,6 +57,7 @@ from market_commentary import generate_commentary
 from strategy_signals import main as run_strategy_signals
 from ensemble_signals import main as run_ensemble_signals
 from backtest_weights import main as run_backtest_weights
+from momentum_signals import main as run_momentum_signals
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -419,7 +420,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Đồng bộ dữ liệu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "breadth_midday.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -445,7 +446,8 @@ def append_history(markets_dict: dict) -> None:
 def append_signals_history() -> None:
     strategy_path = DATA_DIR / "strategy_signals.json"
     ensemble_path = DATA_DIR / "ensemble_signals.json"
-    if not strategy_path.exists() and not ensemble_path.exists():
+    momentum_path = DATA_DIR / "momentum_signals.json"
+    if not strategy_path.exists() and not ensemble_path.exists() and not momentum_path.exists():
         return
 
     history = []
@@ -455,7 +457,7 @@ def append_signals_history() -> None:
         except Exception:
             history = []
 
-    entry = {"date": "", "strategy": None, "ensemble": None}
+    entry = {"date": "", "strategy": None, "ensemble": None, "momentum": None}
     if strategy_path.exists():
         data = json.loads(strategy_path.read_text(encoding="utf-8"))
         entry["date"] = data.get("date", "")
@@ -464,6 +466,11 @@ def append_signals_history() -> None:
         data = json.loads(ensemble_path.read_text(encoding="utf-8"))
         entry["date"] = entry["date"] or data.get("date", "")
         entry["ensemble"] = data
+
+    if momentum_path.exists():
+        data = json.loads(momentum_path.read_text(encoding="utf-8"))
+        entry["date"] = entry["date"] or data.get("date", "")
+        entry["momentum"] = data
 
     if not entry["date"]:
         return
@@ -551,6 +558,12 @@ def main():
             print(f"Da ghi tin hieu ensemble.\n")
         except Exception as e:
             print(f"Loi sinh tin hieu ensemble: {e}")
+
+        try:
+            run_momentum_signals()
+            print(f"Da ghi tin hieu momentum.\n")
+        except Exception as e:
+            print(f"Loi sinh tin hieu momentum: {e}")
 
         append_signals_history()
     else:

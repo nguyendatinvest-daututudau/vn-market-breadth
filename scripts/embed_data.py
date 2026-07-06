@@ -10,6 +10,7 @@ COMMENTARY_JSON = ROOT / "data" / "market_commentary.json"
 SIGNALS_JSON = ROOT / "data" / "strategy_signals.json"
 ENSEMBLE_JSON = ROOT / "data" / "ensemble_signals.json"
 WEIGHTS_JSON = ROOT / "data" / "backtest_weights.json"
+MOMENTUM_JSON = ROOT / "data" / "momentum_signals.json"
 SIGNALS_HISTORY_JSON = ROOT / "data" / "signals_history.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
@@ -21,6 +22,7 @@ commentary = json.loads(COMMENTARY_JSON.read_text(encoding="utf-8")) if COMMENTA
 signals = json.loads(SIGNALS_JSON.read_text(encoding="utf-8")) if SIGNALS_JSON.exists() else None
 ensemble = json.loads(ENSEMBLE_JSON.read_text(encoding="utf-8")) if ENSEMBLE_JSON.exists() else None
 weights = json.loads(WEIGHTS_JSON.read_text(encoding="utf-8")) if WEIGHTS_JSON.exists() else None
+momentum = json.loads(MOMENTUM_JSON.read_text(encoding="utf-8")) if MOMENTUM_JSON.exists() else None
 signals_history = json.loads(SIGNALS_HISTORY_JSON.read_text(encoding="utf-8")) if SIGNALS_HISTORY_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
@@ -35,6 +37,7 @@ const EMBEDDED_COMMENTARY = {json.dumps(commentary, ensure_ascii=False)};
 const EMBEDDED_SIGNALS = {json.dumps(signals, ensure_ascii=False)};
 const EMBEDDED_ENSEMBLE = {json.dumps(ensemble, ensure_ascii=False)};
 const EMBEDDED_WEIGHTS = {json.dumps(weights, ensure_ascii=False)};
+const EMBEDDED_MOMENTUM = {json.dumps(momentum, ensure_ascii=False)};
 const EMBEDDED_SIGNALS_HISTORY = {json.dumps(signals_history, ensure_ascii=False)};
 </script>
 """
@@ -52,6 +55,7 @@ new_func = """async function loadData(){
   SIGNALS = EMBEDDED_SIGNALS;
   ENSEMBLE = EMBEDDED_ENSEMBLE;
   ENSEMBLE_WEIGHTS = EMBEDDED_WEIGHTS;
+  MOMENTUM = EMBEDDED_MOMENTUM;
   SIGNALS_HISTORY = EMBEDDED_SIGNALS_HISTORY;
   if (SIGNALS_HISTORY && SIGNALS_HISTORY.length > 0) { activeSignalsDate = SIGNALS_HISTORY[SIGNALS_HISTORY.length - 1].date; }
   if (MIDDAY && MIDDAY.markets && MIDDAY.markets.ALL.date !== LATEST.markets.ALL.date) { MIDDAY = null; }
