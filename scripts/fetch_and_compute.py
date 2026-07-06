@@ -87,11 +87,13 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
         from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
     else:
         latest_cached = cached["TradingDate"].max()
-        if latest_cached is not None and latest_cached.date() > today.date():
+        if pd.isna(latest_cached):
+            from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
+        elif latest_cached.date() > today.date():
             return cached
-        # Lu├┤n fetch data h├┤m nay (cho ph├⌐p midday + closing c├╣ng ng├áy)
-        cached_historical = cached[cached["TradingDate"].dt.date < today.date()]
-        from_date = today - timedelta(days=INCREMENTAL_LOOKBACK)
+        else:
+            cached_historical = cached[cached["TradingDate"].dt.date < today.date()]
+            from_date = today - timedelta(days=INCREMENTAL_LOOKBACK)
 
     rows = client.daily_ohlc(
         symbol,
