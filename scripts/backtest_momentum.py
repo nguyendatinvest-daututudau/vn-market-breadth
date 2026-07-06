@@ -26,7 +26,7 @@ DOCS_OUTPUT_JSON = ROOT / "docs" / "data" / "backtest_momentum.json"
 MIN_SYMBOL_HISTORY = 220
 LOOKFORWARD_OPTIONS = [5, 10, 20]
 SUCCESS_THRESHOLD = 0.02
-MIN_AVG_VOLUME = 800_000
+MIN_AVG_VOLUME = 500_000
 MIN_OBSERVATIONS = 20
 
 # Base scores
@@ -75,7 +75,7 @@ def compute_ma_crossover_signal(close: pd.Series, volume: pd.Series, rsi: pd.Ser
         & (close > ma10)
         & (rsi > 50)
         & (adx >= 22)
-        & (vol_ratio > 1.5)
+        & (vol_ratio > 1.3)
     ).astype(int)
 
 
@@ -87,7 +87,7 @@ def compute_breakout_signal(close: pd.Series, volume: pd.Series, rsi: pd.Series)
 
     return (
         (close > high_20)
-        & (vol_ratio > 1.5)
+        & (vol_ratio > 1.3)
         & (rsi > 45)
         & (close > ma10)
     ).astype(int)
@@ -209,8 +209,8 @@ def backtest_symbol(symbol: str) -> dict | None:
 
     # Categorize
     is_strong = (score >= 60).astype(int)
-    is_watch = ((score >= 35) & (score < 60)).astype(int)
-    has_signal = (score >= 35).astype(int)
+    is_watch = ((score >= 30) & (score < 60)).astype(int)
+    has_signal = (score >= 30).astype(int)
 
     # Forward returns
     results = {}
@@ -251,7 +251,7 @@ def backtest_symbol(symbol: str) -> dict | None:
         "mean": round(float(valid_scores.mean()), 2),
         "median": round(float(valid_scores.median()), 2),
         "pct_strong": round(float((valid_scores >= 60).mean() * 100), 2),
-        "pct_watch": round(float(((valid_scores >= 35) & (valid_scores < 60)).mean() * 100), 2),
+        "pct_watch": round(float(((valid_scores >= 30) & (valid_scores < 60)).mean() * 100), 2),
     }
 
     return results

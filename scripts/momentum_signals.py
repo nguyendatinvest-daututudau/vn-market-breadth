@@ -7,8 +7,8 @@ Momentum Signals — Bộ 4 chiến lược tìm điểm mua.
 
   Score = sum(strategy_base) + sum(bonuses)
     >= 60: Strong Buy
-    35-59: Quan sát
-    < 35:  Bỏ qua
+    30-59: Quan sát
+    < 30:  Bỏ qua
 """
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ DOCS_DATA_DIR = ROOT / "docs" / "data"
 SIGNALS_JSON = DATA_DIR / "momentum_signals.json"
 DOCS_SIGNALS_JSON = DOCS_DATA_DIR / "momentum_signals.json"
 
-MIN_AVG_VOLUME = 800_000
+MIN_AVG_VOLUME = 500_000
 
 # Base scores
 SCORE_MA = 30
@@ -121,7 +121,7 @@ def compute_ma_crossover(df: pd.DataFrame) -> dict:
         and close[-1] > ma10
         and rsi14 > 50
         and adx14 >= 22
-        and vol_ratio > 1.5
+        and vol_ratio > 1.3
     ) else 0
 
     return {
@@ -147,7 +147,7 @@ def compute_breakout(df: pd.DataFrame) -> dict:
 
     signal = 1 if (
         close[-1] > high_20
-        and vol_ratio > 1.5
+        and vol_ratio > 1.3
         and rsi14 > 45
         and close[-1] > ma10
     ) else 0
@@ -313,7 +313,7 @@ def analyze_symbol(symbol: str) -> dict | None:
             + hy["signal"] * SCORE_HYBRID)
     score = base + bonuses["total"]
 
-    if score < 35:
+    if score < 30:
         return None
 
     activated = []
