@@ -1,6 +1,11 @@
 ﻿name: Update market breadth data
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/**'
+      - 'docs/**'
   schedule:
     # 08:10 UTC = 15:10 gio VN (sau gio dong cua)
     - cron: "10 8 * * 1-5"
