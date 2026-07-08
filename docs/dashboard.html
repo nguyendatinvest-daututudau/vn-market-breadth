@@ -467,8 +467,8 @@ function buildSummary(dateStr){
   if (k4Src && k4Src.all_signals) {
     k4Src.all_signals.forEach(s => {
       symbols.add(s.symbol);
-      if (s.buy) k4Buy++;
-      if (s.sell) k4Sell++;
+      if (s.khung4_tplus_buy) k4Buy++;
+      if (s.khung4_tplus_sell) k4Sell++;
     });
   }
 
@@ -859,7 +859,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       if (s.sell) parts.push('state chuyển 1→0');
       result.push({
         symbol: s.symbol, score: s.score,
-        signalType: s.buy ? 'valid' : (s.sell ? 'sell_warning' : 'watch'), source: 'khung4-tplus',
+        signalType: s.khung4_tplus_buy ? 'valid' : (s.khung4_tplus_sell ? 'sell_warning' : 'watch'), source: 'khung4-tplus',
         strategies: ['khung4_tplus'], expl: parts.join(' + '),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
