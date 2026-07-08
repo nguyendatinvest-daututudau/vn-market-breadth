@@ -30,8 +30,6 @@ def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
             return df.dropna(subset=["Close"])
         except Exception as exc:
             logger.warning("load_cache(%s): %s", symbol, exc)
-    else:
-        logger.warning("load_cache(%s): file not found at %s", symbol, path)
     return pd.DataFrame(columns=["TradingDate", "Open", "High", "Low", "Close", "Volume"])
 
 
