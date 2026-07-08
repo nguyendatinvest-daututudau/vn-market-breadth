@@ -12,6 +12,7 @@ lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua G
 - **Ensemble Signals**: 4-signal voting strategy (MA Crossover + Pullback + Breakout + Momentum)
 - **Momentum Signals**: Bộ lọc momentum có điểm số, ADX/RSI/volume bonus
 - **Lục Mạch Signals**: bản core theo Diệp gốc, gồm VUDD 13/20/35/55/65 + Tplus
+- **Khung4/Tplus Signals**: hub mua riêng theo state Khung4/Tplus, có giá mua tại phiên phát tín hiệu
 - **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
 - **Session Compare**: So sánh phiên sáng vs đóng cửa
 
@@ -26,6 +27,7 @@ scripts/
   ensemble_signals.py     # 4-signal voting strategy
   momentum_signals.py     # Momentum score + bonuses
   luc_mach_signals.py     # Lục Mạch core: VUDD + Tplus
+  khung4_tplus_signals.py # Khung4/Tplus standalone: buy + buy_price
   market_commentary.py    # Nhận định thị trường (breadth + technical)
   embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
@@ -37,6 +39,7 @@ data/
   ensemble_signals.json   # tín hiệu ensemble
   momentum_signals.json   # tín hiệu momentum
   luc_mach_signals.json   # tín hiệu Lục Mạch
+  khung4_tplus_signals.json # tín hiệu mua Khung4/Tplus
   market_commentary.json  # nhận định thị trường
   ohlc_cache/             # cache OHLCV theo mã
 docs/

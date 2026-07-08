@@ -15,6 +15,7 @@ from momentum_signals import (
     compute_roc_momentum, compute_hybrid, check_common_filters,
     compute_bonuses,
 )
+from khung4_tplus_signals import compute_khung4_tplus
 
 
 def _make_df(close_values, volume_values=None):
@@ -26,6 +27,19 @@ def _make_df(close_values, volume_values=None):
         "Volume": volume_values if volume_values else [1_000_000] * n,
     })
     return df
+
+
+def _make_ohlcv_df(open_values, high_values, low_values, close_values):
+    n = len(close_values)
+    dates = pd.date_range("2025-01-01", periods=n, freq="D")
+    return pd.DataFrame({
+        "TradingDate": dates,
+        "Open": open_values,
+        "High": high_values,
+        "Low": low_values,
+        "Close": close_values,
+        "Volume": [1_000_000] * n,
+    })
 
 
 class TestRSI:
@@ -115,6 +129,31 @@ class TestStrategySignals:
         result = compute_bonuses(df)
         assert "total" in result
         assert result["vol_surge"] == 0
+
+
+class TestKhung4Tplus:
+    def test_requires_previous_d_before_cross(self):
+        df = _make_ohlcv_df(
+            [10, 10, 10, 10, 16],
+            [11, 12, 13, 14, 16],
+            [9, 9, 9, 9, 15],
+            [10, 10, 10, 10, 15],
+        )
+        result = compute_khung4_tplus(df)
+        assert result["buy"] is False
+        assert result["state"] == 0
+
+    def test_buy_price_is_close_on_state_flip_to_one(self):
+        df = _make_ohlcv_df(
+            [10, 10, 10, 10, 8, 8, 15],
+            [11, 12, 13, 14, 9, 9, 15],
+            [9, 9, 9, 9, 7, 7, 13],
+            [10, 10, 10, 10, 8, 8, 15],
+        )
+        result = compute_khung4_tplus(df)
+        assert result["buy"] is True
+        assert result["state"] == 1
+        assert result["buy_price"] == 15.0
 
 
 class TestCommonFilters:

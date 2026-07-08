@@ -1,4 +1,4 @@
-﻿name: Update market breadth data
+name: Update market breadth data
 
 on:
   push:
@@ -9,15 +9,20 @@ on:
   schedule:
     # 08:10 UTC = 15:10 gio VN (sau gio dong cua)
     - cron: "10 8 * * 1-5"
-  workflow_dispatch: {}   # Cho phep chay thu cong
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
+concurrency:
+  group: update-market-data
+  cancel-in-progress: false
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 120
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -40,11 +45,19 @@ jobs:
           restore-keys: |
             ohlc-cache-v2-
 
-      - name: Run fetch + compute
+      - name: Validate SSI secrets
+        run: |
+          test -n "$SSI_CONSUMER_ID"
+          test -n "$SSI_CONSUMER_SECRET"
         env:
           SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
           SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+
+      - name: Run fetch + compute
         run: python scripts/fetch_and_compute.py
+        env:
+          SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
+          SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
 
       - name: Generate dashboard.html (embedded data)
         run: python scripts/embed_data.py
@@ -54,5 +67,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/ docs/
-          git diff --cached --quiet || git commit -m "chore: update market breadth data $(date -u +'%Y-%m-%d')"
-          git push
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore: update market breadth data $(date -u +'%Y-%m-%d')"
+            git push
+          fi

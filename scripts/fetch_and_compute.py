@@ -33,6 +33,7 @@ from backtest_weights import main as run_backtest_weights
 from momentum_signals import main as run_momentum_signals
 from backtest_momentum import main as run_backtest_momentum
 from luc_mach_signals import main as run_luc_mach_signals
+from khung4_tplus_signals import main as run_khung4_tplus_signals
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
@@ -414,7 +415,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "luc_mach_signals.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "luc_mach_signals.json", "khung4_tplus_signals.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -562,6 +563,12 @@ def main():
         print(f"Da ghi tin hieu Luc Mach.\n")
     except Exception as e:
         print(f"Loi sinh tin hieu Luc Mach: {e}")
+
+    try:
+        run_khung4_tplus_signals()
+        print(f"Da ghi tin hieu Khung4/Tplus.\n")
+    except Exception as e:
+        print(f"Loi sinh tin hieu Khung4/Tplus: {e}")
 
     try:
         run_backtest_momentum()

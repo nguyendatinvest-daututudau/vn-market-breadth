@@ -176,6 +176,10 @@
   .lm-sym{font-weight:800;color:var(--text);}
   .lm-meta{color:var(--muted);text-align:right;}
 
+  .buy-hub-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px;}
+  .buy-hub-note{font-size:11px;color:var(--muted);line-height:1.5;max-width:560px;}
+  .price-buy{color:var(--up);font-weight:800;}
+
   .session-badge{display:inline-block;font-family:var(--font-all);font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:6px;}
 .session-badge.close{background:rgba(79,70,229,0.12);color:var(--accent-1);}
 </style>
@@ -201,7 +205,7 @@ let activeMarket = 'ALL';
 let activeFilter = 'all';
 let searchQuery = '';
 let LATEST = null, HISTORY = null, COMMENTARY = null;
-let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, LUC_MACH = null;
+let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null;
 let ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null;
 
 async function loadData(){
@@ -228,6 +232,9 @@ async function loadData(){
 
     const lm = await fetch(`./data/luc_mach_signals.json?t=${ts}`);
     LUC_MACH = lm.ok ? await lm.json() : null;
+
+    const k4 = await fetch(`./data/khung4_tplus_signals.json?t=${ts}`);
+    KHUNG4_TPLUS = k4.ok ? await k4.json() : null;
 
     const w = await fetch(`./data/backtest_weights.json?t=${ts}`);
     ENSEMBLE_WEIGHTS = w.ok ? await w.json() : null;
@@ -265,6 +272,7 @@ function renderMarketTabs(){
 }
 
 function fmt1(n){ return (n === null || n === undefined) ? '\u2014' : Number(n).toFixed(1); }
+function fmtPrice(n){ return (n === null || n === undefined) ? '\u2014' : Number(n).toLocaleString('vi-VN'); }
 
 function render(){
   const m = LATEST.markets[activeMarket];
@@ -277,6 +285,7 @@ function render(){
 
   let summary = buildSummary(activeSignalDate);
   let actionHTML = buildActionBoard(summary);
+  let buyHubHTML = buildBuyHub(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
   let lucMachHTML = buildLucMachPanel();
   let chartHTML = buildChartSection();
@@ -313,6 +322,8 @@ function render(){
     </div>
 
     ${actionHTML}
+
+    ${buyHubHTML}
 
     <div class="panel">
       <h2>Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} tín hiệu${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
@@ -472,6 +483,32 @@ function buildActionBoard(summary){
   </div>`;
 }
 
+function buildBuyHub(dateStr){
+  const src = dateStr ? null : KHUNG4_TPLUS;
+  const rows = src?.all_signals || [];
+  if (!rows.length) return '';
+
+  const tbody = rows.map(r => `<tr>
+      <td class="mono" style="font-weight:800;">${r.symbol}</td>
+      <td>Khung4/Tplus</td>
+      <td class="mono" style="font-weight:700;">${r.score}</td>
+      <td class="mono price-buy">${fmtPrice(r.buy_price)}</td>
+      <td class="mono">${fmtPrice(r.khung4_tplus_d)}</td>
+      <td class="mono">${Math.round(r.last_volume || 0).toLocaleString('vi-VN')}</td>
+    </tr>`).join('');
+
+  return `<div class="panel">
+    <div class="buy-hub-head">
+      <h2 style="margin-bottom:0;">Hub mua Khung4/Tplus <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${rows.length} mã)</span></h2>
+      <div class="buy-hub-note">Bộ riêng theo công thức Diệp: Close phá vùng 4 phiên tạo đường d, mua khi state chuyển 0 sang 1. Giá mua là Close tại phiên phát sinh tín hiệu.</div>
+    </div>
+    <table>
+      <thead><tr><th>Mã</th><th>Bộ lọc</th><th>Score</th><th>Giá mua</th><th>d</th><th>Vol</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>
+  </div>`;
+}
+
 // --- Unified signal table ---
 function buildSignalHub(dateStr){
   let rows = collectAllSignals(dateStr);
@@ -578,6 +615,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
         adx: s.adx14 != null ? s.adx14.toFixed(1) : null,
         vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : (s.last_price ? fmtPrice(s.last_price) : null),
       });
     });
   }
@@ -592,6 +630,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
         strategies: ['pre-breakout'], expl: expl,
         rsi: null, adx: null, vol: s.vol_ratio != null ? s.vol_ratio.toFixed(2) : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : (s.last_price ? fmtPrice(s.last_price) : null),
       });
     });
   }
@@ -616,6 +655,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
         rsi: s.rsi14 != null ? s.rsi14.toFixed(1) : null,
         adx: null, vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : (s.last_price ? fmtPrice(s.last_price) : null),
       });
     });
   }
@@ -636,6 +676,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : (s.last_price && s.luc_mach_buy ? fmtPrice(s.last_price) : null),
       });
     });
   }
