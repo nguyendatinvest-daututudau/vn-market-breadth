@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
-    """Load OHLC cache for a symbol. Returns DataFrame with TradingDate, Close, Volume."""
+    """Load OHLC cache for a symbol. Returns DataFrame with TradingDate, OHLC, Volume when available."""
     path = cache_dir / f"{symbol}.csv"
     if path.exists():
         try:
@@ -22,16 +22,17 @@ def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
                 warnings.simplefilter("ignore", UserWarning)
                 df["TradingDate"] = pd.to_datetime(df["TradingDate"], dayfirst=True, errors="coerce")
             df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-            if "Volume" in df.columns:
-                df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")
-            else:
-                df["Volume"] = float("nan")
+            for col in ("Open", "High", "Low", "Volume"):
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce")
+                else:
+                    df[col] = float("nan")
             return df.dropna(subset=["Close"])
         except Exception as exc:
             logger.warning("load_cache(%s): %s", symbol, exc)
     else:
         logger.warning("load_cache(%s): file not found at %s", symbol, path)
-    return pd.DataFrame(columns=["TradingDate", "Close", "Volume"])
+    return pd.DataFrame(columns=["TradingDate", "Open", "High", "Low", "Close", "Volume"])
 
 
 def compute_rsi_wilder(close_series: pd.Series, period: int = 14) -> float:

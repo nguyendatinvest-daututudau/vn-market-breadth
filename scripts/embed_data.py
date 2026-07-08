@@ -11,6 +11,7 @@ ENSEMBLE_JSON = ROOT / "data" / "ensemble_signals.json"
 WEIGHTS_JSON = ROOT / "data" / "backtest_weights.json"
 MOMENTUM_JSON = ROOT / "data" / "momentum_signals.json"
 MOMENTUM_BT_JSON = ROOT / "data" / "backtest_momentum.json"
+LUC_MACH_JSON = ROOT / "data" / "luc_mach_signals.json"
 SIGNALS_HISTORY_JSON = ROOT / "data" / "signals_history.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
@@ -23,6 +24,7 @@ ensemble = json.loads(ENSEMBLE_JSON.read_text(encoding="utf-8")) if ENSEMBLE_JSO
 weights = json.loads(WEIGHTS_JSON.read_text(encoding="utf-8")) if WEIGHTS_JSON.exists() else None
 momentum = json.loads(MOMENTUM_JSON.read_text(encoding="utf-8")) if MOMENTUM_JSON.exists() else None
 momentum_bt = json.loads(MOMENTUM_BT_JSON.read_text(encoding="utf-8")) if MOMENTUM_BT_JSON.exists() else None
+luc_mach = json.loads(LUC_MACH_JSON.read_text(encoding="utf-8")) if LUC_MACH_JSON.exists() else None
 signals_history = json.loads(SIGNALS_HISTORY_JSON.read_text(encoding="utf-8")) if SIGNALS_HISTORY_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
@@ -38,6 +40,7 @@ const EMBEDDED_ENSEMBLE = {json.dumps(ensemble, ensure_ascii=False)};
 const EMBEDDED_WEIGHTS = {json.dumps(weights, ensure_ascii=False)};
 const EMBEDDED_MOMENTUM = {json.dumps(momentum, ensure_ascii=False)};
 const EMBEDDED_MOMENTUM_BT = {json.dumps(momentum_bt, ensure_ascii=False)};
+const EMBEDDED_LUC_MACH = {json.dumps(luc_mach, ensure_ascii=False)};
 const EMBEDDED_SIGNALS_HISTORY = {json.dumps(signals_history, ensure_ascii=False)};
 </script>
 """
@@ -56,6 +59,7 @@ new_func = """async function loadData(){
   ENSEMBLE_WEIGHTS = EMBEDDED_WEIGHTS;
   MOMENTUM = EMBEDDED_MOMENTUM;
   MOMENTUM_BT = EMBEDDED_MOMENTUM_BT;
+  LUC_MACH = EMBEDDED_LUC_MACH;
   SIGNALS_HISTORY = EMBEDDED_SIGNALS_HISTORY;
   const sessionLabel = '<span class="session-badge close">Dong cua 15:10</span>';
   document.getElementById('metaLine').innerHTML =
@@ -81,5 +85,5 @@ if old_marker in html:
     html = html[:idx] + new_func + "\n\n" + html[actual_end:]
 
 OUT_HTML.write_text(html, encoding="utf-8")
-print(f"Da tao: {OUT_HTML}")
+print(f"Da tao: {OUT_HTML.name}")
 print("Mo file nay bang double-click (file://) de xem dashboard.")

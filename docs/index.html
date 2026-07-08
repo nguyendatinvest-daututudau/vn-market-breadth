@@ -71,6 +71,25 @@
   .s-badge.active{opacity:1;box-shadow:0 0 0 2px var(--accent-1);}
   .summary-count{font-family:var(--font-all);font-size:14px;font-weight:600;color:var(--text);}
 
+  .action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
+  @media (max-width:850px){.action-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.action-grid{grid-template-columns:1fr;}}
+  .action-card{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--panel);box-shadow:var(--shadow-sm);min-height:132px;}
+  .action-card.buy{border-color:rgba(15,174,114,0.25);background:linear-gradient(180deg,rgba(15,174,114,0.08),#fff 60%);}
+  .action-card.watch{border-color:rgba(245,165,36,0.28);background:linear-gradient(180deg,rgba(245,165,36,0.10),#fff 60%);}
+  .action-card.sell{border-color:rgba(240,71,62,0.25);background:linear-gradient(180deg,rgba(240,71,62,0.08),#fff 60%);}
+  .action-card.neutral{border-color:rgba(79,70,229,0.18);background:linear-gradient(180deg,rgba(79,70,229,0.06),#fff 60%);}
+  .action-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .action-title{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:700;}
+  .action-num{font-size:24px;font-weight:800;line-height:1;color:var(--text);}
+  .action-card.buy .action-num{color:var(--up);} .action-card.watch .action-num{color:#B9760F;} .action-card.sell .action-num{color:var(--down);}
+  .action-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+  .action-note{font-size:10.5px;color:var(--muted);line-height:1.45;margin-top:6px;}
+  .mini-symbol{font-size:10px;font-weight:700;border:1px solid var(--border);background:rgba(255,255,255,0.7);border-radius:999px;padding:3px 8px;color:var(--text);}
+  .mini-symbol.sell{color:var(--down);border-color:rgba(240,71,62,0.20);}
+  .mini-symbol.buy{color:var(--up);border-color:rgba(15,174,114,0.20);}
+  .mini-symbol.watch{color:#B9760F;border-color:rgba(245,165,36,0.25);}
+
   .filter-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
   .filter-bar input,.filter-bar select{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-size:12px;font-family:var(--font-all);outline:none;}
   .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent-1);}
@@ -148,6 +167,15 @@
 
   .signal-count{font-family:var(--font-all);font-weight:700;font-size:22px;}
 
+  .lm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media (max-width:800px){.lm-grid{grid-template-columns:1fr;}}
+  .lm-box{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--panel-tint);}
+  .lm-box h3{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;color:var(--muted);}
+  .lm-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;}
+  .lm-row:last-child{border-bottom:none;}
+  .lm-sym{font-weight:800;color:var(--text);}
+  .lm-meta{color:var(--muted);text-align:right;}
+
   .session-badge{display:inline-block;font-family:var(--font-all);font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:6px;}
 .session-badge.close{background:rgba(79,70,229,0.12);color:var(--accent-1);}
 </style>
@@ -173,7 +201,7 @@ let activeMarket = 'ALL';
 let activeFilter = 'all';
 let searchQuery = '';
 let LATEST = null, HISTORY = null, COMMENTARY = null;
-let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null;
+let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, LUC_MACH = null;
 let ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null;
 
 async function loadData(){
@@ -198,6 +226,9 @@ async function loadData(){
     const s3 = await fetch(`./data/momentum_signals.json?t=${ts}`);
     MOMENTUM = s3.ok ? await s3.json() : null;
 
+    const lm = await fetch(`./data/luc_mach_signals.json?t=${ts}`);
+    LUC_MACH = lm.ok ? await lm.json() : null;
+
     const w = await fetch(`./data/backtest_weights.json?t=${ts}`);
     ENSEMBLE_WEIGHTS = w.ok ? await w.json() : null;
 
@@ -209,7 +240,7 @@ async function loadData(){
 
     document.getElementById('metaLine').innerHTML =
       `Cập nhật: ${new Date(LATEST.generated_at).toLocaleString('vi-VN')}`
-      + ` ┬╖ ${LATEST.markets.ALL.date}`
+      + ` · ${LATEST.markets.ALL.date}`
       + `<span class="session-badge close">Đóng cửa 15:10</span>`;
 
     MARKETS = ['ALL', ...Object.keys(LATEST.markets).filter(k => k !== 'ALL')];
@@ -245,7 +276,9 @@ function render(){
   const downW = total ? m.declines_pct : 0;
 
   let summary = buildSummary(activeSignalDate);
+  let actionHTML = buildActionBoard(summary);
   let signalsHTML = buildSignalHub(activeSignalDate);
+  let lucMachHTML = buildLucMachPanel();
   let chartHTML = buildChartSection();
   let commentaryHTML = buildCommentarySection();
   let appendixHTML = buildAppendixSection(m);
@@ -256,6 +289,7 @@ function render(){
       <div class="summary-top">
         <div>
           <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
+          <div class="sub">Buy ${summary.buySignals} · Watch ${summary.watchSignals} · Sell warning ${summary.sellWarnings}${summary.missingOhlc ? ` · Thiếu OHLCV ${summary.missingOhlc} mã` : ''}</div>
         </div>
         <div class="summary-badges">
           ${summary.badges.map(b => `<span class="s-badge ${b.cls}" data-filter="${b.filter}">${b.label}</span>`).join('')}
@@ -278,16 +312,24 @@ function render(){
       <span style="width:${downW}%;background:var(--down);">${downW > 10 ? fmt1(downW)+'%' : ''}</span>
     </div>
 
+    ${actionHTML}
+
     <div class="panel">
       <h2>Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} tín hiệu${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
       <div class="filter-bar">
         <select id="filterSelect" onchange="activeFilter=this.value;renderSignalTable()">
           <option value="all">⚡ Tất cả</option>
+          <option value="buy">✅ Buy</option>
           <option value="strong">🟢 Strong</option>
           <option value="watch">🟡 Watch</option>
+          <option value="sell-warning">🔴 Sell Warning</option>
           <option value="pre-breakout">🔵 Pre-Breakout</option>
           <option value="ensemble-strong">🟣 Ensemble Strong</option>
           <option value="ensemble-weak">⚪ Ensemble Weak</option>
+          <option value="luc-mach-strong">🟢 Lục Mạch Strong</option>
+          <option value="luc-mach-valid">✅ Lục Mạch Valid</option>
+          <option value="luc-mach-watch">👀 Lục Mạch Watch</option>
+          <option value="luc-mach-sell">🔴 Lục Mạch Sell</option>
         </select>
         <select id="signalDateSelect" onchange="onSignalDateChange(this.value)" style="margin-left:6px;width:auto;min-width:100px;">
           <option value="">Hôm nay</option>
@@ -298,6 +340,7 @@ function render(){
       <div id="signalTableContainer">${signalsHTML}</div>
     </div>
 
+    ${lucMachHTML}
     ${chartHTML}
     ${commentaryHTML}
     ${appendixHTML}
@@ -329,14 +372,15 @@ function adRatioNote(r){
 // --- Build summary badges from all strategies ---
 function buildSummary(dateStr){
   let strongCount = 0, watchCount = 0, preCount = 0, ensStrong = 0, ensWeak = 0;
+  let lmStrong = 0, lmValid = 0, lmWatch = 0, lmSell = 0;
   let symbols = new Set();
 
-  let momSrc, stratSrc, ensSrc;
+  let momSrc, stratSrc, ensSrc, lmSrc;
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; }
+    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; lmSrc = entry.luc_mach; }
   } else {
-    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE;
+    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE; lmSrc = LUC_MACH;
   }
 
   if (momSrc && momSrc.all_signals) {
@@ -359,6 +403,15 @@ function buildSummary(dateStr){
       else if (s.total_score >= 0.35) ensWeak++;
     });
   }
+  if (lmSrc && lmSrc.all_signals) {
+    lmSrc.all_signals.forEach(s => {
+      symbols.add(s.symbol);
+      if (s.status === 'STRONG_BUY') lmStrong++;
+      else if (s.status === 'VALID_BUY') lmValid++;
+      else if (s.status === 'WATCHLIST') lmWatch++;
+      else if (s.status === 'SELL_WARNING') lmSell++;
+    });
+  }
 
   let badges = [];
   if (strongCount) badges.push({cls:'str', label:`🟢 Strong ${strongCount}`, filter:'strong'});
@@ -366,8 +419,60 @@ function buildSummary(dateStr){
   if (preCount) badges.push({cls:'pre', label:`🔵 Pre-Breakout ${preCount}`, filter:'pre-breakout'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
   if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
+  if (lmStrong) badges.push({cls:'str', label:`🟢 LM Strong ${lmStrong}`, filter:'luc-mach-strong'});
+  if (lmValid) badges.push({cls:'ens', label:`✅ LM Valid ${lmValid}`, filter:'luc-mach-valid'});
+  if (lmWatch) badges.push({cls:'wat', label:`👀 LM Watch ${lmWatch}`, filter:'luc-mach-watch'});
+  if (lmSell) badges.push({cls:'ensw', label:`🔴 LM Sell ${lmSell}`, filter:'luc-mach-sell'});
 
-  return { totalSignals: strongCount+watchCount+preCount+ensStrong+ensWeak, uniqueSymbols: symbols.size, badges };
+  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmStrong + lmValid;
+  const watchSignals = watchCount + lmWatch;
+  const sellWarnings = lmSell;
+  const missingOhlc = lmSrc?.skipped_missing_ohlc || 0;
+  return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
+}
+
+function currentSignalSources(dateStr){
+  if (dateStr && SIGNALS_HISTORY) {
+    const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
+    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach };
+  }
+  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH };
+}
+
+function topSymbols(rows, kind, limit=8){
+  return rows.filter(r => {
+    if (kind === 'buy') return r.signalType === 'strong' || r.signalType === 'valid' || r.signalType === 'moderate' || r.signalType === 'weak';
+    if (kind === 'watch') return r.signalType === 'watch';
+    if (kind === 'sell') return r.signalType === 'sell_warning';
+    return true;
+  }).slice(0, limit).map(r => `<span class="mini-symbol ${kind}">${r.symbol}</span>`).join('') || '<span class="empty-note">Không có</span>';
+}
+
+function buildActionBoard(summary){
+  const rows = collectAllSignals(activeSignalDate);
+  const buyList = topSymbols(rows, 'buy', 10);
+  const watchList = topSymbols(rows, 'watch', 10);
+  const sellList = topSymbols(rows, 'sell', 10);
+  const m = LATEST?.markets?.[activeMarket];
+  const marketNote = m ? `${adRatioNote(m.ad_ratio)} · MA20 ${fmt1(m.pct_above_ma20)}% · MA50 ${fmt1(m.pct_above_ma50)}%` : '';
+  return `<div class="action-grid">
+    <div class="action-card buy">
+      <div class="action-head"><div><div class="action-title">Buy candidates</div><div class="action-note">Ưu tiên kiểm tra điểm mua</div></div><div class="action-num">${summary.buySignals}</div></div>
+      <div class="action-list">${buyList}</div>
+    </div>
+    <div class="action-card watch">
+      <div class="action-head"><div><div class="action-title">Watchlist</div><div class="action-note">Đổi trạng thái, chờ xác nhận</div></div><div class="action-num">${summary.watchSignals}</div></div>
+      <div class="action-list">${watchList}</div>
+    </div>
+    <div class="action-card sell">
+      <div class="action-head"><div><div class="action-title">Sell warning</div><div class="action-note">Cần rà lại vị thế đang nắm</div></div><div class="action-num">${summary.sellWarnings}</div></div>
+      <div class="action-list">${sellList}</div>
+    </div>
+    <div class="action-card neutral">
+      <div class="action-head"><div><div class="action-title">Market context</div><div class="action-note">${marketNote}</div></div><div class="action-num">${m?.ad_ratio ?? '—'}</div></div>
+      <div class="action-note">${summary.missingOhlc ? `Còn thiếu OHLCV ${summary.missingOhlc} mã trong Lục Mạch.` : 'OHLCV đủ cho tập Lục Mạch hiện tại.'}</div>
+    </div>
+  </div>`;
 }
 
 // --- Unified signal table ---
@@ -383,6 +488,7 @@ function buildSignalHub(dateStr){
       (prev.strategy?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
       (prev.ensemble?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
       (prev.momentum?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
+      (prev.luc_mach?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
     }
   }
 
@@ -404,10 +510,15 @@ function buildSignalHub(dateStr){
       typeTag = r.score >= 75 ? '<span class="tag str">Mạnh</span>' : '<span class="tag wat">TB</span>';
     } else if (r.source === 'ensemble') {
       typeTag = r.signalType === 'strong' ? '<span class="tag ens">Strong</span>' : '<span class="tag ens-w">Weak</span>';
+    } else if (r.source === 'luc-mach') {
+      if (r.signalType === 'strong') typeTag = '<span class="tag str">LM Strong</span>';
+      else if (r.signalType === 'valid') typeTag = '<span class="tag ens">LM Valid</span>';
+      else if (r.signalType === 'watch') typeTag = '<span class="tag wat">LM Watch</span>';
+      else typeTag = '<span class="tag ens-w">LM Sell</span>';
     }
 
     let srcTags = r.strategies.map(s => {
-      const cls = {hy:'hy',ma:'ma',breakout:'bo',roc_momentum:'roc',roc:'roc',pullback:'pb',ma_crossover:'ma'}[s] || '';
+      const cls = {hy:'hy',ma:'ma',breakout:'bo',darvas:'bo',roc_momentum:'roc',roc:'roc',pullback:'pb',ma_crossover:'ma',luc_mach:'hy',tplus:'ma',sell_warning:'ens-w'}[s] || '';
       return `<span class="src-tag ${cls}">${s.replace('_momentum','').replace('_crossover','').toUpperCase()}</span>`;
     }).join('');
 
@@ -441,13 +552,13 @@ let activeSignalDate = null; // null = hom nay
 function collectAllSignals(dateStr){
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble);
+    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble, entry.luc_mach);
     return [];
   }
-  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE);
+  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH);
 }
 
-function _collectSignals(momSrc, stratSrc, ensSrc){
+function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
   let result = [];
   // Momentum signals
   if (momSrc && momSrc.all_signals) {
@@ -512,6 +623,28 @@ function _collectSignals(momSrc, stratSrc, ensSrc){
       });
     });
   }
+  // Luc Mach signals
+  if (lmSrc && lmSrc.all_signals) {
+    lmSrc.all_signals.forEach(s => {
+      let parts = [];
+      if (s.buy_score != null) parts.push(`BuyScore ${s.buy_score}/6`);
+      if (s.luc_mach_buy) parts.push('LucMach');
+      if (s.pullback_buy) parts.push('Pullback MA20');
+      if (s.breakout_buy) parts.push('Breakout20');
+      if (s.trend_up_strong) parts.push('Trend mạnh');
+      else if (s.trend_up_basic) parts.push('Trend OK');
+      if (s.sell_warning) parts.push('Sell warning');
+      if (s.vol_ratio != null) parts.push(`Vol ${s.vol_ratio.toFixed(1)}x`);
+      result.push({
+        symbol: s.symbol, score: s.score,
+        signalType: s.signal_type, source: 'luc-mach',
+        strategies: s.strategies || [], expl: parts.join(' + '),
+        rsi: null, adx: null,
+        vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
+        price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+      });
+    });
+  }
   // Sort by score desc
   result.sort((a, b) => b.score - a.score);
   return result;
@@ -520,11 +653,17 @@ function _collectSignals(momSrc, stratSrc, ensSrc){
 function applyFilters(rows, filter, query){
   return rows.filter(r => {
     if (filter !== 'all') {
+      if (filter === 'buy' && (r.signalType === 'watch' || r.signalType === 'sell_warning')) return false;
       if (filter === 'strong' && r.signalType !== 'strong') return false;
-      if (filter === 'watch' && !(r.source === 'momentum' && r.signalType === 'watch')) return false;
+      if (filter === 'watch' && !((r.source === 'momentum' && r.signalType === 'watch') || (r.source === 'luc-mach' && r.signalType === 'watch'))) return false;
+      if (filter === 'sell-warning' && r.signalType !== 'sell_warning') return false;
       if (filter === 'pre-breakout' && r.source !== 'pre-breakout') return false;
       if (filter === 'ensemble-strong' && !(r.source === 'ensemble' && r.signalType === 'strong')) return false;
       if (filter === 'ensemble-weak' && !(r.source === 'ensemble' && r.signalType === 'weak')) return false;
+      if (filter === 'luc-mach-strong' && !(r.source === 'luc-mach' && r.signalType === 'strong')) return false;
+      if (filter === 'luc-mach-valid' && !(r.source === 'luc-mach' && r.signalType === 'valid')) return false;
+      if (filter === 'luc-mach-watch' && !(r.source === 'luc-mach' && r.signalType === 'watch')) return false;
+      if (filter === 'luc-mach-sell' && !(r.source === 'luc-mach' && r.signalType === 'sell_warning')) return false;
     }
     if (query && !r.symbol.includes(query)) return false;
     return true;
@@ -568,6 +707,34 @@ function copySymbols(){
     const btn = document.getElementById('copyBtn');
     if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy DS'; }, 2000); }
   }).catch(() => {});
+}
+
+function renderLmRows(items, emptyText){
+  if (!items || !items.length) return `<div class="empty-note">${emptyText}</div>`;
+  return items.slice(0, 8).map(s => {
+    let meta = [];
+    if (s.buy_score != null) meta.push(`B${s.buy_score}/6`);
+    if (s.sell_score != null && s.sell_score > 0) meta.push(`S${s.sell_score}/6`);
+    if (s.vol_ratio != null) meta.push(`${s.vol_ratio.toFixed(1)}x vol`);
+    if (s.trading_value_ma20_billion != null) meta.push(`${s.trading_value_ma20_billion} tỷ`);
+    return `<div class="lm-row"><span class="lm-sym">${s.symbol}</span><span class="lm-meta">${meta.join(' · ')}</span></div>`;
+  }).join('');
+}
+
+function buildLucMachPanel(){
+  const src = currentSignalSources(activeSignalDate).lm;
+  if (!src) return '';
+  const valid = [...(src.strong || []), ...(src.valid || [])];
+  const watch = src.watch || [];
+  const sell = src.sell_warning || [];
+  return `<div class="panel">
+    <h2>Lục Mạch Core Filter <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${src.total_signals || 0} tín hiệu · thiếu OHLCV ${src.skipped_missing_ohlc || 0})</span></h2>
+    <div class="lm-grid">
+      <div class="lm-box"><h3>Buy / Valid</h3>${renderLmRows(valid, 'Chưa có mã mua hợp lệ')}</div>
+      <div class="lm-box"><h3>Watchlist</h3>${renderLmRows(watch, 'Chưa có mã theo dõi')}</div>
+      <div class="lm-box"><h3>Sell warning</h3>${renderLmRows(sell, 'Chưa có cảnh báo bán')}</div>
+    </div>
+  </div>`;
 }
 
 // --- Chart ---
@@ -640,7 +807,7 @@ function renderBreadthChart(m){
       ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ch); ctx.stroke(); ctx.restore();
       lines.forEach(s => { const dy = yp(p[s.k]); ctx.fillStyle = '#fff'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
       tt.style.display = 'block';
-      tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA20: <strong>${p.v20.toFixed(1)}%</strong> ┬╖ MA50: <strong>${p.v50.toFixed(1)}%</strong> ┬╖ MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
+      tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA20: <strong>${p.v20.toFixed(1)}%</strong> · MA50: <strong>${p.v50.toFixed(1)}%</strong> · MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
       const tw = tt.offsetWidth; let tx = Math.round(x - tw / 2);
       if (tx < 4) tx = 4; if (tx + tw > w - 4) tx = w - tw - 4;
       tt.style.left = tx + 'px'; tt.style.top = Math.max(4, P.t - 46) + 'px';
@@ -678,6 +845,12 @@ function buildHistorySection(){
     }
     if (day.ensemble && day.ensemble.all_signals) {
       day.ensemble.all_signals.forEach(s => { signals.push({symbol:s.symbol, source:'ENS', type:s.total_score>=0.65?'Strong':'Weak', score:Math.round(s.total_score*100)}); });
+    }
+    if (day.luc_mach && day.luc_mach.all_signals) {
+      day.luc_mach.all_signals.forEach(s => {
+        const type = s.status === 'STRONG_BUY' ? 'Strong' : s.status === 'VALID_BUY' ? 'Valid' : s.status === 'WATCHLIST' ? 'Watch' : 'Sell';
+        signals.push({symbol:s.symbol, source:'LM', type:type, score:s.score});
+      });
     }
     rows.push({date: day.date, signals});
   });

@@ -32,6 +32,7 @@ from ensemble_signals import main as run_ensemble_signals
 from backtest_weights import main as run_backtest_weights
 from momentum_signals import main as run_momentum_signals
 from backtest_momentum import main as run_backtest_momentum
+from luc_mach_signals import main as run_luc_mach_signals
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
@@ -62,6 +63,9 @@ def vn_today() -> datetime:
 def save_cache(symbol: str, df: pd.DataFrame) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     df = df.sort_values("TradingDate").drop_duplicates("TradingDate")
+    ordered = [c for c in ["TradingDate", "Open", "High", "Low", "Close", "Volume"] if c in df.columns]
+    rest = [c for c in df.columns if c not in ordered]
+    df = df[ordered + rest]
     df.to_csv(CACHE_DIR / f"{symbol}.csv", index=False, date_format="%d/%m/%Y")
 
 
@@ -84,6 +88,8 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
     cached = _load_cache(symbol, CACHE_DIR)
     if not cached.empty:
         cached = cached.dropna(subset=["TradingDate"])
+        if not {"Open", "High", "Low"}.issubset(cached.columns) or cached[["Open", "High", "Low"]].tail(80).isna().any().any():
+            cached = pd.DataFrame()
     cached_historical = pd.DataFrame()
     if cached.empty:
         from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
@@ -91,7 +97,8 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
         latest_cached = cached["TradingDate"].max()
         if pd.isna(latest_cached):
             from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
-        elif latest_cached.date() > today.date():
+        elif latest_cached.date() >= today.date():
+            cached.attrs["api_called"] = False
             return cached
         else:
             cached_historical = cached[cached["TradingDate"].dt.date < today.date()]
@@ -110,6 +117,12 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
             cl = c.lower()
             if cl in ("tradingdate", "trading_date", "date"):
                 col_map[c] = "TradingDate"
+            elif cl in ("open", "openprice", "open_price", "referenceopen"):
+                col_map[c] = "Open"
+            elif cl in ("high", "highest", "highestprice", "highprice", "high_price"):
+                col_map[c] = "High"
+            elif cl in ("low", "lowest", "lowestprice", "lowprice", "low_price"):
+                col_map[c] = "Low"
             elif cl in ("close", "closeprice", "close_price"):
                 col_map[c] = "Close"
             elif cl in ("volume", "totalvolume", "total_volume", "matchvolume",
@@ -118,20 +131,21 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
         new_df = new_df.rename(columns=col_map)
 
         if "TradingDate" in new_df.columns and "Close" in new_df.columns:
-            cols = ["TradingDate", "Close"]
-            if "Volume" in new_df.columns:
-                cols.append("Volume")
+            cols = ["TradingDate"]
+            for col in ["Open", "High", "Low", "Close", "Volume"]:
+                if col in new_df.columns:
+                    cols.append(col)
             new_df = new_df[cols]
             new_df["TradingDate"] = pd.to_datetime(new_df["TradingDate"], dayfirst=True, errors="coerce")
-            new_df["Close"] = pd.to_numeric(new_df["Close"], errors="coerce")
-            if "Volume" in new_df.columns:
-                new_df["Volume"] = pd.to_numeric(new_df["Volume"], errors="coerce")
-            else:
-                new_df["Volume"] = float("nan")
+            for col in ["Open", "High", "Low", "Close", "Volume"]:
+                if col in new_df.columns:
+                    new_df[col] = pd.to_numeric(new_df[col], errors="coerce")
+                else:
+                    new_df[col] = float("nan")
             new_df = new_df.dropna(subset=["Close"])
 
             # Align columns truoc khi concat
-            for col in ["Volume"]:
+            for col in ["Open", "High", "Low", "Volume"]:
                 if col in cached_historical.columns and col not in new_df.columns:
                     new_df[col] = float("nan")
                 if col in new_df.columns and col not in cached_historical.columns:
@@ -145,6 +159,7 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
         merged = cached
 
     merged = merged.sort_values("TradingDate").drop_duplicates("TradingDate").reset_index(drop=True)
+    merged.attrs["api_called"] = True
     save_cache(symbol, merged)
     return merged
 
@@ -175,7 +190,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
 
         try:
             df = update_ohlc(client, sym, today)
-            time.sleep(REQUEST_SLEEP_SEC)
+            if df.attrs.get("api_called"):
+                time.sleep(REQUEST_SLEEP_SEC)
         except Exception as e:
             tqdm.write(f"  [WARN] {sym}: loi khi tai OHLC: {e}")
             continue
@@ -398,7 +414,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "luc_mach_signals.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -425,7 +441,8 @@ def append_signals_history() -> None:
     strategy_path = DATA_DIR / "strategy_signals.json"
     ensemble_path = DATA_DIR / "ensemble_signals.json"
     momentum_path = DATA_DIR / "momentum_signals.json"
-    if not strategy_path.exists() and not ensemble_path.exists() and not momentum_path.exists():
+    luc_mach_path = DATA_DIR / "luc_mach_signals.json"
+    if not strategy_path.exists() and not ensemble_path.exists() and not momentum_path.exists() and not luc_mach_path.exists():
         return
 
     history = []
@@ -435,7 +452,7 @@ def append_signals_history() -> None:
         except Exception:
             history = []
 
-    entry = {"date": "", "strategy": None, "ensemble": None, "momentum": None}
+    entry = {"date": "", "strategy": None, "ensemble": None, "momentum": None, "luc_mach": None}
     if strategy_path.exists():
         data = json.loads(strategy_path.read_text(encoding="utf-8"))
         entry["date"] = data.get("date", "")
@@ -449,6 +466,11 @@ def append_signals_history() -> None:
         data = json.loads(momentum_path.read_text(encoding="utf-8"))
         entry["date"] = entry["date"] or data.get("date", "")
         entry["momentum"] = data
+
+    if luc_mach_path.exists():
+        data = json.loads(luc_mach_path.read_text(encoding="utf-8"))
+        entry["date"] = entry["date"] or data.get("date", "")
+        entry["luc_mach"] = data
 
     if not entry["date"]:
         return
@@ -534,6 +556,12 @@ def main():
         print(f"Da ghi tin hieu momentum.\n")
     except Exception as e:
         print(f"Loi sinh tin hieu momentum: {e}")
+
+    try:
+        run_luc_mach_signals()
+        print(f"Da ghi tin hieu Luc Mach.\n")
+    except Exception as e:
+        print(f"Loi sinh tin hieu Luc Mach: {e}")
 
     try:
         run_backtest_momentum()
