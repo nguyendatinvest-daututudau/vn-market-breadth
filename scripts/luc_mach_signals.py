@@ -112,8 +112,10 @@ def compute_tplus(df: pd.DataFrame) -> dict:
         else:
             d.iloc[i] = d.iloc[i - 1]
 
-    cross_up = ((close > d) & (close.shift(1) <= d.shift(1))).fillna(False)
-    cross_down = ((d > close) & (d.shift(1) <= close.shift(1))).fillna(False)
+    prev_d = d.shift(1)
+    prev_close = close.shift(1)
+    cross_up = ((close > d) & ((prev_close <= prev_d) | prev_d.isna())).fillna(False)
+    cross_down = ((d > close) & ((prev_d <= prev_close) | prev_d.isna())).fillna(False)
     state = pd.Series(0, index=range(n), dtype=int)
     for i in range(1, n):
         if cross_up.iloc[i]:

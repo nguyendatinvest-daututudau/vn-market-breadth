@@ -78,7 +78,7 @@ Mở `docs/dashboard.html` trực tiếp bằng double-click (file://) — đã 
 | Nhận định | Market commentary (breadth + VN-Index technical) |
 | Pre-Breakout | Cổ phiếu tích lũy sắp breakout (base + OBV + vol gradient) |
 | Ensemble | 4-signal voting: MA Crossover + Pullback + Breakout + Momentum |
-| Lục Mạch | VUDD + Tplus + trend/volume/pullback/breakout/sell warning |
+| Lục Mạch | Core Diệp gốc: VUDD 13/20/35/55/65 + Tplus |
 
 ## Triển khai GitHub
 
