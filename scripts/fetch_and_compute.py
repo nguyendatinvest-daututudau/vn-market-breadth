@@ -34,6 +34,8 @@ from momentum_signals import main as run_momentum_signals
 from backtest_momentum import main as run_backtest_momentum
 from luc_mach_signals import main as run_luc_mach_signals
 from khung4_tplus_signals import main as run_khung4_tplus_signals
+from mama_positional_signals import main as run_mama_positional_signals
+from advanced_trailstop_signals import main as run_advanced_trailstop_signals
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
@@ -415,7 +417,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "luc_mach_signals.json", "khung4_tplus_signals.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -443,7 +445,9 @@ def append_signals_history() -> None:
     ensemble_path = DATA_DIR / "ensemble_signals.json"
     momentum_path = DATA_DIR / "momentum_signals.json"
     luc_mach_path = DATA_DIR / "luc_mach_signals.json"
-    if not strategy_path.exists() and not ensemble_path.exists() and not momentum_path.exists() and not luc_mach_path.exists():
+    mama_path = DATA_DIR / "mama_positional_signals.json"
+    ats_path = DATA_DIR / "advanced_trailstop_signals.json"
+    if not strategy_path.exists() and not ensemble_path.exists() and not momentum_path.exists() and not luc_mach_path.exists() and not mama_path.exists() and not ats_path.exists():
         return
 
     history = []
@@ -453,7 +457,7 @@ def append_signals_history() -> None:
         except Exception:
             history = []
 
-    entry = {"date": "", "strategy": None, "ensemble": None, "momentum": None, "luc_mach": None}
+    entry = {"date": "", "strategy": None, "ensemble": None, "momentum": None, "luc_mach": None, "mama_positional": None, "advanced_trailstop": None}
     if strategy_path.exists():
         data = json.loads(strategy_path.read_text(encoding="utf-8"))
         entry["date"] = data.get("date", "")
@@ -472,6 +476,16 @@ def append_signals_history() -> None:
         data = json.loads(luc_mach_path.read_text(encoding="utf-8"))
         entry["date"] = entry["date"] or data.get("date", "")
         entry["luc_mach"] = data
+
+    if mama_path.exists():
+        data = json.loads(mama_path.read_text(encoding="utf-8"))
+        entry["date"] = entry["date"] or data.get("date", "")
+        entry["mama_positional"] = data
+
+    if ats_path.exists():
+        data = json.loads(ats_path.read_text(encoding="utf-8"))
+        entry["date"] = entry["date"] or data.get("date", "")
+        entry["advanced_trailstop"] = data
 
     if not entry["date"]:
         return
@@ -569,6 +583,18 @@ def main():
         print(f"Da ghi tin hieu Khung4/Tplus.\n")
     except Exception as e:
         print(f"Loi sinh tin hieu Khung4/Tplus: {e}")
+
+    try:
+        run_mama_positional_signals()
+        print(f"Da ghi tin hieu MAMA Positional.\n")
+    except Exception as e:
+        print(f"Loi sinh tin hieu MAMA Positional: {e}")
+
+    try:
+        run_advanced_trailstop_signals()
+        print(f"Da ghi tin hieu Advanced Trailstop.\n")
+    except Exception as e:
+        print(f"Loi sinh tin hieu Advanced Trailstop: {e}")
 
     try:
         run_backtest_momentum()

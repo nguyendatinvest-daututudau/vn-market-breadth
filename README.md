@@ -28,6 +28,8 @@ scripts/
   momentum_signals.py     # Momentum score + bonuses
   luc_mach_signals.py     # Lục Mạch core: VUDD + Tplus
   khung4_tplus_signals.py # Khung4/Tplus standalone: buy + buy_price
+  mama_positional_signals.py # MAMA positional: Ehlers MAMA/FAMA + xác nhận High/Low setup
+  advanced_trailstop_signals.py # Advanced Trailstop: bs ATR + Close cross
   market_commentary.py    # Nhận định thị trường (breadth + technical)
   embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
@@ -40,6 +42,8 @@ data/
   momentum_signals.json   # tín hiệu momentum
   luc_mach_signals.json   # tín hiệu Lục Mạch
   khung4_tplus_signals.json # tín hiệu mua Khung4/Tplus
+  mama_positional_signals.json # tín hiệu MAMA positional
+  advanced_trailstop_signals.json # tín hiệu Advanced Trailstop
   market_commentary.json  # nhận định thị trường
   ohlc_cache/             # cache OHLCV theo mã
 docs/
@@ -66,6 +70,8 @@ Sau khi chạy:
 - `data/ensemble_signals.json` — ensemble signals
 - `data/momentum_signals.json` — momentum signals
 - `data/luc_mach_signals.json` — Lục Mạch signals
+- `data/mama_positional_signals.json` — MAMA positional signals
+- `data/advanced_trailstop_signals.json` — Advanced Trailstop signals
 - `data/market_commentary.json` — nhận định thị trường
 
 Mở `docs/index.html` qua Live Server (VSCode) hoặc `python -m http.server`.
@@ -115,3 +121,19 @@ Mở `docs/dashboard.html` trực tiếp bằng double-click (file://) — đã 
 - **Filter**: `Volume > 20000` và có ít nhất một tín hiệu mua hoặc bán
 - **History**: yêu cầu tối thiểu 300 phiên OHLCV; pipeline backfill 800 ngày lịch để ZeroLagTEMA(65) ổn định hơn
 - **Status**: VALID_BUY, WATCHLIST, SELL_WARNING, CONFLICT
+
+### MAMA Positional (mama_positional_signals.py)
+- **Mode**: `ehlers_mama_positional`, tính MAMA/FAMA theo John Ehlers với `Period` động
+- **Input price**: `(High + Low) / 2`
+- **Setup**: `Buysetup = Cross(MAMA, FAMA)`, `Sellsetup = Cross(FAMA, MAMA)`
+- **Confirm**: Buy khi Close vượt High của phiên setup mua; Sell khi Close thủng Low của phiên setup bán
+- **Filter**: `ExRem` loại tín hiệu lặp; `BPrice`/`SPrice` là Close tại phiên tín hiệu thật
+- **Output**: `data/mama_positional_signals.json` gồm nhóm `buy`, `sell`, `all_signals`, `audit`
+
+### Advanced Trailstop (advanced_trailstop_signals.py)
+- **Mode**: `diep_advanced_trailstop`, độc lập với Lục Mạch, Khung4/Tplus và MAMA
+- **ATR**: `atrvalue = 2.0 * ATR(7)` mặc định, dùng Wilder-style ATR
+- **bs tăng**: nếu Low hiện tại cao hơn toàn bộ 9 Low trước và Close > `bs` trước đó, `bs = Low - atrvalue`
+- **bs giảm**: nếu High hiện tại thấp hơn toàn bộ 9 High trước và Close < `bs` trước đó, `bs = High + atrvalue`
+- **Signal**: Buy khi Close cắt lên `bs`; Sell khi `bs` cắt lên Close
+- **Price**: `BuyPrice`/`SellPrice` là Close tại lần Buy/Sell gần nhất

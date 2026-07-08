@@ -11,8 +11,12 @@ ENSEMBLE_JSON = ROOT / "data" / "ensemble_signals.json"
 WEIGHTS_JSON = ROOT / "data" / "backtest_weights.json"
 MOMENTUM_JSON = ROOT / "data" / "momentum_signals.json"
 MOMENTUM_BT_JSON = ROOT / "data" / "backtest_momentum.json"
+MAMA_BT_JSON = ROOT / "data" / "backtest_mama_positional.json"
+ATS_BT_JSON = ROOT / "data" / "backtest_advanced_trailstop.json"
 LUC_MACH_JSON = ROOT / "data" / "luc_mach_signals.json"
 KHUNG4_TPLUS_JSON = ROOT / "data" / "khung4_tplus_signals.json"
+MAMA_POSITIONAL_JSON = ROOT / "data" / "mama_positional_signals.json"
+ADVANCED_TRAILSTOP_JSON = ROOT / "data" / "advanced_trailstop_signals.json"
 SIGNALS_HISTORY_JSON = ROOT / "data" / "signals_history.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
@@ -25,8 +29,12 @@ ensemble = json.loads(ENSEMBLE_JSON.read_text(encoding="utf-8")) if ENSEMBLE_JSO
 weights = json.loads(WEIGHTS_JSON.read_text(encoding="utf-8")) if WEIGHTS_JSON.exists() else None
 momentum = json.loads(MOMENTUM_JSON.read_text(encoding="utf-8")) if MOMENTUM_JSON.exists() else None
 momentum_bt = json.loads(MOMENTUM_BT_JSON.read_text(encoding="utf-8")) if MOMENTUM_BT_JSON.exists() else None
+mama_bt = json.loads(MAMA_BT_JSON.read_text(encoding="utf-8")) if MAMA_BT_JSON.exists() else None
+ats_bt = json.loads(ATS_BT_JSON.read_text(encoding="utf-8")) if ATS_BT_JSON.exists() else None
 luc_mach = json.loads(LUC_MACH_JSON.read_text(encoding="utf-8")) if LUC_MACH_JSON.exists() else None
 khung4_tplus = json.loads(KHUNG4_TPLUS_JSON.read_text(encoding="utf-8")) if KHUNG4_TPLUS_JSON.exists() else None
+mama_positional = json.loads(MAMA_POSITIONAL_JSON.read_text(encoding="utf-8")) if MAMA_POSITIONAL_JSON.exists() else None
+advanced_trailstop = json.loads(ADVANCED_TRAILSTOP_JSON.read_text(encoding="utf-8")) if ADVANCED_TRAILSTOP_JSON.exists() else None
 signals_history = json.loads(SIGNALS_HISTORY_JSON.read_text(encoding="utf-8")) if SIGNALS_HISTORY_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
@@ -42,8 +50,12 @@ const EMBEDDED_ENSEMBLE = {json.dumps(ensemble, ensure_ascii=False)};
 const EMBEDDED_WEIGHTS = {json.dumps(weights, ensure_ascii=False)};
 const EMBEDDED_MOMENTUM = {json.dumps(momentum, ensure_ascii=False)};
 const EMBEDDED_MOMENTUM_BT = {json.dumps(momentum_bt, ensure_ascii=False)};
+const EMBEDDED_MAMA_BT = {json.dumps(mama_bt, ensure_ascii=False)};
+const EMBEDDED_ATS_BT = {json.dumps(ats_bt, ensure_ascii=False)};
 const EMBEDDED_LUC_MACH = {json.dumps(luc_mach, ensure_ascii=False)};
 const EMBEDDED_KHUNG4_TPLUS = {json.dumps(khung4_tplus, ensure_ascii=False)};
+const EMBEDDED_MAMA_POSITIONAL = {json.dumps(mama_positional, ensure_ascii=False)};
+const EMBEDDED_ADVANCED_TRAILSTOP = {json.dumps(advanced_trailstop, ensure_ascii=False)};
 const EMBEDDED_SIGNALS_HISTORY = {json.dumps(signals_history, ensure_ascii=False)};
 </script>
 """
@@ -62,8 +74,12 @@ new_func = """async function loadData(){
   ENSEMBLE_WEIGHTS = EMBEDDED_WEIGHTS;
   MOMENTUM = EMBEDDED_MOMENTUM;
   MOMENTUM_BT = EMBEDDED_MOMENTUM_BT;
+  MAMA_BT = EMBEDDED_MAMA_BT;
+  ATS_BT = EMBEDDED_ATS_BT;
   LUC_MACH = EMBEDDED_LUC_MACH;
   KHUNG4_TPLUS = EMBEDDED_KHUNG4_TPLUS;
+  MAMA_POSITIONAL = EMBEDDED_MAMA_POSITIONAL;
+  ADVANCED_TRAILSTOP = EMBEDDED_ADVANCED_TRAILSTOP;
   SIGNALS_HISTORY = EMBEDDED_SIGNALS_HISTORY;
   const sessionLabel = '<span class="session-badge close">Dong cua 15:10</span>';
   document.getElementById('metaLine').innerHTML =

@@ -180,6 +180,26 @@
   .buy-hub-note{font-size:11px;color:var(--muted);line-height:1.5;max-width:560px;}
   .price-buy{color:var(--up);font-weight:800;}
 
+  .radar-table td{vertical-align:middle;}
+  .action-pill{font-size:10px;font-weight:800;border-radius:999px;padding:4px 10px;display:inline-block;letter-spacing:0.03em;}
+  .action-pill.buy{background:rgba(15,174,114,0.12);color:var(--up);}
+  .action-pill.sell{background:rgba(240,71,62,0.12);color:var(--down);}
+  .action-pill.watch{background:rgba(245,165,36,0.14);color:#B9760F;}
+  .action-pill.conflict{background:rgba(79,70,229,0.10);color:var(--accent-1);}
+  .method-tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .method-tag{font-size:9px;font-weight:700;border-radius:999px;padding:3px 8px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);}
+  .method-tag.buy{color:var(--up);border-color:rgba(15,174,114,0.24);background:rgba(15,174,114,0.07);}
+  .method-tag.sell{color:var(--down);border-color:rgba(240,71,62,0.22);background:rgba(240,71,62,0.07);}
+  .method-tag.watch{color:#B9760F;border-color:rgba(245,165,36,0.25);background:rgba(245,165,36,0.08);}
+  .radar-note{font-size:10.5px;color:var(--muted);line-height:1.45;max-width:300px;}
+  .bt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+  @media (max-width:850px){.bt-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.bt-grid{grid-template-columns:1fr;}}
+  .bt-card{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--panel);box-shadow:var(--shadow-sm);}
+  .bt-card .lab{font-size:9px;text-transform:uppercase;letter-spacing:0.05em;color:var(--faint);font-weight:700;}
+  .bt-card .num{font-size:18px;font-weight:800;margin-top:2px;color:var(--accent-1);}
+  .bt-card .sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
   .session-badge{display:inline-block;font-family:var(--font-all);font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:6px;}
 .session-badge.close{background:rgba(79,70,229,0.12);color:var(--accent-1);}
 </style>
@@ -205,7 +225,7 @@ let activeMarket = 'ALL';
 let activeFilter = 'all';
 let searchQuery = '';
 let LATEST = null, HISTORY = null, COMMENTARY = null;
-let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null;
+let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, MAMA_BT = null, ATS_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null, MAMA_POSITIONAL = null, ADVANCED_TRAILSTOP = null;
 let ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null;
 
 async function loadData(){
@@ -236,11 +256,23 @@ async function loadData(){
     const k4 = await fetch(`./data/khung4_tplus_signals.json?t=${ts}`);
     KHUNG4_TPLUS = k4.ok ? await k4.json() : null;
 
+    const mama = await fetch(`./data/mama_positional_signals.json?t=${ts}`);
+    MAMA_POSITIONAL = mama.ok ? await mama.json() : null;
+
+    const ats = await fetch(`./data/advanced_trailstop_signals.json?t=${ts}`);
+    ADVANCED_TRAILSTOP = ats.ok ? await ats.json() : null;
+
     const w = await fetch(`./data/backtest_weights.json?t=${ts}`);
     ENSEMBLE_WEIGHTS = w.ok ? await w.json() : null;
 
     const bt = await fetch(`./data/backtest_momentum.json?t=${ts}`);
     MOMENTUM_BT = bt.ok ? await bt.json() : null;
+
+    const mbt = await fetch(`./data/backtest_mama_positional.json?t=${ts}`);
+    MAMA_BT = mbt.ok ? await mbt.json() : null;
+
+    const abt = await fetch(`./data/backtest_advanced_trailstop.json?t=${ts}`);
+    ATS_BT = abt.ok ? await abt.json() : null;
 
     const sh = await fetch(`./data/signals_history.json?t=${ts}`);
     SIGNALS_HISTORY = sh.ok ? await sh.json() : null;
@@ -285,7 +317,9 @@ function render(){
 
   let summary = buildSummary(activeSignalDate);
   let actionHTML = buildActionBoard(summary);
+  let backtestHTML = buildBacktestSnapshot();
   let buyHubHTML = buildBuyHub(activeSignalDate);
+  let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
   let lucMachHTML = buildLucMachPanel();
   let chartHTML = buildChartSection();
@@ -323,13 +357,16 @@ function render(){
 
     ${actionHTML}
 
+    ${backtestHTML}
+
     ${buyHubHTML}
 
     <div class="panel">
-      <h2>Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} tín hiệu${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
+      <h2>Stock Radar <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(gom theo mã${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
       <div class="filter-bar">
         <select id="filterSelect" onchange="activeFilter=this.value;renderSignalTable()">
           <option value="all">⚡ Tất cả</option>
+          <option value="multi-system">⭐ Từ 2 hệ trở lên</option>
           <option value="buy">✅ Buy</option>
           <option value="strong">🟢 Strong</option>
           <option value="watch">🟡 Watch</option>
@@ -340,6 +377,10 @@ function render(){
           <option value="luc-mach-valid">✅ Lục Mạch Buy</option>
           <option value="luc-mach-watch">👀 Lục Mạch Watch</option>
           <option value="luc-mach-sell">🔴 Lục Mạch Sell</option>
+          <option value="mama-buy">✅ MAMA Buy</option>
+          <option value="mama-sell">🔴 MAMA Sell</option>
+          <option value="ats-buy">✅ ATS Buy</option>
+          <option value="ats-sell">🔴 ATS Sell</option>
         </select>
         <select id="signalDateSelect" onchange="onSignalDateChange(this.value)" style="margin-left:6px;width:auto;min-width:100px;">
           <option value="">Hôm nay</option>
@@ -347,7 +388,14 @@ function render(){
         <input id="searchInput" type="text" placeholder="🔍 Tìm mã..." oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
         <button class="btn-copy" id="copyBtn" onclick="copySymbols()">📋 Copy DS</button>
       </div>
-      <div id="signalTableContainer">${signalsHTML}</div>
+      <div id="stockRadarContainer">${radarHTML}</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Chi tiết tín hiệu theo phương pháp <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} dòng)</span></h2>
+      <div class="accordion-body collapsed">
+        <div id="signalTableContainer">${signalsHTML}</div>
+      </div>
     </div>
 
     ${lucMachHTML}
@@ -382,15 +430,15 @@ function adRatioNote(r){
 // --- Build summary badges from all strategies ---
 function buildSummary(dateStr){
   let strongCount = 0, watchCount = 0, preCount = 0, ensStrong = 0, ensWeak = 0;
-  let lmValid = 0, lmWatch = 0, lmSell = 0;
+  let lmValid = 0, lmWatch = 0, lmSell = 0, mamaBuy = 0, mamaSell = 0, atsBuy = 0, atsSell = 0;
   let symbols = new Set();
 
-  let momSrc, stratSrc, ensSrc, lmSrc;
+  let momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc;
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; lmSrc = entry.luc_mach; }
+    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; lmSrc = entry.luc_mach; mamaSrc = entry.mama_positional; atsSrc = entry.advanced_trailstop; }
   } else {
-    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE; lmSrc = LUC_MACH;
+    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE; lmSrc = LUC_MACH; mamaSrc = MAMA_POSITIONAL; atsSrc = ADVANCED_TRAILSTOP;
   }
 
   if (momSrc && momSrc.all_signals) {
@@ -421,6 +469,20 @@ function buildSummary(dateStr){
       else if (s.status === 'SELL_WARNING') lmSell++;
     });
   }
+  if (mamaSrc && mamaSrc.all_signals) {
+    mamaSrc.all_signals.forEach(s => {
+      symbols.add(s.symbol);
+      if (s.mama_buy) mamaBuy++;
+      if (s.mama_sell) mamaSell++;
+    });
+  }
+  if (atsSrc && atsSrc.all_signals) {
+    atsSrc.all_signals.forEach(s => {
+      symbols.add(s.symbol);
+      if (s.ats_buy) atsBuy++;
+      if (s.ats_sell) atsSell++;
+    });
+  }
 
   let badges = [];
   if (strongCount) badges.push({cls:'str', label:`🟢 Strong ${strongCount}`, filter:'strong'});
@@ -431,20 +493,24 @@ function buildSummary(dateStr){
   if (lmValid) badges.push({cls:'ens', label:`✅ LM Buy ${lmValid}`, filter:'luc-mach-valid'});
   if (lmWatch) badges.push({cls:'wat', label:`👀 LM Watch ${lmWatch}`, filter:'luc-mach-watch'});
   if (lmSell) badges.push({cls:'ensw', label:`🔴 LM Sell ${lmSell}`, filter:'luc-mach-sell'});
+  if (mamaBuy) badges.push({cls:'str', label:`✅ MAMA Buy ${mamaBuy}`, filter:'mama-buy'});
+  if (mamaSell) badges.push({cls:'ensw', label:`🔴 MAMA Sell ${mamaSell}`, filter:'mama-sell'});
+  if (atsBuy) badges.push({cls:'str', label:`✅ ATS Buy ${atsBuy}`, filter:'ats-buy'});
+  if (atsSell) badges.push({cls:'ensw', label:`🔴 ATS Sell ${atsSell}`, filter:'ats-sell'});
 
-  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmValid;
+  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmValid + mamaBuy + atsBuy;
   const watchSignals = watchCount + lmWatch;
-  const sellWarnings = lmSell;
-  const missingOhlc = lmSrc?.skipped_missing_ohlc || 0;
+  const sellWarnings = lmSell + mamaSell + atsSell;
+  const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0);
   return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
 }
 
 function currentSignalSources(dateStr){
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach };
+    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach, mama: entry.mama_positional, ats: entry.advanced_trailstop };
   }
-  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH };
+  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH, mama: MAMA_POSITIONAL, ats: ADVANCED_TRAILSTOP };
 }
 
 function topSymbols(rows, kind, limit=8){
@@ -478,9 +544,97 @@ function buildActionBoard(summary){
     </div>
     <div class="action-card neutral">
       <div class="action-head"><div><div class="action-title">Market context</div><div class="action-note">${marketNote}</div></div><div class="action-num">${m?.ad_ratio ?? '—'}</div></div>
-      <div class="action-note">${summary.missingOhlc ? `Còn thiếu OHLCV ${summary.missingOhlc} mã trong Lục Mạch.` : 'OHLCV đủ cho tập Lục Mạch hiện tại.'}</div>
+      <div class="action-note">${summary.missingOhlc ? `Còn thiếu OHLCV ${summary.missingOhlc} lượt kiểm tra trong các bộ lọc.` : 'OHLCV đủ cho các bộ lọc hiện tại.'}</div>
     </div>
   </div>`;
+}
+
+function buildBacktestSnapshot(){
+  const cards = [];
+  const momStrong = MOMENTUM_BT?.stats?.['strong_T+10'];
+  const momWatch = MOMENTUM_BT?.stats?.['watch_T+10'];
+  if (momStrong) cards.push({lab:'Momentum Strong T+10', num:`${(momStrong.win_rate*100).toFixed(1)}%`, sub:`${momStrong.wins}/${momStrong.total} đạt ngưỡng backtest`});
+  if (momWatch) cards.push({lab:'Momentum Watch T+10', num:`${(momWatch.win_rate*100).toFixed(1)}%`, sub:`${momWatch.wins}/${momWatch.total} đạt ngưỡng backtest`});
+  if (MAMA_BT?.stats_all) cards.push({lab:'MAMA T+10 >=7%', num:`${(MAMA_BT.stats_all.win_rate*100).toFixed(1)}%`, sub:`${MAMA_BT.stats_all.wins}/${MAMA_BT.stats_all.total} điểm Buy`});
+  if (ATS_BT?.stats_all) cards.push({lab:'ATS T+10 >=7%', num:`${(ATS_BT.stats_all.win_rate*100).toFixed(1)}%`, sub:`${ATS_BT.stats_all.wins}/${ATS_BT.stats_all.total} điểm Buy`});
+  if (!cards.length) return '';
+  return `<div class="bt-grid">${cards.map(c => `<div class="bt-card"><div class="lab">${c.lab}</div><div class="num">${c.num}</div><div class="sub">${c.sub}</div></div>`).join('')}</div>`;
+}
+
+function methodLabel(source){
+  return {
+    momentum:'Momentum',
+    'pre-breakout':'Pre-Breakout',
+    ensemble:'Ensemble',
+    'luc-mach':'Lục Mạch',
+    mama:'MAMA',
+    ats:'ATS',
+  }[source] || source;
+}
+
+function signalSide(row){
+  if (row.signalType === 'sell_warning') return 'sell';
+  if (row.signalType === 'watch') return 'watch';
+  return 'buy';
+}
+
+function aggregateSignalRows(rows){
+  const bySymbol = new Map();
+  rows.forEach(r => {
+    if (!bySymbol.has(r.symbol)) {
+      bySymbol.set(r.symbol, {
+        symbol: r.symbol, rows: [], buy: 0, sell: 0, watch: 0,
+        maxScore: 0, price: r.price, vol: r.vol, methods: new Map(), notes: []
+      });
+    }
+    const g = bySymbol.get(r.symbol);
+    g.rows.push(r);
+    const side = signalSide(r);
+    g[side] += 1;
+    g.maxScore = Math.max(g.maxScore, Number(r.score) || 0);
+    if (!g.price && r.price) g.price = r.price;
+    if (!g.vol && r.vol) g.vol = r.vol;
+    const key = `${r.source}:${side}`;
+    g.methods.set(key, {label: methodLabel(r.source), side});
+    if (r.expl) g.notes.push(`${methodLabel(r.source)}: ${r.expl}`);
+  });
+  return [...bySymbol.values()].map(g => {
+    let action = 'WATCH';
+    let cls = 'watch';
+    if (g.buy && g.sell) { action = 'CONFLICT'; cls = 'conflict'; }
+    else if (g.sell) { action = 'SELL'; cls = 'sell'; }
+    else if (g.buy) { action = 'BUY'; cls = 'buy'; }
+    return { ...g, action, cls, methodList: [...g.methods.values()] };
+  }).sort((a, b) => {
+    const rank = {CONFLICT:4, BUY:3, SELL:2, WATCH:1};
+    return (rank[b.action] - rank[a.action]) || (b.rows.length - a.rows.length) || (b.maxScore - a.maxScore);
+  });
+}
+
+function buildStockRadar(dateStr){
+  const raw = applyFilters(collectAllSignals(dateStr), activeFilter === 'multi-system' ? 'all' : activeFilter, searchQuery);
+  if (!raw.length) return '<div class="note" style="margin-bottom:0;">Không có mã phù hợp bộ lọc.</div>';
+  let grouped = aggregateSignalRows(raw);
+  if (activeFilter === 'multi-system') grouped = grouped.filter(g => g.rows.length >= 2);
+  if (!grouped.length) return '<div class="note" style="margin-bottom:0;">Không có mã có từ 2 hệ đồng thuận.</div>';
+  const tbody = grouped.map(g => {
+    const methods = g.methodList.map(m => `<span class="method-tag ${m.side}">${m.label}</span>`).join('');
+    const note = g.notes.slice(0, 2).join(' · ');
+    const consensus = `${g.buy} Buy · ${g.watch} Watch · ${g.sell} Sell`;
+    return `<tr>
+      <td class="mono" style="font-weight:900;font-size:13px;">${g.symbol}</td>
+      <td><span class="action-pill ${g.cls}">${g.action}</span></td>
+      <td class="mono" style="font-weight:800;">${g.rows.length} hệ</td>
+      <td><div class="method-tags">${methods}</div></td>
+      <td class="radar-note">${consensus}${note ? '<br>'+note : ''}</td>
+      <td class="mono">${g.price ?? '—'}</td>
+      <td class="mono">${g.vol ?? '—'}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="radar-table">
+    <thead><tr><th>Mã</th><th>Action</th><th>Đồng thuận</th><th>Hệ báo</th><th>Ghi chú nhanh</th><th>Giá</th><th>Vol</th></tr></thead>
+    <tbody>${tbody}</tbody>
+  </table>`;
 }
 
 function buildBuyHub(dateStr){
@@ -523,6 +677,8 @@ function buildSignalHub(dateStr){
       (prev.ensemble?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
       (prev.momentum?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
       (prev.luc_mach?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
+      (prev.mama_positional?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
+      (prev.advanced_trailstop?.all_signals || []).forEach(s => prevSymbols.add(s.symbol));
     }
   }
 
@@ -535,7 +691,13 @@ function buildSignalHub(dateStr){
     return { ...r, repeat };
   });
 
-  let tbody = applyFilters(rows, activeFilter, searchQuery).map(r => {
+  let filteredRows = applyFilters(rows, activeFilter === 'multi-system' ? 'all' : activeFilter, searchQuery);
+  if (activeFilter === 'multi-system') {
+    const counts = filteredRows.reduce((acc, r) => { acc[r.symbol] = (acc[r.symbol] || 0) + 1; return acc; }, {});
+    filteredRows = filteredRows.filter(r => counts[r.symbol] >= 2);
+  }
+
+  let tbody = filteredRows.map(r => {
     let typeTag = '', winrateStr = '';
     if (r.source === 'momentum') {
       if (r.signalType === 'strong') { typeTag = '<span class="tag str">Strong</span>'; winrateStr = wrStrong ? `<span class="winrate">~${(wrStrong*100).toFixed(0)}%</span>` : ''; }
@@ -548,10 +710,14 @@ function buildSignalHub(dateStr){
       if (r.signalType === 'valid') typeTag = '<span class="tag ens">LM Buy</span>';
       else if (r.signalType === 'watch') typeTag = '<span class="tag wat">LM Watch</span>';
       else typeTag = '<span class="tag ens-w">LM Sell</span>';
+    } else if (r.source === 'mama') {
+      typeTag = r.signalType === 'valid' ? '<span class="tag str">MAMA Buy</span>' : '<span class="tag ens-w">MAMA Sell</span>';
+    } else if (r.source === 'ats') {
+      typeTag = r.signalType === 'valid' ? '<span class="tag str">ATS Buy</span>' : '<span class="tag ens-w">ATS Sell</span>';
     }
 
     let srcTags = r.strategies.map(s => {
-      const cls = {hy:'hy',ma:'ma',breakout:'bo',darvas:'bo',roc_momentum:'roc',roc:'roc',pullback:'pb',ma_crossover:'ma',luc_mach:'hy',tplus:'ma',sell_warning:'ens-w'}[s] || '';
+      const cls = {hy:'hy',ma:'ma',breakout:'bo',darvas:'bo',roc_momentum:'roc',roc:'roc',pullback:'pb',ma_crossover:'ma',luc_mach:'hy',tplus:'ma',mama_positional_buy:'hy',mama_positional_sell:'ens-w',advanced_trailstop_buy:'ma',advanced_trailstop_sell:'ens-w',sell_warning:'ens-w'}[s] || '';
       return `<span class="src-tag ${cls}">${s.replace('_momentum','').replace('_crossover','').toUpperCase()}</span>`;
     }).join('');
 
@@ -585,13 +751,13 @@ let activeSignalDate = null; // null = hom nay
 function collectAllSignals(dateStr){
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble, entry.luc_mach);
+    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble, entry.luc_mach, entry.mama_positional, entry.advanced_trailstop);
     return [];
   }
-  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH);
+  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH, MAMA_POSITIONAL, ADVANCED_TRAILSTOP);
 }
 
-function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
+function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc){
   let result = [];
   // Momentum signals
   if (momSrc && momSrc.all_signals) {
@@ -680,6 +846,44 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
       });
     });
   }
+  // MAMA positional signals
+  if (mamaSrc && mamaSrc.all_signals) {
+    mamaSrc.all_signals.forEach(s => {
+      let parts = [];
+      if (s.mama != null && s.fama != null) parts.push(`MAMA ${fmtPrice(s.mama)} / FAMA ${fmtPrice(s.fama)}`);
+      if (s.period != null) parts.push(`Period ${Number(s.period).toFixed(1)}`);
+      if (s.mama_buy && s.buy_setup_value != null) parts.push(`Close vượt High setup ${fmtPrice(s.buy_setup_value)}`);
+      if (s.mama_sell && s.sell_setup_value != null) parts.push(`Close thủng Low setup ${fmtPrice(s.sell_setup_value)}`);
+      result.push({
+        symbol: s.symbol, score: s.score,
+        signalType: s.mama_buy ? 'valid' : 'sell_warning', source: 'mama',
+        strategies: s.strategies || [], expl: parts.join(' + '),
+        rsi: null, adx: null,
+        vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
+        price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : null,
+      });
+    });
+  }
+  // Advanced Trailstop signals
+  if (atsSrc && atsSrc.all_signals) {
+    atsSrc.all_signals.forEach(s => {
+      let parts = [];
+      if (s.bs != null) parts.push(`bs ${fmtPrice(s.bs)}`);
+      if (s.atrvalue != null) parts.push(`2ATR7 ${fmtPrice(s.atrvalue)}`);
+      if (s.ats_buy) parts.push('Close cắt lên bs');
+      if (s.ats_sell) parts.push('Close cắt xuống bs');
+      result.push({
+        symbol: s.symbol, score: s.score,
+        signalType: s.ats_buy ? 'valid' : 'sell_warning', source: 'ats',
+        strategies: s.strategies || [], expl: parts.join(' + '),
+        rsi: null, adx: null,
+        vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
+        price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : null,
+      });
+    });
+  }
   // Sort by score desc
   result.sort((a, b) => b.score - a.score);
   return result;
@@ -698,6 +902,10 @@ function applyFilters(rows, filter, query){
       if (filter === 'luc-mach-valid' && !(r.source === 'luc-mach' && r.signalType === 'valid')) return false;
       if (filter === 'luc-mach-watch' && !(r.source === 'luc-mach' && r.signalType === 'watch')) return false;
       if (filter === 'luc-mach-sell' && !(r.source === 'luc-mach' && r.signalType === 'sell_warning')) return false;
+      if (filter === 'mama-buy' && !(r.source === 'mama' && r.signalType === 'valid')) return false;
+      if (filter === 'mama-sell' && !(r.source === 'mama' && r.signalType === 'sell_warning')) return false;
+      if (filter === 'ats-buy' && !(r.source === 'ats' && r.signalType === 'valid')) return false;
+      if (filter === 'ats-sell' && !(r.source === 'ats' && r.signalType === 'sell_warning')) return false;
     }
     if (query && !r.symbol.includes(query)) return false;
     return true;
@@ -705,6 +913,8 @@ function applyFilters(rows, filter, query){
 }
 
 function renderSignalTable(){
+  const radar = document.getElementById('stockRadarContainer');
+  if (radar) radar.innerHTML = buildStockRadar(activeSignalDate);
   const container = document.getElementById('signalTableContainer');
   if (!container) return;
   container.innerHTML = buildSignalHub(activeSignalDate);
@@ -726,17 +936,18 @@ function populateSignalDateSelector(){
 
 function onSignalDateChange(dateStr){
   activeSignalDate = dateStr || null;
-  const h2 = document.querySelector('.panel h2');
-  if (h2 && dateStr) h2.innerHTML = `Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${dateStr})</span>`;
-  else if (h2) h2.innerHTML = `Tín hiệu giao dịch <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(hôm nay)</span>`;
   renderSignalTable();
 }
 
 function copySymbols(){
   let rows = collectAllSignals(activeSignalDate);
   if (!rows.length) return;
-  let filtered = applyFilters(rows, activeFilter, searchQuery);
-  let text = filtered.map(r => r.symbol).join(', ');
+  let filtered = applyFilters(rows, activeFilter === 'multi-system' ? 'all' : activeFilter, searchQuery);
+  if (activeFilter === 'multi-system') {
+    const counts = filtered.reduce((acc, r) => { acc[r.symbol] = (acc[r.symbol] || 0) + 1; return acc; }, {});
+    filtered = filtered.filter(r => counts[r.symbol] >= 2);
+  }
+  let text = [...new Set(filtered.map(r => r.symbol))].join(', ');
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBtn');
     if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy DS'; }, 2000); }

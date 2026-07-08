@@ -16,6 +16,8 @@ from momentum_signals import (
     compute_bonuses,
 )
 from khung4_tplus_signals import compute_khung4_tplus
+from mama_positional_signals import compute_mama_positional_system
+from advanced_trailstop_signals import compute_advanced_trailstop
 
 
 def _make_df(close_values, volume_values=None):
@@ -154,6 +156,71 @@ class TestKhung4Tplus:
         assert result["buy"] is True
         assert result["state"] == 1
         assert result["buy_price"] == 15.0
+
+
+class TestMamaPositional:
+    def test_ehlers_period_is_dynamic(self):
+        n = 140
+        x = np.arange(n, dtype=float)
+        close = 50 + 4 * np.sin(x / 5) + 0.04 * x
+        high = close + 1.0
+        low = close - 1.0
+        df = _make_ohlcv_df(close, high, low, close)
+
+        result = compute_mama_positional_system(df)
+        period = result["period_series"]
+
+        assert period.iloc[-1] > 0
+        assert period.iloc[30:].nunique() > 1
+        assert result["mama"] is not None
+        assert result["fama"] is not None
+
+    def test_outputs_confirmed_signal_series(self):
+        n = 120
+        x = np.arange(n, dtype=float)
+        close = 30 + 0.1 * x + 2.5 * np.sin(x / 4)
+        high = close + 0.8
+        low = close - 0.8
+        df = _make_ohlcv_df(close, high, low, close)
+
+        result = compute_mama_positional_system(df)
+
+        assert len(result["buy_series"]) == n
+        assert len(result["sell_series"]) == n
+        assert "buy_setup_value_series" in result
+        assert "sell_setup_value_series" in result
+
+
+class TestAdvancedTrailstop:
+    def test_bs_updates_only_after_nine_bar_low_condition(self):
+        close = [10.0] * 9 + [20.0]
+        high = [11.0] * 9 + [21.0]
+        low = [9.0] * 9 + [19.0]
+        df = _make_ohlcv_df(close, high, low, close)
+
+        result = compute_advanced_trailstop(df)
+
+        assert bool(result["up_condition_series"].iloc[8]) is False
+        assert bool(result["up_condition_series"].iloc[9]) is True
+        assert result["bs_series"].iloc[8] == 0.0
+        assert result["bs_series"].iloc[9] > 0.0
+        assert result["bs_series"].iloc[9] < low[-1]
+
+    def test_buy_is_close_cross_above_bs_not_bs_update(self):
+        df = _make_ohlcv_df(
+            [50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 35, 40, 46],
+            [51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 36, 41, 47],
+            [49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 34, 39, 45],
+            [50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 35, 40, 46],
+        )
+
+        result = compute_advanced_trailstop(df, mult=0.1, aper=2)
+        buy = result["buy_series"]
+
+        assert len(buy) == len(df)
+        assert bool(buy.iloc[-1]) == (df["Close"].iloc[-1] > result["bs_series"].iloc[-1] and df["Close"].iloc[-2] <= result["bs_series"].iloc[-2])
+        assert "buy_price_series" in result
+        assert "sell_price_series" in result
 
 
 class TestCommonFilters:
