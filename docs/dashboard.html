@@ -299,7 +299,6 @@ function render(){
   let summary = buildSummary(activeSignalDate);
   let actionHTML = buildActionBoard(summary);
   let backtestHTML = buildBacktestSnapshot();
-  let buyHubHTML = buildBuyHub(activeSignalDate);
   let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
   let lucMachHTML = buildLucMachPanel();
@@ -340,7 +339,6 @@ function render(){
 
     ${backtestHTML}
 
-    ${buyHubHTML}
 
     <div class="panel">
       <h2>Stock Radar <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(gom theo mã${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
@@ -362,6 +360,8 @@ function render(){
           <option value="mama-sell">🔴 MAMA Sell</option>
           <option value="ats-buy">✅ ATS Buy</option>
           <option value="ats-sell">🔴 ATS Sell</option>
+          <option value="k4-buy">✅ K4 Buy</option>
+          <option value="k4-sell">🔴 K4 Sell</option>
         </select>
         <select id="signalDateSelect" onchange="onSignalDateChange(this.value)" style="margin-left:6px;width:auto;min-width:100px;">
           <option value="">Hôm nay</option>
@@ -411,15 +411,15 @@ function adRatioNote(r){
 // --- Build summary badges from all strategies ---
 function buildSummary(dateStr){
   let strongCount = 0, watchCount = 0, preCount = 0, ensStrong = 0, ensWeak = 0;
-  let lmValid = 0, lmWatch = 0, lmSell = 0, mamaBuy = 0, mamaSell = 0, atsBuy = 0, atsSell = 0;
+  let lmValid = 0, lmWatch = 0, lmSell = 0, mamaBuy = 0, mamaSell = 0, atsBuy = 0, atsSell = 0, k4Buy = 0, k4Sell = 0;
   let symbols = new Set();
 
-  let momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc;
+  let momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src;
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; lmSrc = entry.luc_mach; mamaSrc = entry.mama_positional; atsSrc = entry.advanced_trailstop; }
+    if (entry) { momSrc = entry.momentum; stratSrc = entry.strategy; ensSrc = entry.ensemble; lmSrc = entry.luc_mach; mamaSrc = entry.mama_positional; atsSrc = entry.advanced_trailstop; k4Src = entry.khung4_tplus; }
   } else {
-    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE; lmSrc = LUC_MACH; mamaSrc = MAMA_POSITIONAL; atsSrc = ADVANCED_TRAILSTOP;
+    momSrc = MOMENTUM; stratSrc = SIGNALS; ensSrc = ENSEMBLE; lmSrc = LUC_MACH; mamaSrc = MAMA_POSITIONAL; atsSrc = ADVANCED_TRAILSTOP; k4Src = KHUNG4_TPLUS;
   }
 
   if (momSrc && momSrc.all_signals) {
@@ -464,6 +464,13 @@ function buildSummary(dateStr){
       if (s.ats_sell) atsSell++;
     });
   }
+  if (k4Src && k4Src.all_signals) {
+    k4Src.all_signals.forEach(s => {
+      symbols.add(s.symbol);
+      if (s.buy) k4Buy++;
+      if (s.sell) k4Sell++;
+    });
+  }
 
   let badges = [];
   if (strongCount) badges.push({cls:'str', label:`🟢 Strong ${strongCount}`, filter:'strong'});
@@ -478,20 +485,22 @@ function buildSummary(dateStr){
   if (mamaSell) badges.push({cls:'ensw', label:`🔴 MAMA Sell ${mamaSell}`, filter:'mama-sell'});
   if (atsBuy) badges.push({cls:'str', label:`✅ ATS Buy ${atsBuy}`, filter:'ats-buy'});
   if (atsSell) badges.push({cls:'ensw', label:`🔴 ATS Sell ${atsSell}`, filter:'ats-sell'});
+  if (k4Buy) badges.push({cls:'str', label:`✅ K4 Buy ${k4Buy}`, filter:'k4-buy'});
+  if (k4Sell) badges.push({cls:'ensw', label:`🔴 K4 Sell ${k4Sell}`, filter:'k4-sell'});
 
-  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmValid + mamaBuy + atsBuy;
+  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmValid + mamaBuy + atsBuy + k4Buy;
   const watchSignals = watchCount + lmWatch;
-  const sellWarnings = lmSell + mamaSell + atsSell;
-  const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0);
+  const sellWarnings = lmSell + mamaSell + atsSell + k4Sell;
+  const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0) + (k4Src?.skipped_missing_ohlc || 0);
   return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
 }
 
 function currentSignalSources(dateStr){
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach, mama: entry.mama_positional, ats: entry.advanced_trailstop };
+    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach, mama: entry.mama_positional, ats: entry.advanced_trailstop, k4: entry.khung4_tplus };
   }
-  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH, mama: MAMA_POSITIONAL, ats: ADVANCED_TRAILSTOP };
+  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH, mama: MAMA_POSITIONAL, ats: ADVANCED_TRAILSTOP, k4: KHUNG4_TPLUS };
 }
 
 function topSymbols(rows, kind, limit=8){
@@ -525,7 +534,7 @@ function buildActionBoard(summary){
     </div>
     <div class="action-card neutral">
       <div class="action-head"><div><div class="action-title">Market context</div><div class="action-note">${marketNote}</div></div><div class="action-num">${m?.ad_ratio ?? '—'}</div></div>
-      <div class="action-note">${summary.missingOhlc ? `Còn thiếu OHLCV ${summary.missingOhlc} lượt kiểm tra trong các bộ lọc.` : 'OHLCV đủ cho các bộ lọc hiện tại.'}</div>
+      <div class="action-note"></div>
     </div>
   </div>`;
 }
@@ -550,6 +559,7 @@ function methodLabel(source){
     'luc-mach':'Lục Mạch',
     mama:'MAMA',
     ats:'ATS',
+    k4:'Khung4/Tplus',
   }[source] || source;
 }
 
@@ -616,32 +626,6 @@ function buildStockRadar(dateStr){
     <thead><tr><th>Mã</th><th>Action</th><th>Đồng thuận</th><th>Hệ báo</th><th>Ghi chú nhanh</th><th>Giá</th><th>Vol</th></tr></thead>
     <tbody>${tbody}</tbody>
   </table>`;
-}
-
-function buildBuyHub(dateStr){
-  const src = dateStr ? null : KHUNG4_TPLUS;
-  const rows = src?.all_signals || [];
-  if (!rows.length) return '';
-
-  const tbody = rows.map(r => `<tr>
-      <td class="mono" style="font-weight:800;">${r.symbol}</td>
-      <td>Khung4/Tplus</td>
-      <td class="mono" style="font-weight:700;">${r.score}</td>
-      <td class="mono price-buy">${fmtPrice(r.buy_price)}</td>
-      <td class="mono">${fmtPrice(r.khung4_tplus_d)}</td>
-      <td class="mono">${Math.round(r.last_volume || 0).toLocaleString('vi-VN')}</td>
-    </tr>`).join('');
-
-  return `<div class="panel">
-    <div class="buy-hub-head">
-      <h2 style="margin-bottom:0;">Hub mua Khung4/Tplus <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${rows.length} mã)</span></h2>
-      <div class="buy-hub-note">Bộ riêng theo công thức Diệp: Close phá vùng 4 phiên tạo đường d, mua khi state chuyển 0 sang 1. Giá mua là Close tại phiên phát sinh tín hiệu.</div>
-    </div>
-    <table>
-      <thead><tr><th>Mã</th><th>Bộ lọc</th><th>Score</th><th>Giá mua</th><th>d</th><th>Vol</th></tr></thead>
-      <tbody>${tbody}</tbody>
-    </table>
-  </div>`;
 }
 
 // --- Unified signal table ---
@@ -732,13 +716,13 @@ let activeSignalDate = null; // null = hom nay
 function collectAllSignals(dateStr){
   if (dateStr && SIGNALS_HISTORY) {
     const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble, entry.luc_mach, entry.mama_positional, entry.advanced_trailstop);
+    if (entry) return _collectSignals(entry.momentum, entry.strategy, entry.ensemble, entry.luc_mach, entry.mama_positional, entry.advanced_trailstop, entry.khung4_tplus);
     return [];
   }
-  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH, MAMA_POSITIONAL, ADVANCED_TRAILSTOP);
+  return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH, MAMA_POSITIONAL, ADVANCED_TRAILSTOP, KHUNG4_TPLUS);
 }
 
-function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc){
+function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src){
   let result = [];
   // Momentum signals
   if (momSrc && momSrc.all_signals) {
@@ -865,6 +849,25 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc){
       });
     });
   }
+  // Khung4/Tplus signals
+  if (k4Src && k4Src.all_signals) {
+    k4Src.all_signals.forEach(s => {
+      let parts = [];
+      if (s.khung4_tplus_d != null) parts.push(`d ${fmtPrice(s.khung4_tplus_d)}`);
+      if (s.khung4_tplus_state != null) parts.push(`state ${s.khung4_tplus_state}`);
+      if (s.buy) parts.push('state chuyển 0→1');
+      if (s.sell) parts.push('state chuyển 1→0');
+      result.push({
+        symbol: s.symbol, score: s.score,
+        signalType: s.buy ? 'valid' : (s.sell ? 'sell_warning' : 'watch'), source: 'khung4-tplus',
+        strategies: ['khung4_tplus'], expl: parts.join(' + '),
+        rsi: null, adx: null,
+        vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
+        price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
+        buyPrice: s.buy_price ? fmtPrice(s.buy_price) : null,
+      });
+    });
+  }
   // Sort by score desc
   result.sort((a, b) => b.score - a.score);
   return result;
@@ -887,6 +890,8 @@ function applyFilters(rows, filter, query){
       if (filter === 'mama-sell' && !(r.source === 'mama' && r.signalType === 'sell_warning')) return false;
       if (filter === 'ats-buy' && !(r.source === 'ats' && r.signalType === 'valid')) return false;
       if (filter === 'ats-sell' && !(r.source === 'ats' && r.signalType === 'sell_warning')) return false;
+      if (filter === 'k4-buy' && !(r.source === 'khung4-tplus' && r.signalType === 'valid')) return false;
+      if (filter === 'k4-sell' && !(r.source === 'khung4-tplus' && r.signalType === 'sell_warning')) return false;
     }
     if (query && !r.symbol.includes(query)) return false;
     return true;
