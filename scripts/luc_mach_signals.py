@@ -5,7 +5,7 @@ This module intentionally keeps the output close to the original AmiBroker logic
   - 5 VUDD checks on periods 13/20/35/55/65
   - 1 Tplus check
   - Buy/Sell by score threshold (roboNo, default 3)
-  - Filter by today's volume and non-zero buy/sell score
+  - Filter by today's volume and at least 2 aligned buy/sell checks for watch
 
 Trend, liquidity, pullback, breakout, Darvas and technical sell warnings are not
 used to decide Luc Mach output in this file.
@@ -115,7 +115,8 @@ def analyze_symbol(symbol: str) -> dict | None:
 
     buy_score = sum(1 for p in VUDD_PERIODS if vudds[p]["buy"]) + int(tplus["buy"])
     sell_score = sum(1 for p in VUDD_PERIODS if vudds[p]["sell"]) + int(tplus["sell"])
-    if buy_score <= 0 and sell_score <= 0:
+    active_score = max(buy_score, sell_score)
+    if active_score < 2:
         return None
 
     luc_mach_buy = buy_score >= LUC_MACH_THRESHOLD
@@ -134,7 +135,6 @@ def analyze_symbol(symbol: str) -> dict | None:
         status = "WATCHLIST"
         signal_type = "watch"
 
-    active_score = max(buy_score, sell_score)
     score = int(round(active_score / 6 * 100))
     strategies = []
     if luc_mach_buy:
