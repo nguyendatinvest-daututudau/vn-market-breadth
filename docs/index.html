@@ -326,8 +326,7 @@ function render(){
           <option value="pre-breakout">🔵 Pre-Breakout</option>
           <option value="ensemble-strong">🟣 Ensemble Strong</option>
           <option value="ensemble-weak">⚪ Ensemble Weak</option>
-          <option value="luc-mach-strong">🟢 Lục Mạch Strong</option>
-          <option value="luc-mach-valid">✅ Lục Mạch Valid</option>
+          <option value="luc-mach-valid">✅ Lục Mạch Buy</option>
           <option value="luc-mach-watch">👀 Lục Mạch Watch</option>
           <option value="luc-mach-sell">🔴 Lục Mạch Sell</option>
         </select>
@@ -372,7 +371,7 @@ function adRatioNote(r){
 // --- Build summary badges from all strategies ---
 function buildSummary(dateStr){
   let strongCount = 0, watchCount = 0, preCount = 0, ensStrong = 0, ensWeak = 0;
-  let lmStrong = 0, lmValid = 0, lmWatch = 0, lmSell = 0;
+  let lmValid = 0, lmWatch = 0, lmSell = 0;
   let symbols = new Set();
 
   let momSrc, stratSrc, ensSrc, lmSrc;
@@ -406,8 +405,7 @@ function buildSummary(dateStr){
   if (lmSrc && lmSrc.all_signals) {
     lmSrc.all_signals.forEach(s => {
       symbols.add(s.symbol);
-      if (s.status === 'STRONG_BUY') lmStrong++;
-      else if (s.status === 'VALID_BUY') lmValid++;
+      if (s.status === 'VALID_BUY') lmValid++;
       else if (s.status === 'WATCHLIST') lmWatch++;
       else if (s.status === 'SELL_WARNING') lmSell++;
     });
@@ -419,12 +417,11 @@ function buildSummary(dateStr){
   if (preCount) badges.push({cls:'pre', label:`🔵 Pre-Breakout ${preCount}`, filter:'pre-breakout'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
   if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
-  if (lmStrong) badges.push({cls:'str', label:`🟢 LM Strong ${lmStrong}`, filter:'luc-mach-strong'});
-  if (lmValid) badges.push({cls:'ens', label:`✅ LM Valid ${lmValid}`, filter:'luc-mach-valid'});
+  if (lmValid) badges.push({cls:'ens', label:`✅ LM Buy ${lmValid}`, filter:'luc-mach-valid'});
   if (lmWatch) badges.push({cls:'wat', label:`👀 LM Watch ${lmWatch}`, filter:'luc-mach-watch'});
   if (lmSell) badges.push({cls:'ensw', label:`🔴 LM Sell ${lmSell}`, filter:'luc-mach-sell'});
 
-  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmStrong + lmValid;
+  const buySignals = strongCount + preCount + ensStrong + ensWeak + lmValid;
   const watchSignals = watchCount + lmWatch;
   const sellWarnings = lmSell;
   const missingOhlc = lmSrc?.skipped_missing_ohlc || 0;
@@ -511,8 +508,7 @@ function buildSignalHub(dateStr){
     } else if (r.source === 'ensemble') {
       typeTag = r.signalType === 'strong' ? '<span class="tag ens">Strong</span>' : '<span class="tag ens-w">Weak</span>';
     } else if (r.source === 'luc-mach') {
-      if (r.signalType === 'strong') typeTag = '<span class="tag str">LM Strong</span>';
-      else if (r.signalType === 'valid') typeTag = '<span class="tag ens">LM Valid</span>';
+      if (r.signalType === 'valid') typeTag = '<span class="tag ens">LM Buy</span>';
       else if (r.signalType === 'watch') typeTag = '<span class="tag wat">LM Watch</span>';
       else typeTag = '<span class="tag ens-w">LM Sell</span>';
     }
@@ -627,20 +623,18 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc){
   if (lmSrc && lmSrc.all_signals) {
     lmSrc.all_signals.forEach(s => {
       let parts = [];
-      if (s.buy_score != null) parts.push(`BuyScore ${s.buy_score}/6`);
-      if (s.luc_mach_buy) parts.push('LucMach');
-      if (s.pullback_buy) parts.push('Pullback MA20');
-      if (s.breakout_buy) parts.push('Breakout20');
-      if (s.trend_up_strong) parts.push('Trend mạnh');
-      else if (s.trend_up_basic) parts.push('Trend OK');
-      if (s.sell_warning) parts.push('Sell warning');
-      if (s.vol_ratio != null) parts.push(`Vol ${s.vol_ratio.toFixed(1)}x`);
+      if (s.buy_score != null) parts.push(`B${s.buy_score}/6`);
+      if (s.sell_score != null) parts.push(`S${s.sell_score}/6`);
+      if (s.vudd_buy_periods && s.vudd_buy_periods.length) parts.push(`VUDD mua ${s.vudd_buy_periods.join('/')}`);
+      if (s.vudd_sell_periods && s.vudd_sell_periods.length) parts.push(`VUDD bán ${s.vudd_sell_periods.join('/')}`);
+      if (s.tplus_buy) parts.push('Tplus mua');
+      if (s.tplus_sell) parts.push('Tplus bán');
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.signal_type, source: 'luc-mach',
         strategies: s.strategies || [], expl: parts.join(' + '),
         rsi: null, adx: null,
-        vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
+        vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
       });
     });
@@ -660,7 +654,6 @@ function applyFilters(rows, filter, query){
       if (filter === 'pre-breakout' && r.source !== 'pre-breakout') return false;
       if (filter === 'ensemble-strong' && !(r.source === 'ensemble' && r.signalType === 'strong')) return false;
       if (filter === 'ensemble-weak' && !(r.source === 'ensemble' && r.signalType === 'weak')) return false;
-      if (filter === 'luc-mach-strong' && !(r.source === 'luc-mach' && r.signalType === 'strong')) return false;
       if (filter === 'luc-mach-valid' && !(r.source === 'luc-mach' && r.signalType === 'valid')) return false;
       if (filter === 'luc-mach-watch' && !(r.source === 'luc-mach' && r.signalType === 'watch')) return false;
       if (filter === 'luc-mach-sell' && !(r.source === 'luc-mach' && r.signalType === 'sell_warning')) return false;
@@ -715,8 +708,7 @@ function renderLmRows(items, emptyText){
     let meta = [];
     if (s.buy_score != null) meta.push(`B${s.buy_score}/6`);
     if (s.sell_score != null && s.sell_score > 0) meta.push(`S${s.sell_score}/6`);
-    if (s.vol_ratio != null) meta.push(`${s.vol_ratio.toFixed(1)}x vol`);
-    if (s.trading_value_ma20_billion != null) meta.push(`${s.trading_value_ma20_billion} tỷ`);
+    if (s.last_volume != null) meta.push(`${Math.round(s.last_volume).toLocaleString('vi-VN')} cp`);
     return `<div class="lm-row"><span class="lm-sym">${s.symbol}</span><span class="lm-meta">${meta.join(' · ')}</span></div>`;
   }).join('');
 }
@@ -730,7 +722,7 @@ function buildLucMachPanel(){
   return `<div class="panel">
     <h2>Lục Mạch Core Filter <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${src.total_signals || 0} tín hiệu · thiếu OHLCV ${src.skipped_missing_ohlc || 0})</span></h2>
     <div class="lm-grid">
-      <div class="lm-box"><h3>Buy / Valid</h3>${renderLmRows(valid, 'Chưa có mã mua hợp lệ')}</div>
+      <div class="lm-box"><h3>Buy</h3>${renderLmRows(valid, 'Chưa có mã mua hợp lệ')}</div>
       <div class="lm-box"><h3>Watchlist</h3>${renderLmRows(watch, 'Chưa có mã theo dõi')}</div>
       <div class="lm-box"><h3>Sell warning</h3>${renderLmRows(sell, 'Chưa có cảnh báo bán')}</div>
     </div>

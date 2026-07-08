@@ -11,7 +11,7 @@ lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua G
 - **Pre-Breakout Signals**: Phát hiện cổ phiếu tích lũy sắp breakout (base score + OBV momentum + vol gradient)
 - **Ensemble Signals**: 4-signal voting strategy (MA Crossover + Pullback + Breakout + Momentum)
 - **Momentum Signals**: Bộ lọc momentum có điểm số, ADX/RSI/volume bonus
-- **Lục Mạch Signals**: VUDD + Tplus + trend/volume/pullback/breakout/sell warning
+- **Lục Mạch Signals**: bản core theo Diệp gốc, gồm VUDD 13/20/35/55/65 + Tplus
 - **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
 - **Session Compare**: So sánh phiên sáng vs đóng cửa
 
@@ -25,7 +25,7 @@ scripts/
   strategy_signals.py     # Pre-breakout detection (base + OBV + vol)
   ensemble_signals.py     # 4-signal voting strategy
   momentum_signals.py     # Momentum score + bonuses
-  luc_mach_signals.py     # Lục Mạch: VUDD + Tplus + setup filter
+  luc_mach_signals.py     # Lục Mạch core: VUDD + Tplus
   market_commentary.py    # Nhận định thị trường (breadth + technical)
   embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
@@ -104,9 +104,11 @@ Mở `docs/dashboard.html` trực tiếp bằng double-click (file://) — đã 
 - **Voting**: >= 3/4 = Strong Buy, 2/4 = Weak Buy
 
 ### Lục Mạch (luc_mach_signals.py)
+- **Mode**: `diep_original`, chỉ dùng VUDD + Tplus để ra tín hiệu Lục Mạch
 - **VUDD**: Heikin Ashi + ZeroLag TEMA trên các chu kỳ 13/20/35/55/65
-- **Tplus**: xác nhận phá vùng 4 phiên
-- **Score**: 5 VUDD + 1 Tplus, threshold mặc định 3/6
-- **Setup**: trend MA20/50/200, volume/GTGD, pullback MA20, breakout/Darvas 20 phiên
-- **Status**: STRONG_BUY, VALID_BUY, WATCHLIST, SELL_WARNING
-- **Lưu ý**: RS-line và sector strength chưa bật vì chưa có benchmark/sector mapping ổn định
+- **Tplus**: xác nhận phá vùng 4 phiên, không gán trạng thái khi chưa đủ dữ liệu
+- **Score**: `buy_score = 5 VUDD buy + Tplus buy`, `sell_score = 5 VUDD sell + Tplus sell`
+- **Buy/Sell**: Buy khi `buy_score >= 3`, Sell khi `sell_score >= 3`
+- **Filter**: `Volume > 20000` và có ít nhất một tín hiệu mua hoặc bán
+- **History**: yêu cầu tối thiểu 300 phiên OHLCV; pipeline backfill 800 ngày lịch để ZeroLagTEMA(65) ổn định hơn
+- **Status**: VALID_BUY, WATCHLIST, SELL_WARNING, CONFLICT

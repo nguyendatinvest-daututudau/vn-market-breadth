@@ -47,7 +47,7 @@ MARKET_INDEX_ID = {
     "HNX": "HNXIndex",
 }
 MA_WINDOWS = [20, 50, 200]
-HISTORY_DAYS_LOOKBACK = 380   # du ~260 phien de tinh MA200
+HISTORY_DAYS_LOOKBACK = 800   # du ~500 phien, giup ZeroLagTEMA(65) on dinh hon cho Luc Mach
 INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tranh thieu sau ky nghi dai)
 REQUEST_SLEEP_SEC = 0.5       # cho giua cac lan goi API de tranh rate limit                                                         
 DATE_FMT = "%d/%m/%Y"
