@@ -286,6 +286,20 @@ function renderMarketTabs(){
 
 function fmt1(n){ return (n === null || n === undefined) ? '\u2014' : Number(n).toFixed(1); }
 function fmtPrice(n){ return (n === null || n === undefined) ? '\u2014' : Number(n).toLocaleString('vi-VN'); }
+function parseDisplayPrice(v){
+  if (v === null || v === undefined || v === '\u2014') return null;
+  const n = Number(String(v).replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(n) ? n : null;
+}
+function fmtBuyPerformance(currentPrice, buyPrice){
+  const cur = parseDisplayPrice(currentPrice);
+  const buy = parseDisplayPrice(buyPrice);
+  if (!cur || !buy) return '\u2014';
+  const pct = ((cur - buy) / buy) * 100;
+  const color = pct >= 0 ? 'var(--up)' : 'var(--down)';
+  const sign = pct >= 0 ? '+' : '';
+  return `<span style="color:${color};font-weight:800;">${sign}${pct.toFixed(1)}%</span>`;
+}
 
 function render(){
   const m = LATEST.markets[activeMarket];
@@ -584,7 +598,7 @@ function aggregateSignalRows(rows){
     g[side] += 1;
     g.maxScore = Math.max(g.maxScore, Number(r.score) || 0);
     if (!g.price && r.price) g.price = r.price;
-    if (!g.vol && r.vol) g.vol = r.vol;
+    if (!g.buyPrice && r.buyPrice) g.buyPrice = r.buyPrice;
     const key = `${r.source}:${side}`;
     g.methods.set(key, {label: methodLabel(r.source), side});
     if (r.expl) g.notes.push(`${methodLabel(r.source)}: ${r.expl}`);
@@ -612,6 +626,7 @@ function buildStockRadar(dateStr){
     const methods = g.methodList.map(m => `<span class="method-tag ${m.side}">${m.label}</span>`).join('');
     const note = g.notes.slice(0, 2).join(' · ');
     const consensus = `${g.buy} Buy · ${g.watch} Watch · ${g.sell} Sell`;
+    const performance = fmtBuyPerformance(g.price, g.buyPrice);
     return `<tr>
       <td class="mono" style="font-weight:900;font-size:13px;">${g.symbol}</td>
       <td><span class="action-pill ${g.cls}">${g.action}</span></td>
@@ -619,11 +634,11 @@ function buildStockRadar(dateStr){
       <td><div class="method-tags">${methods}</div></td>
       <td class="radar-note">${consensus}${note ? '<br>'+note : ''}</td>
       <td class="mono">${g.price ?? '—'}</td>
-      <td class="mono">${g.vol ?? '—'}</td>
+      <td class="mono">${performance}</td>
     </tr>`;
   }).join('');
   return `<table class="radar-table">
-    <thead><tr><th>Mã</th><th>Action</th><th>Đồng thuận</th><th>Hệ báo</th><th>Ghi chú nhanh</th><th>Giá</th><th>Vol</th></tr></thead>
+    <thead><tr><th>Mã</th><th>Action</th><th>Đồng thuận</th><th>Hệ báo</th><th>Ghi chú nhanh</th><th>Giá</th><th>Hiệu quả</th></tr></thead>
     <tbody>${tbody}</tbody>
   </table>`;
 }
