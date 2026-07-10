@@ -212,6 +212,24 @@
   .bt-card .num{font-size:18px;font-weight:800;margin-top:2px;color:var(--accent-1);}
   .bt-card .sub{font-size:10px;color:var(--muted);margin-top:2px;}
 
+  .ad-dist-wrap{display:grid;grid-template-columns:1fr;gap:10px;}
+  .ad-dist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .ad-dist-total{font-size:11px;color:var(--muted);font-weight:600;}
+  .ad-bars{height:220px;display:grid;grid-template-columns:repeat(11,1fr);gap:8px;align-items:end;padding:18px 4px 4px;border-radius:12px;background:linear-gradient(180deg,rgba(247,249,255,0.9),rgba(255,255,255,0.5));}
+  .ad-bar-col{min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+  .ad-bar-num{font-size:10px;font-weight:800;color:var(--muted);height:14px;}
+  .ad-bar{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;min-height:2px;box-shadow:0 8px 18px rgba(31,41,102,0.08);}
+  .ad-bar.down{background:linear-gradient(180deg,#F0473E,#D82735);}
+  .ad-bar.neutral{background:linear-gradient(180deg,#D8C91B,#B7A90D);}
+  .ad-bar.up{background:linear-gradient(180deg,#12C7A0,#0FAE72);}
+  .ad-bar-label{font-size:9px;color:var(--muted);white-space:nowrap;}
+  .ad-dist-legend{height:7px;border-radius:999px;display:grid;grid-template-columns:5fr 1fr 5fr;overflow:hidden;margin-top:4px;}
+  .ad-dist-legend span:nth-child(1){background:var(--down);}
+  .ad-dist-legend span:nth-child(2){background:#B7A90D;}
+  .ad-dist-legend span:nth-child(3){background:var(--up);}
+  .ad-dist-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;}
+  @media (max-width:700px){.ad-bars{gap:4px;height:180px;overflow-x:auto;}.ad-bar-label{font-size:8px;writing-mode:vertical-rl;transform:rotate(180deg);}}
+
   .session-badge{display:inline-block;font-family:var(--font-all);font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:6px;}
 .session-badge.close{background:rgba(79,70,229,0.12);color:var(--accent-1);}
 </style>
@@ -364,6 +382,7 @@ function render(){
 
   let summary = buildSummary(activeSignalDate);
   let actionHTML = buildActionBoard(summary);
+  let adDistributionHTML = buildAdDistributionPanel(m);
   let backtestHTML = buildBacktestSnapshot();
   let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
@@ -402,6 +421,8 @@ function render(){
     </div>
 
     ${actionHTML}
+
+    ${adDistributionHTML}
 
     ${backtestHTML}
 
@@ -601,6 +622,35 @@ function buildActionBoard(summary){
     <div class="action-card neutral">
       <div class="action-head"><div><div class="action-title">Market context</div><div class="action-note">${marketNote}</div></div><div class="action-num">${m?.ad_ratio ?? '—'}</div></div>
       <div class="action-note"></div>
+    </div>
+  </div>`;
+}
+
+function buildAdDistributionPanel(m){
+  const dist = m?.ad_distribution || [];
+  if (!dist.length) return '';
+  const total = m?.ad_distribution_total || dist.reduce((sum, b) => sum + (Number(b.count) || 0), 0);
+  const maxCount = Math.max(...dist.map(b => Number(b.count) || 0), 1);
+  const downCount = dist.filter(b => b.side === 'down').reduce((sum, b) => sum + (Number(b.count) || 0), 0);
+  const upCount = dist.filter(b => b.side === 'up').reduce((sum, b) => sum + (Number(b.count) || 0), 0);
+  const bars = dist.map(b => {
+    const count = Number(b.count) || 0;
+    const h = Math.max(2, Math.round(count / maxCount * 160));
+    return `<div class="ad-bar-col">
+      <div class="ad-bar-num">${count}</div>
+      <div class="ad-bar ${b.side}" style="height:${h}px"></div>
+      <div class="ad-bar-label">${b.bucket}</div>
+    </div>`;
+  }).join('');
+  return `<div class="panel">
+    <div class="ad-dist-head">
+      <h2 style="margin-bottom:0;">Phân bổ tăng/giảm theo biên độ giá</h2>
+      <div class="ad-dist-total">Tổng: ${total.toLocaleString('vi-VN')} mã</div>
+    </div>
+    <div class="ad-dist-wrap">
+      <div class="ad-bars">${bars}</div>
+      <div class="ad-dist-legend"><span></span><span></span><span></span></div>
+      <div class="ad-dist-foot"><span>Giảm: ${downCount.toLocaleString('vi-VN')}</span><span>Tăng: ${upCount.toLocaleString('vi-VN')}</span></div>
     </div>
   </div>`;
 }

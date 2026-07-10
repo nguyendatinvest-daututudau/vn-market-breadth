@@ -58,6 +58,49 @@ DATE_FMT = "%d/%m/%Y"
 MIN_AVG_VOLUME = 300_000      # loc thanh khoan: TB 20 phien >= 300,000 cp
 
 
+AD_BUCKETS = [
+    ("<=-7%", None, -7.0, "down"),
+    ("-7~-5%", -7.0, -5.0, "down"),
+    ("-5~-3%", -5.0, -3.0, "down"),
+    ("-3~-1%", -3.0, -1.0, "down"),
+    ("-1~0%", -1.0, 0.0, "down"),
+    ("0%", 0.0, 0.0, "neutral"),
+    ("0~1%", 0.0, 1.0, "up"),
+    ("1~3%", 1.0, 3.0, "up"),
+    ("3~5%", 3.0, 5.0, "up"),
+    ("5~7%", 5.0, 7.0, "up"),
+    (">=7%", 7.0, None, "up"),
+]
+
+
+def _empty_ad_distribution() -> list[dict]:
+    return [{"bucket": label, "count": 0, "side": side} for label, _lo, _hi, side in AD_BUCKETS]
+
+
+def _ad_bucket_index(pct_change: float) -> int:
+    if pct_change < -7:
+        return 0
+    if pct_change < -5:
+        return 1
+    if pct_change < -3:
+        return 2
+    if pct_change < -1:
+        return 3
+    if pct_change < 0:
+        return 4
+    if pct_change == 0:
+        return 5
+    if pct_change <= 1:
+        return 6
+    if pct_change <= 3:
+        return 7
+    if pct_change <= 5:
+        return 8
+    if pct_change <= 7:
+        return 9
+    return 10
+
+
 def vn_today() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=7)
 
@@ -196,6 +239,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     newly_above = {20: [], 50: []}
     newly_below = {20: [], 50: []}
     volume_breakout = []
+    ad_distribution = _empty_ad_distribution()
+    total_distribution = 0
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
@@ -237,6 +282,10 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
 
         close = df["Close"].values
         last_close = close[-1]
+        if len(close) >= 2 and close[-2] > 0:
+            pct_change = (last_close / close[-2] - 1) * 100
+            ad_distribution[_ad_bucket_index(round(float(pct_change), 6))]["count"] += 1
+            total_distribution += 1
         total_valid += 1
 
         for w in MA_WINDOWS:
@@ -288,6 +337,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         "newly_below_ma50":   sorted(newly_below[50]),
         "volume_breakout_symbols": sorted(volume_breakout),
         "volume_breakout_count": len(volume_breakout),
+        "ad_distribution": ad_distribution,
+        "ad_distribution_total": total_distribution,
     }
 
 
@@ -376,12 +427,21 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
         "newly_below_ma50":   ma["newly_below_ma50"],
         "volume_breakout_symbols": ma["volume_breakout_symbols"],
         "volume_breakout_count": ma["volume_breakout_count"],
+        "ad_distribution": ma.get("ad_distribution", _empty_ad_distribution()),
+        "ad_distribution_total": ma.get("ad_distribution_total", 0),
     }
 
 
 # --- Gop ALL ------------------------------------------------------------------
 
 def combine_all(snapshots: list[dict], today: datetime) -> dict:
+    ad_distribution = _empty_ad_distribution()
+    for snap in snapshots:
+        for idx, bucket in enumerate(snap.get("ad_distribution", [])):
+            if idx < len(ad_distribution):
+                ad_distribution[idx]["count"] += int(bucket.get("count", 0) or 0)
+    ad_distribution_total = sum(b["count"] for b in ad_distribution)
+
     adv  = sum(s["advances"] for s in snapshots)
     dec  = sum(s["declines"] for s in snapshots)
     unc  = sum(s["unchanged"] for s in snapshots)
