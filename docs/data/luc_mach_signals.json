@@ -1,117 +1,22 @@
 {
   "mode": "diep_original",
-  "generated_at": "2026-07-14T20:02:21.034349+00:00",
-  "date": "14/07/2026",
+  "generated_at": "2026-07-15T20:08:42.451692+00:00",
+  "date": "15/07/2026",
   "threshold": 3,
   "min_volume": 20000,
   "min_history": 300,
   "total_symbols_analyzed": 650,
-  "total_signals": 35,
+  "total_signals": 31,
   "skipped_missing_ohlc": 101,
   "strong_buy": 0,
-  "valid_buy": 10,
-  "watch_count": 21,
-  "sell_warning_count": 4,
+  "valid_buy": 3,
+  "watch_count": 18,
+  "sell_warning_count": 10,
   "conflict_count": 0,
   "strong": [],
   "valid": [
     {
-      "symbol": "CSC",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        35,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd35_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 12000.0,
-      "last_volume": 38500.0
-    },
-    {
-      "symbol": "PLX",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 36800.0,
-      "last_volume": 3602800.0
-    },
-    {
-      "symbol": "PVS",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        20,
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd20_buy",
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 38800.0,
-      "last_volume": 6103000.0
-    },
-    {
-      "symbol": "CEO",
+      "symbol": "GSP",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -137,11 +42,11 @@
         "vudd20_buy",
         "vudd35_buy"
       ],
-      "last_price": 14300.0,
-      "last_volume": 4607400.0
+      "last_price": 10950.0,
+      "last_volume": 55600.0
     },
     {
-      "symbol": "HDG",
+      "symbol": "TLH",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -167,70 +72,11 @@
         "vudd20_buy",
         "vudd35_buy"
       ],
-      "last_price": 19150.0,
-      "last_volume": 1249900.0
+      "last_price": 4300.0,
+      "last_volume": 118800.0
     },
     {
-      "symbol": "HHS",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 11050.0,
-      "last_volume": 1483600.0
-    },
-    {
-      "symbol": "MCH",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 139900.0,
-      "last_volume": 369600.0
-    },
-    {
-      "symbol": "NBB",
+      "symbol": "VPI",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -247,75 +93,17 @@
       "vudd_buy_periods": [
         13,
         20,
-        55
+        35
       ],
       "vudd_sell_periods": [],
       "strategies": [
         "luc_mach_buy",
         "vudd13_buy",
         "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 17200.0,
-      "last_volume": 24100.0
-    },
-    {
-      "symbol": "PVP",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 17600.0,
-      "last_volume": 564900.0
-    },
-    {
-      "symbol": "TCH",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
         "vudd35_buy"
       ],
-      "last_price": 14300.0,
-      "last_volume": 8887300.0
+      "last_price": 61800.0,
+      "last_volume": 1061700.0
     }
   ],
   "watch": [
@@ -331,74 +119,45 @@
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 22850.0,
-      "last_volume": 18290500.0
-    },
-    {
-      "symbol": "APH",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
+      "tplus_buy": true,
       "tplus_sell": false,
       "tplus_state": 1,
       "vudd_buy_periods": [
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 5580.0,
-      "last_volume": 84200.0
-    },
-    {
-      "symbol": "BFC",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
         35
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
+        "tplus_buy",
         "vudd35_buy"
       ],
-      "last_price": 57200.0,
-      "last_volume": 415600.0
+      "last_price": 23100.0,
+      "last_volume": 23294700.0
+    },
+    {
+      "symbol": "BAF",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        20
+      ],
+      "strategies": [
+        "tplus_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 29600.0,
+      "last_volume": 721300.0
     },
     {
       "symbol": "BMP",
@@ -416,19 +175,19 @@
       "tplus_sell": false,
       "tplus_state": 0,
       "vudd_buy_periods": [
-        13,
-        20
+        35,
+        65
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd35_buy",
+        "vudd65_buy"
       ],
-      "last_price": 150900.0,
-      "last_volume": 199800.0
+      "last_price": 153500.0,
+      "last_volume": 391000.0
     },
     {
-      "symbol": "BWE",
+      "symbol": "CRE",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -441,26 +200,80 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 1,
+      "tplus_state": 0,
       "vudd_buy_periods": [
+        13,
+        20
+      ],
+      "vudd_sell_periods": [],
+      "strategies": [
+        "vudd13_buy",
+        "vudd20_buy"
+      ],
+      "last_price": 6900.0,
+      "last_volume": 84500.0
+    },
+    {
+      "symbol": "CTI",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20
+      ],
+      "strategies": [
+        "vudd13_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 19400.0,
+      "last_volume": 59900.0
+    },
+    {
+      "symbol": "EVE",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         20,
         35
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd20_buy",
-        "vudd35_buy"
+        "vudd20_sell",
+        "vudd35_sell"
       ],
-      "last_price": 45300.0,
-      "last_volume": 130800.0
+      "last_price": 8740.0,
+      "last_volume": 21400.0
     },
     {
-      "symbol": "CDC",
+      "symbol": "HHS",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -469,98 +282,17 @@
       "tplus_buy": false,
       "tplus_sell": false,
       "tplus_state": 0,
-      "vudd_buy_periods": [
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         13,
         20
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd13_sell",
+        "vudd20_sell"
       ],
-      "last_price": 18800.0,
-      "last_volume": 228100.0
-    },
-    {
-      "symbol": "CSV",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 22700.0,
-      "last_volume": 191800.0
-    },
-    {
-      "symbol": "GAS",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        20,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 78500.0,
-      "last_volume": 2251800.0
-    },
-    {
-      "symbol": "GMD",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 77500.0,
-      "last_volume": 2417600.0
+      "last_price": 10700.0,
+      "last_volume": 763500.0
     },
     {
       "symbol": "HSG",
@@ -574,28 +306,27 @@
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
-      "tplus_buy": false,
+      "tplus_buy": true,
       "tplus_sell": false,
-      "tplus_state": 0,
+      "tplus_state": 1,
       "vudd_buy_periods": [
-        13,
-        20
+        35
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "tplus_buy",
+        "vudd35_buy"
       ],
-      "last_price": 11550.0,
-      "last_volume": 2242100.0
+      "last_price": 11650.0,
+      "last_volume": 6866400.0
     },
     {
-      "symbol": "HUT",
+      "symbol": "HSL",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -603,18 +334,18 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         13,
         20
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd13_sell",
+        "vudd20_sell"
       ],
-      "last_price": 15200.0,
-      "last_volume": 1459400.0
+      "last_price": 8830.0,
+      "last_volume": 498500.0
     },
     {
       "symbol": "HVH",
@@ -632,46 +363,19 @@
       "tplus_sell": false,
       "tplus_state": 0,
       "vudd_buy_periods": [
-        20,
-        55
+        13,
+        65
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
+        "vudd13_buy",
+        "vudd65_buy"
       ],
       "last_price": 10100.0,
-      "last_volume": 128100.0
+      "last_volume": 127900.0
     },
     {
-      "symbol": "MSB",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        20,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 16200.0,
-      "last_volume": 7768000.0
-    },
-    {
-      "symbol": "NAG",
+      "symbol": "KBC",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -694,11 +398,65 @@
         "vudd13_buy",
         "vudd35_buy"
       ],
-      "last_price": 7300.0,
-      "last_volume": 66400.0
+      "last_price": 28600.0,
+      "last_volume": 899900.0
     },
     {
-      "symbol": "SDA",
+      "symbol": "MCM",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        55,
+        65
+      ],
+      "strategies": [
+        "vudd55_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 28250.0,
+      "last_volume": 28800.0
+    },
+    {
+      "symbol": "NNC",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 2,
+      "sell_score": 0,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [
+        13,
+        55
+      ],
+      "vudd_sell_periods": [],
+      "strategies": [
+        "vudd13_buy",
+        "vudd55_buy"
+      ],
+      "last_price": 43250.0,
+      "last_volume": 20600.0
+    },
+    {
+      "symbol": "PVG",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -721,11 +479,11 @@
         "vudd13_sell",
         "vudd20_sell"
       ],
-      "last_price": 2000.0,
-      "last_volume": 125000.0
+      "last_price": 5800.0,
+      "last_volume": 58700.0
     },
     {
-      "symbol": "SHI",
+      "symbol": "SCR",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -741,44 +499,18 @@
       "tplus_state": 1,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
-        55,
+        13,
         65
       ],
       "strategies": [
-        "vudd55_sell",
+        "vudd13_sell",
         "vudd65_sell"
       ],
-      "last_price": 14100.0,
-      "last_volume": 110000.0
+      "last_price": 5070.0,
+      "last_volume": 1153400.0
     },
     {
-      "symbol": "SJS",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "tplus_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 48500.0,
-      "last_volume": 26700.0
-    },
-    {
-      "symbol": "VDS",
+      "symbol": "SKG",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -794,23 +526,23 @@
       "tplus_state": 0,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
-        55,
-        65
+        20,
+        35
       ],
       "strategies": [
-        "vudd55_sell",
-        "vudd65_sell"
+        "vudd20_sell",
+        "vudd35_sell"
       ],
-      "last_price": 14500.0,
-      "last_volume": 1149400.0
+      "last_price": 8050.0,
+      "last_volume": 22400.0
     },
     {
       "symbol": "VGC",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -819,20 +551,20 @@
       "tplus_buy": false,
       "tplus_sell": false,
       "tplus_state": 0,
-      "vudd_buy_periods": [
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         55,
         65
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
+        "vudd55_sell",
+        "vudd65_sell"
       ],
-      "last_price": 42300.0,
-      "last_volume": 236900.0
+      "last_price": 41500.0,
+      "last_volume": 246300.0
     },
     {
-      "symbol": "VIC",
+      "symbol": "VNE",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -855,45 +587,18 @@
         "vudd13_sell",
         "vudd20_sell"
       ],
-      "last_price": 219000.0,
-      "last_volume": 3450700.0
-    },
-    {
-      "symbol": "VTV",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 13600.0,
-      "last_volume": 120900.0
+      "last_price": 2700.0,
+      "last_volume": 1619500.0
     }
   ],
   "sell_warning": [
     {
-      "symbol": "PLP",
+      "symbol": "APH",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
-      "score": 67,
+      "score": 50,
       "buy_score": 0,
-      "sell_score": 4,
+      "sell_score": 3,
       "luc_mach_buy": false,
       "luc_mach_sell": true,
       "diep_filter": true,
@@ -904,22 +609,20 @@
       "tplus_state": 0,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
-        13,
-        20,
+        55,
         65
       ],
       "strategies": [
         "luc_mach_sell",
         "tplus_sell",
-        "vudd13_sell",
-        "vudd20_sell",
+        "vudd55_sell",
         "vudd65_sell"
       ],
-      "last_price": 3830.0,
-      "last_volume": 36000.0
+      "last_price": 5490.0,
+      "last_volume": 91400.0
     },
     {
-      "symbol": "HPX",
+      "symbol": "BFC",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
       "score": 50,
@@ -932,53 +635,54 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 0,
+      "tplus_state": 1,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
-        35,
-        55,
-        65
-      ],
-      "strategies": [
-        "luc_mach_sell",
-        "vudd35_sell",
-        "vudd55_sell",
-        "vudd65_sell"
-      ],
-      "last_price": 4300.0,
-      "last_volume": 893000.0
-    },
-    {
-      "symbol": "HVN",
-      "status": "SELL_WARNING",
-      "signal_type": "sell_warning",
-      "score": 50,
-      "buy_score": 0,
-      "sell_score": 3,
-      "luc_mach_buy": false,
-      "luc_mach_sell": true,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": true,
-      "tplus_state": 0,
-      "vudd_buy_periods": [],
-      "vudd_sell_periods": [
+        13,
         20,
         35
       ],
       "strategies": [
         "luc_mach_sell",
-        "tplus_sell",
+        "vudd13_sell",
         "vudd20_sell",
         "vudd35_sell"
       ],
-      "last_price": 24850.0,
-      "last_volume": 1982400.0
+      "last_price": 55000.0,
+      "last_volume": 105100.0
     },
     {
-      "symbol": "SBT",
+      "symbol": "BWE",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20,
+        35
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "vudd13_sell",
+        "vudd20_sell",
+        "vudd35_sell"
+      ],
+      "last_price": 45000.0,
+      "last_volume": 80700.0
+    },
+    {
+      "symbol": "CEO",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
       "score": 50,
@@ -996,117 +700,197 @@
       "vudd_sell_periods": [
         13,
         20,
-        55
+        35
       ],
       "strategies": [
         "luc_mach_sell",
         "vudd13_sell",
         "vudd20_sell",
+        "vudd35_sell"
+      ],
+      "last_price": 13800.0,
+      "last_volume": 3003000.0
+    },
+    {
+      "symbol": "DIG",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        55
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd13_sell",
         "vudd55_sell"
       ],
-      "last_price": 20900.0,
-      "last_volume": 627900.0
+      "last_price": 12000.0,
+      "last_volume": 7460600.0
+    },
+    {
+      "symbol": "ELC",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        55,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd55_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 16200.0,
+      "last_volume": 310300.0
+    },
+    {
+      "symbol": "KHG",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "vudd13_sell",
+        "vudd20_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 4900.0,
+      "last_volume": 4315000.0
+    },
+    {
+      "symbol": "KOS",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd13_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 36050.0,
+      "last_volume": 162000.0
+    },
+    {
+      "symbol": "MBB",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        35,
+        55
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd35_sell",
+        "vudd55_sell"
+      ],
+      "last_price": 23950.0,
+      "last_volume": 12725100.0
+    },
+    {
+      "symbol": "TCM",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        20,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd20_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 19750.0,
+      "last_volume": 1030200.0
     }
   ],
   "conflicts": [],
   "all_signals": [
     {
-      "symbol": "CSC",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        35,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd35_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 12000.0,
-      "last_volume": 38500.0
-    },
-    {
-      "symbol": "PLX",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 36800.0,
-      "last_volume": 3602800.0
-    },
-    {
-      "symbol": "PVS",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 67,
-      "buy_score": 4,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        20,
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd20_buy",
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 38800.0,
-      "last_volume": 6103000.0
-    },
-    {
-      "symbol": "CEO",
+      "symbol": "GSP",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -1132,11 +916,11 @@
         "vudd20_buy",
         "vudd35_buy"
       ],
-      "last_price": 14300.0,
-      "last_volume": 4607400.0
+      "last_price": 10950.0,
+      "last_volume": 55600.0
     },
     {
-      "symbol": "HDG",
+      "symbol": "TLH",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -1162,70 +946,11 @@
         "vudd20_buy",
         "vudd35_buy"
       ],
-      "last_price": 19150.0,
-      "last_volume": 1249900.0
+      "last_price": 4300.0,
+      "last_volume": 118800.0
     },
     {
-      "symbol": "HHS",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "vudd13_buy",
-        "vudd20_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 11050.0,
-      "last_volume": 1483600.0
-    },
-    {
-      "symbol": "MCH",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 139900.0,
-      "last_volume": 369600.0
-    },
-    {
-      "symbol": "NBB",
+      "symbol": "VPI",
       "status": "VALID_BUY",
       "signal_type": "valid",
       "score": 50,
@@ -1242,75 +967,17 @@
       "vudd_buy_periods": [
         13,
         20,
-        55
+        35
       ],
       "vudd_sell_periods": [],
       "strategies": [
         "luc_mach_buy",
         "vudd13_buy",
         "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 17200.0,
-      "last_volume": 24100.0
-    },
-    {
-      "symbol": "PVP",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 17600.0,
-      "last_volume": 564900.0
-    },
-    {
-      "symbol": "TCH",
-      "status": "VALID_BUY",
-      "signal_type": "valid",
-      "score": 50,
-      "buy_score": 3,
-      "sell_score": 0,
-      "luc_mach_buy": true,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": true,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "luc_mach_buy",
-        "tplus_buy",
-        "vudd13_buy",
         "vudd35_buy"
       ],
-      "last_price": 14300.0,
-      "last_volume": 8887300.0
+      "last_price": 61800.0,
+      "last_volume": 1061700.0
     },
     {
       "symbol": "ACB",
@@ -1324,74 +991,45 @@
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 22850.0,
-      "last_volume": 18290500.0
-    },
-    {
-      "symbol": "APH",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
+      "tplus_buy": true,
       "tplus_sell": false,
       "tplus_state": 1,
       "vudd_buy_periods": [
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 5580.0,
-      "last_volume": 84200.0
-    },
-    {
-      "symbol": "BFC",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
         35
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
+        "tplus_buy",
         "vudd35_buy"
       ],
-      "last_price": 57200.0,
-      "last_volume": 415600.0
+      "last_price": 23100.0,
+      "last_volume": 23294700.0
+    },
+    {
+      "symbol": "BAF",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        20
+      ],
+      "strategies": [
+        "tplus_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 29600.0,
+      "last_volume": 721300.0
     },
     {
       "symbol": "BMP",
@@ -1409,19 +1047,19 @@
       "tplus_sell": false,
       "tplus_state": 0,
       "vudd_buy_periods": [
-        13,
-        20
+        35,
+        65
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd35_buy",
+        "vudd65_buy"
       ],
-      "last_price": 150900.0,
-      "last_volume": 199800.0
+      "last_price": 153500.0,
+      "last_volume": 391000.0
     },
     {
-      "symbol": "BWE",
+      "symbol": "CRE",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1434,26 +1072,80 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 1,
+      "tplus_state": 0,
       "vudd_buy_periods": [
+        13,
+        20
+      ],
+      "vudd_sell_periods": [],
+      "strategies": [
+        "vudd13_buy",
+        "vudd20_buy"
+      ],
+      "last_price": 6900.0,
+      "last_volume": 84500.0
+    },
+    {
+      "symbol": "CTI",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20
+      ],
+      "strategies": [
+        "vudd13_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 19400.0,
+      "last_volume": 59900.0
+    },
+    {
+      "symbol": "EVE",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         20,
         35
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd20_buy",
-        "vudd35_buy"
+        "vudd20_sell",
+        "vudd35_sell"
       ],
-      "last_price": 45300.0,
-      "last_volume": 130800.0
+      "last_price": 8740.0,
+      "last_volume": 21400.0
     },
     {
-      "symbol": "CDC",
+      "symbol": "HHS",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -1462,98 +1154,17 @@
       "tplus_buy": false,
       "tplus_sell": false,
       "tplus_state": 0,
-      "vudd_buy_periods": [
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         13,
         20
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd13_sell",
+        "vudd20_sell"
       ],
-      "last_price": 18800.0,
-      "last_volume": 228100.0
-    },
-    {
-      "symbol": "CSV",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        13,
-        35
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd35_buy"
-      ],
-      "last_price": 22700.0,
-      "last_volume": 191800.0
-    },
-    {
-      "symbol": "GAS",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        20,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 78500.0,
-      "last_volume": 2251800.0
-    },
-    {
-      "symbol": "GMD",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        13,
-        20
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
-      ],
-      "last_price": 77500.0,
-      "last_volume": 2417600.0
+      "last_price": 10700.0,
+      "last_volume": 763500.0
     },
     {
       "symbol": "HSG",
@@ -1567,28 +1178,27 @@
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
-      "tplus_buy": false,
+      "tplus_buy": true,
       "tplus_sell": false,
-      "tplus_state": 0,
+      "tplus_state": 1,
       "vudd_buy_periods": [
-        13,
-        20
+        35
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "tplus_buy",
+        "vudd35_buy"
       ],
-      "last_price": 11550.0,
-      "last_volume": 2242100.0
+      "last_price": 11650.0,
+      "last_volume": 6866400.0
     },
     {
-      "symbol": "HUT",
+      "symbol": "HSL",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -1596,18 +1206,18 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
         13,
         20
       ],
-      "vudd_sell_periods": [],
       "strategies": [
-        "vudd13_buy",
-        "vudd20_buy"
+        "vudd13_sell",
+        "vudd20_sell"
       ],
-      "last_price": 15200.0,
-      "last_volume": 1459400.0
+      "last_price": 8830.0,
+      "last_volume": 498500.0
     },
     {
       "symbol": "HVH",
@@ -1625,46 +1235,19 @@
       "tplus_sell": false,
       "tplus_state": 0,
       "vudd_buy_periods": [
-        20,
-        55
+        13,
+        65
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
+        "vudd13_buy",
+        "vudd65_buy"
       ],
       "last_price": 10100.0,
-      "last_volume": 128100.0
+      "last_volume": 127900.0
     },
     {
-      "symbol": "MSB",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 1,
-      "vudd_buy_periods": [
-        20,
-        55
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd20_buy",
-        "vudd55_buy"
-      ],
-      "last_price": 16200.0,
-      "last_volume": 7768000.0
-    },
-    {
-      "symbol": "NAG",
+      "symbol": "KBC",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1687,38 +1270,11 @@
         "vudd13_buy",
         "vudd35_buy"
       ],
-      "last_price": 7300.0,
-      "last_volume": 66400.0
+      "last_price": 28600.0,
+      "last_volume": 899900.0
     },
     {
-      "symbol": "SDA",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 0,
-      "sell_score": 2,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [],
-      "vudd_sell_periods": [
-        13,
-        20
-      ],
-      "strategies": [
-        "vudd13_sell",
-        "vudd20_sell"
-      ],
-      "last_price": 2000.0,
-      "last_volume": 125000.0
-    },
-    {
-      "symbol": "SHI",
+      "symbol": "MCM",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1741,11 +1297,11 @@
         "vudd55_sell",
         "vudd65_sell"
       ],
-      "last_price": 14100.0,
-      "last_volume": 110000.0
+      "last_price": 28250.0,
+      "last_volume": 28800.0
     },
     {
-      "symbol": "SJS",
+      "symbol": "NNC",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1756,22 +1312,23 @@
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
-      "tplus_buy": true,
+      "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 1,
+      "tplus_state": 0,
       "vudd_buy_periods": [
+        13,
         55
       ],
       "vudd_sell_periods": [],
       "strategies": [
-        "tplus_buy",
+        "vudd13_buy",
         "vudd55_buy"
       ],
-      "last_price": 48500.0,
-      "last_volume": 26700.0
+      "last_price": 43250.0,
+      "last_volume": 20600.0
     },
     {
-      "symbol": "VDS",
+      "symbol": "PVG",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1787,45 +1344,18 @@
       "tplus_state": 0,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
-        55,
-        65
+        13,
+        20
       ],
       "strategies": [
-        "vudd55_sell",
-        "vudd65_sell"
+        "vudd13_sell",
+        "vudd20_sell"
       ],
-      "last_price": 14500.0,
-      "last_volume": 1149400.0
+      "last_price": 5800.0,
+      "last_volume": 58700.0
     },
     {
-      "symbol": "VGC",
-      "status": "WATCHLIST",
-      "signal_type": "watch",
-      "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
-      "luc_mach_buy": false,
-      "luc_mach_sell": false,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 42300.0,
-      "last_volume": 236900.0
-    },
-    {
-      "symbol": "VIC",
+      "symbol": "SCR",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
@@ -1842,22 +1372,22 @@
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
         13,
-        20
+        65
       ],
       "strategies": [
         "vudd13_sell",
-        "vudd20_sell"
+        "vudd65_sell"
       ],
-      "last_price": 219000.0,
-      "last_volume": 3450700.0
+      "last_price": 5070.0,
+      "last_volume": 1153400.0
     },
     {
-      "symbol": "VTV",
+      "symbol": "SKG",
       "status": "WATCHLIST",
       "signal_type": "watch",
       "score": 33,
-      "buy_score": 2,
-      "sell_score": 0,
+      "buy_score": 0,
+      "sell_score": 2,
       "luc_mach_buy": false,
       "luc_mach_sell": false,
       "diep_filter": true,
@@ -1865,94 +1395,6 @@
       "threshold": 3,
       "tplus_buy": false,
       "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [
-        55,
-        65
-      ],
-      "vudd_sell_periods": [],
-      "strategies": [
-        "vudd55_buy",
-        "vudd65_buy"
-      ],
-      "last_price": 13600.0,
-      "last_volume": 120900.0
-    },
-    {
-      "symbol": "PLP",
-      "status": "SELL_WARNING",
-      "signal_type": "sell_warning",
-      "score": 67,
-      "buy_score": 0,
-      "sell_score": 4,
-      "luc_mach_buy": false,
-      "luc_mach_sell": true,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": true,
-      "tplus_state": 0,
-      "vudd_buy_periods": [],
-      "vudd_sell_periods": [
-        13,
-        20,
-        65
-      ],
-      "strategies": [
-        "luc_mach_sell",
-        "tplus_sell",
-        "vudd13_sell",
-        "vudd20_sell",
-        "vudd65_sell"
-      ],
-      "last_price": 3830.0,
-      "last_volume": 36000.0
-    },
-    {
-      "symbol": "HPX",
-      "status": "SELL_WARNING",
-      "signal_type": "sell_warning",
-      "score": 50,
-      "buy_score": 0,
-      "sell_score": 3,
-      "luc_mach_buy": false,
-      "luc_mach_sell": true,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": false,
-      "tplus_state": 0,
-      "vudd_buy_periods": [],
-      "vudd_sell_periods": [
-        35,
-        55,
-        65
-      ],
-      "strategies": [
-        "luc_mach_sell",
-        "vudd35_sell",
-        "vudd55_sell",
-        "vudd65_sell"
-      ],
-      "last_price": 4300.0,
-      "last_volume": 893000.0
-    },
-    {
-      "symbol": "HVN",
-      "status": "SELL_WARNING",
-      "signal_type": "sell_warning",
-      "score": 50,
-      "buy_score": 0,
-      "sell_score": 3,
-      "luc_mach_buy": false,
-      "luc_mach_sell": true,
-      "diep_filter": true,
-      "min_volume": 20000,
-      "threshold": 3,
-      "tplus_buy": false,
-      "tplus_sell": true,
       "tplus_state": 0,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
@@ -1960,16 +1402,157 @@
         35
       ],
       "strategies": [
-        "luc_mach_sell",
-        "tplus_sell",
         "vudd20_sell",
         "vudd35_sell"
       ],
-      "last_price": 24850.0,
-      "last_volume": 1982400.0
+      "last_price": 8050.0,
+      "last_volume": 22400.0
     },
     {
-      "symbol": "SBT",
+      "symbol": "VGC",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        55,
+        65
+      ],
+      "strategies": [
+        "vudd55_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 41500.0,
+      "last_volume": 246300.0
+    },
+    {
+      "symbol": "VNE",
+      "status": "WATCHLIST",
+      "signal_type": "watch",
+      "score": 33,
+      "buy_score": 0,
+      "sell_score": 2,
+      "luc_mach_buy": false,
+      "luc_mach_sell": false,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20
+      ],
+      "strategies": [
+        "vudd13_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 2700.0,
+      "last_volume": 1619500.0
+    },
+    {
+      "symbol": "APH",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        55,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd55_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 5490.0,
+      "last_volume": 91400.0
+    },
+    {
+      "symbol": "BFC",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20,
+        35
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "vudd13_sell",
+        "vudd20_sell",
+        "vudd35_sell"
+      ],
+      "last_price": 55000.0,
+      "last_volume": 105100.0
+    },
+    {
+      "symbol": "BWE",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20,
+        35
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "vudd13_sell",
+        "vudd20_sell",
+        "vudd35_sell"
+      ],
+      "last_price": 45000.0,
+      "last_volume": 80700.0
+    },
+    {
+      "symbol": "CEO",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
       "score": 50,
@@ -1987,16 +1570,191 @@
       "vudd_sell_periods": [
         13,
         20,
-        55
+        35
       ],
       "strategies": [
         "luc_mach_sell",
         "vudd13_sell",
         "vudd20_sell",
+        "vudd35_sell"
+      ],
+      "last_price": 13800.0,
+      "last_volume": 3003000.0
+    },
+    {
+      "symbol": "DIG",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        55
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd13_sell",
         "vudd55_sell"
       ],
-      "last_price": 20900.0,
-      "last_volume": 627900.0
+      "last_price": 12000.0,
+      "last_volume": 7460600.0
+    },
+    {
+      "symbol": "ELC",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        55,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd55_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 16200.0,
+      "last_volume": 310300.0
+    },
+    {
+      "symbol": "KHG",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": false,
+      "tplus_state": 1,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "vudd13_sell",
+        "vudd20_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 4900.0,
+      "last_volume": 4315000.0
+    },
+    {
+      "symbol": "KOS",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        13,
+        20
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd13_sell",
+        "vudd20_sell"
+      ],
+      "last_price": 36050.0,
+      "last_volume": 162000.0
+    },
+    {
+      "symbol": "MBB",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        35,
+        55
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd35_sell",
+        "vudd55_sell"
+      ],
+      "last_price": 23950.0,
+      "last_volume": 12725100.0
+    },
+    {
+      "symbol": "TCM",
+      "status": "SELL_WARNING",
+      "signal_type": "sell_warning",
+      "score": 50,
+      "buy_score": 0,
+      "sell_score": 3,
+      "luc_mach_buy": false,
+      "luc_mach_sell": true,
+      "diep_filter": true,
+      "min_volume": 20000,
+      "threshold": 3,
+      "tplus_buy": false,
+      "tplus_sell": true,
+      "tplus_state": 0,
+      "vudd_buy_periods": [],
+      "vudd_sell_periods": [
+        20,
+        65
+      ],
+      "strategies": [
+        "luc_mach_sell",
+        "tplus_sell",
+        "vudd20_sell",
+        "vudd65_sell"
+      ],
+      "last_price": 19750.0,
+      "last_volume": 1030200.0
     }
   ]
 }
