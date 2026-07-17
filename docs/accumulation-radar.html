@@ -28,6 +28,9 @@
   .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0;}
   input,select,button{border:1px solid var(--line);background:rgba(15,27,45,.94);color:var(--text);border-radius:12px;padding:10px 12px;font-size:13px;outline:none;}
   input{flex:1;min-width:180px;} button{cursor:pointer;font-weight:800;} button.active{border-color:var(--green);box-shadow:0 0 0 3px rgba(40,209,124,.12);}
+  .quick-filters{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 0 16px;}
+  .quick-filters button{font-size:12px;color:#BBD0EA;background:rgba(104,168,255,.08);}
+  .quick-filters button.active{color:#08111F;background:var(--green);border-color:var(--green);box-shadow:0 10px 24px rgba(40,209,124,.18);}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
   @media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:520px){.grid{grid-template-columns:1fr;}.hero{border-radius:20px;}}
@@ -55,55 +58,75 @@
   <section class="hero">
     <div class="kicker">Standalone Hub</div>
     <h1>Accumulation Radar</h1>
-    <p class="desc">Phat hien co phieu van khoe, giam it hon thi truong va co dau hieu gom hang khi breadth xau. Diem so uu tien relative strength, kha nang chiu don, volume tich luy, nen gia co hep va do san sang breakout.</p>
+    <p class="desc">Phát hiện cổ phiếu vẫn khỏe, giảm ít hơn thị trường và có dấu hiệu gom hàng khi breadth xấu. Điểm số ưu tiên sức mạnh tương đối, khả năng chịu đòn, volume tích lũy, nền giá co hẹp và độ sẵn sàng breakout.</p>
     <div class="meta" id="meta"></div>
   </section>
 
   <div class="grid" id="kpis"></div>
 
   <div class="toolbar">
-    <input id="search" placeholder="Tim ma...">
+    <input id="search" placeholder="Tìm mã...">
     <select id="statusFilter">
-      <option value="ALL">Tat ca trang thai</option>
+      <option value="ALL">Tất cả trạng thái</option>
       <option value="LEADER">Leader</option>
       <option value="WATCHLIST">Watchlist</option>
       <option value="EARLY">Early</option>
     </select>
     <button type="button" class="active" data-sort="score">Score</button>
     <button type="button" data-sort="rs20">RS20</button>
-    <button type="button" data-sort="position20">Gan breakout</button>
+    <button type="button" data-sort="position20">Gần breakout</button>
   </div>
 
-  <div id="staleWarning" style="display:none;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>Canh bao:</b> Du lieu cache OHLCV co the cu hon ngay hien thi. Diem so van tinh tu cache, can chay fetch_and_compute de cap nhat.</div>
+  <div class="quick-filters" id="quickFilters">
+    <button type="button" data-filter="rsStrong">RS > 80</button>
+    <button type="button" data-filter="volumeStrong">Volume > 70</button>
+    <button type="button" data-filter="baseTight">Nền giá > 70</button>
+    <button type="button" data-filter="nearBreakout">Gần breakout</button>
+    <button type="button" data-filter="clear">Xóa lọc nhanh</button>
+  </div>
+
+  <div id="staleWarning" style="display:none;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>Cảnh báo:</b> Dữ liệu cache OHLCV có thể cũ hơn ngày hiển thị. Điểm số vẫn tính từ cache, cần chạy fetch_and_compute để cập nhật.</div>
 
   <section class="panel">
     <div class="panel-head">
       <div>
         <div class="panel-title">Top Accumulation Candidates</div>
-        <div class="small">Benchmark la proxy equal-weight tu cac ma thanh khoan trong cache, khong phu thuoc VNINDEX.</div>
+        <div class="small">Benchmark là proxy equal-weight từ các mã thanh khoản trong cache, không phụ thuộc VNINDEX.</div>
       </div>
       <div class="small" id="count"></div>
     </div>
     <div class="legend">
-      <div class="legend-item"><b>Score</b><span>Diem tong hop: RS 30%, suc ben 20%, volume 20%, nen gia 15%, breakout 15%.</span></div>
-      <div class="legend-item"><b>RS</b><span>So sanh return cua co phieu voi benchmark. RS trend duong = suc manh tuong doi dang cai thien.</span></div>
-      <div class="legend-item"><b>Suc ben</b><span>Do giam DD60, kha nang giu MA20/MA50 va vi tri trong range 20 phien.</span></div>
-      <div class="legend-item"><b>Volume</b><span>Up/Down cao va ngay tich luy nhieu hon phan phoi cho thay dong tien dang ung ho.</span></div>
-      <div class="legend-item"><b>Nen gia</b><span>Range20/Range60 cang co hep, nen gia cang chat, rui ro rung lac thap hon.</span></div>
-      <div class="legend-item"><b>Breakout</b><span>Pos20 cao, range 10 phien chat va volume can gan dinh la dau hieu san sang vuot nen.</span></div>
+      <div class="legend-item"><b>Score</b><span>Điểm tổng hợp: RS 30%, sức bền 20%, volume 20%, nền giá 15%, breakout 15%.</span></div>
+      <div class="legend-item"><b>RS</b><span>So sánh return của cổ phiếu với benchmark. RS trend dương = sức mạnh tương đối đang cải thiện.</span></div>
+      <div class="legend-item"><b>Sức bền</b><span>Độ giảm DD60, khả năng giữ MA20/MA50 và vị trí trong range 20 phiên.</span></div>
+      <div class="legend-item"><b>Volume</b><span>Up/Down cao và ngày tích lũy nhiều hơn phân phối cho thấy dòng tiền đang ủng hộ.</span></div>
+      <div class="legend-item"><b>Nền giá</b><span>Range20/Range60 càng co hẹp, nền giá càng chặt, rủi ro rung lắc thấp hơn.</span></div>
+      <div class="legend-item"><b>Breakout</b><span>Pos20 cao, range 10 phiên chặt và volume cạn gần đỉnh là dấu hiệu sẵn sàng vượt nền.</span></div>
     </div>
-    <div class="table-wrap" id="table"><div class="loading">Dang tai du lieu...</div></div>
+    <div class="table-wrap" id="table"><div class="loading">Đang tải dữ liệu...</div></div>
   </section>
-  <footer>Khong phai khuyen nghi dau tu. Dung nhu radar loc watchlist, can xac nhan voi nen gia va quan tri rui ro.</footer>
+  <footer>Không phải khuyến nghị đầu tư. Dùng như radar lọc watchlist, cần xác nhận với nền giá và quản trị rủi ro.</footer>
 </div>
 
 <script>
 let DATA = null;
 let rows = [];
 let sortKey = 'score';
+const activeFilters = new Set();
 
 const fmt = (v, d = 1) => v === null || v === undefined ? '-' : Number(v).toFixed(d);
 const signed = (v, d = 2) => v === null || v === undefined ? '-' : `${v >= 0 ? '+' : ''}${Number(v).toFixed(d)}`;
+const reasonText = {
+  'RS20 vuot benchmark': 'RS20 vượt benchmark',
+  'RS20 dang cai thien': 'RS20 đang cải thiện',
+  'giu tren MA50': 'Giữ trên MA50',
+  'giu tren MA20': 'Giữ trên MA20',
+  'volume phien tang tot': 'Volume phiên tăng tốt',
+  'nen gia co hep': 'Nền giá co hẹp',
+  'gan dinh nen 20 phien': 'Gần đỉnh nền 20 phiên',
+  'volume can o gan dinh': 'Volume cạn ở gần đỉnh'
+};
+const labelReason = (x) => reasonText[x] || x;
 const parseViDate = (s) => {
   const m = String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   return m ? new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
@@ -112,14 +135,14 @@ const parseViDate = (s) => {
 async function loadData(){
   try{
     const res = await fetch('data/accumulation_radar.json', {cache:'no-store'});
-    if(!res.ok) throw new Error('Khong tim thay data/accumulation_radar.json');
+    if(!res.ok) throw new Error('Không tìm thấy data/accumulation_radar.json');
     DATA = await res.json();
     rows = DATA.all_candidates || [];
     renderMeta();
     renderKpis();
     renderTable();
   }catch(err){
-    document.getElementById('table').innerHTML = `<div class="err">${err.message}. Hay chay scripts/accumulation_radar.py de tao du lieu.</div>`;
+    document.getElementById('table').innerHTML = `<div class="err">${err.message}. Hãy chạy scripts/accumulation_radar.py để tạo dữ liệu.</div>`;
   }
 }
 
@@ -131,8 +154,8 @@ function renderMeta(){
   const stalenessDays = dataDate ? Math.floor((new Date() - dataDate) / 86400000) : 0;
   document.getElementById('staleWarning').style.display = stalenessDays >= 2 ? 'block' : 'none';
   document.getElementById('meta').innerHTML = `
-    <span class="pill">Cap nhat: ${genDate.toLocaleString('vi-VN')}</span>
-    <span class="pill">Gia moi nhat: ${cacheDate}</span>
+    <span class="pill">Cập nhật: ${genDate.toLocaleString('vi-VN')}</span>
+    <span class="pill">Giá mới nhất: ${cacheDate}</span>
     <span class="pill">Benchmark 20D: ${signed(b.return_20d)}%</span>
     <span class="pill">Benchmark 60D: ${signed(b.return_60d)}%</span>
     <span class="pill">DD60: ${signed(b.drawdown_60d)}%</span>`;
@@ -140,7 +163,7 @@ function renderMeta(){
 
 function renderKpis(){
   document.getElementById('kpis').innerHTML = `
-    <div class="card"><div class="lab">Da phan tich</div><div class="num">${DATA.total_symbols_analyzed || 0}</div></div>
+    <div class="card"><div class="lab">Đủ điều kiện phân tích</div><div class="num">${DATA.total_symbols_analyzed || 0}</div></div>
     <div class="card"><div class="lab">Leader</div><div class="num green">${DATA.leader_count || 0}</div></div>
     <div class="card"><div class="lab">Watchlist</div><div class="num amber">${DATA.watchlist_count || 0}</div></div>
     <div class="card"><div class="lab">Early</div><div class="num blue">${DATA.early_count || 0}</div></div>`;
@@ -152,7 +175,17 @@ function filteredRows(){
   return rows
     .filter(r => !q || r.symbol.includes(q))
     .filter(r => st === 'ALL' || r.status === st)
+    .filter(matchesQuickFilters)
     .sort((a,b) => (Number(b[sortKey]) || 0) - (Number(a[sortKey]) || 0));
+}
+
+function matchesQuickFilters(r){
+  const scores = r.component_scores || {};
+  if(activeFilters.has('rsStrong') && Number(scores.relative_strength || 0) < 80) return false;
+  if(activeFilters.has('volumeStrong') && Number(scores.volume || 0) < 70) return false;
+  if(activeFilters.has('baseTight') && Number(scores.contraction || 0) < 70) return false;
+  if(activeFilters.has('nearBreakout') && Number(r.position20 || 0) < 80) return false;
+  return true;
 }
 
 function scoreBar(value){
@@ -162,21 +195,21 @@ function scoreBar(value){
 
 function renderTable(){
   const out = filteredRows();
-  document.getElementById('count').textContent = `${out.length} ma hien thi`;
+  document.getElementById('count').textContent = `${out.length} mã hiển thị`;
   if(!out.length){
-    document.getElementById('table').innerHTML = '<div class="loading">Khong co ung vien phu hop bo loc.</div>';
+    document.getElementById('table').innerHTML = '<div class="loading">Không có ứng viên phù hợp bộ lọc.</div>';
     return;
   }
   const html = `<table><thead><tr>
-    <th>Ma <span class="hint" title="Ma co phieu, gia dong cua moi nhat va ngay du lieu dung de hien thi.">?</span></th>
-    <th>Trang thai <span class="hint" title="LEADER: score >= 80; WATCHLIST: 65-79.9; EARLY: 50-64.9.">?</span></th>
-    <th>Score <span class="hint" title="Diem tong hop 0-100 tu 5 nhom: Relative Strength, Resilience, Volume, Base Contraction, Breakout Readiness.">?</span></th>
-    <th>RS <span class="hint" title="RS20/RS60 = return co phieu tru benchmark 20/60 phien. Trend = RS20 hien tai tru RS20 cua 5 phien truoc.">?</span></th>
-    <th>Suc ben <span class="hint" title="Co phieu duoc cong diem khi giu tren MA20/MA50, drawdown 60 phien nho hon benchmark va nam cao trong range 20 phien.">?</span></th>
-    <th>Volume <span class="hint" title="Up/Down = volume trung binh phien tang chia phien giam. Dry-up thap gan dinh la volume can, Acc/Dist dem ngay tang/giam manh kem volume cao.">?</span></th>
-    <th>Nen gia <span class="hint" title="Range20 va Range60 do bien do gia. Range20 nho va co hep so voi Range60 la nen gia chat hon.">?</span></th>
-    <th>Breakout <span class="hint" title="Pos20 la vi tri gia trong range 20 phien; cang cao cang gan dinh nen va gan vung breakout.">?</span></th>
-    <th>Ly do <span class="hint" title="Cac tag tom tat nhung dieu kien noi bat nhat lam co phieu duoc dua vao radar.">?</span></th>
+    <th>Mã <span class="hint" title="Mã cổ phiếu, giá đóng cửa mới nhất và ngày dữ liệu dùng để hiển thị.">?</span></th>
+    <th>Trạng thái <span class="hint" title="LEADER: score >= 80; WATCHLIST: 65-79.9; EARLY: 50-64.9.">?</span></th>
+    <th>Score <span class="hint" title="Điểm tổng hợp 0-100 từ 5 nhóm: Relative Strength, Resilience, Volume, Base Contraction, Breakout Readiness.">?</span></th>
+    <th>RS <span class="hint" title="RS20/RS60 = return cổ phiếu trừ benchmark 20/60 phiên. Trend = RS20 hiện tại trừ RS20 của 5 phiên trước.">?</span></th>
+    <th>Sức bền <span class="hint" title="Cổ phiếu được cộng điểm khi giữ trên MA20/MA50, drawdown 60 phiên nhỏ hơn benchmark và nằm cao trong range 20 phiên.">?</span></th>
+    <th>Volume <span class="hint" title="Up/Down = volume trung bình phiên tăng chia phiên giảm. Dry-up thấp gần đỉnh là volume cạn, Acc/Dist đếm ngày tăng/giảm mạnh kèm volume cao.">?</span></th>
+    <th>Nền giá <span class="hint" title="Range20 và Range60 đo biên độ giá. Range20 nhỏ và co hẹp so với Range60 là nền giá chặt hơn.">?</span></th>
+    <th>Breakout <span class="hint" title="Pos20 là vị trí giá trong range 20 phiên; càng cao càng gần đỉnh nền và gần vùng breakout.">?</span></th>
+    <th>Lý do <span class="hint" title="Các tag tóm tắt những điều kiện nổi bật nhất làm cổ phiếu được đưa vào radar.">?</span></th>
   </tr></thead><tbody>${out.map(r => `
     <tr>
       <td><div class="sym">${r.symbol}</div><div class="small">${fmt(r.last_price,0)} - ${r.last_date || ''}</div></td>
@@ -187,13 +220,27 @@ function renderTable(){
       <td><div>Up/Down ${fmt(r.up_down_volume_ratio,2)}</div><div class="small">Dry-up ${fmt(r.vol_dry_ratio,2)} | Acc ${r.accumulation_days} / Dist ${r.distribution_days}</div></td>
       <td><div>Range20 ${fmt(r.range20)}%</div><div class="small">Range60 ${fmt(r.range60)}%</div></td>
       <td><div>Pos20 ${fmt(r.position20)}%</div>${scoreBar(r.position20)}</td>
-      <td><div class="reasons">${(r.reasons || []).map(x => `<span class="reason">${x}</span>`).join('')}</div></td>
+      <td><div class="reasons">${(r.reasons || []).map(x => `<span class="reason">${labelReason(x)}</span>`).join('')}</div></td>
     </tr>`).join('')}</tbody></table>`;
   document.getElementById('table').innerHTML = html;
 }
 
 document.getElementById('search').addEventListener('input', renderTable);
 document.getElementById('statusFilter').addEventListener('change', renderTable);
+document.querySelectorAll('#quickFilters button[data-filter]').forEach(btn => btn.addEventListener('click', () => {
+  const key = btn.dataset.filter;
+  if(key === 'clear'){
+    activeFilters.clear();
+  }else if(activeFilters.has(key)){
+    activeFilters.delete(key);
+  }else{
+    activeFilters.add(key);
+  }
+  document.querySelectorAll('#quickFilters button[data-filter]').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter !== 'clear' && activeFilters.has(b.dataset.filter));
+  });
+  renderTable();
+}));
 document.querySelectorAll('button[data-sort]').forEach(btn => btn.addEventListener('click', () => {
   sortKey = btn.dataset.sort;
   document.querySelectorAll('button[data-sort]').forEach(b => b.classList.toggle('active', b === btn));

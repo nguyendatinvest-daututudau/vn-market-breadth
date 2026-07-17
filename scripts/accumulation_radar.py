@@ -227,21 +227,21 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
 
     reasons = []
     if rs20 > 0:
-        reasons.append("RS20 vuot benchmark")
+        reasons.append("RS20 vượt benchmark")
     if rs_trend is not None and rs_trend >= 2:
-        reasons.append("RS20 dang cai thien")
+        reasons.append("RS20 đang cải thiện")
     if last >= ma50:
-        reasons.append("giu tren MA50")
+        reasons.append("Giữ trên MA50")
     elif last >= ma20:
-        reasons.append("giu tren MA20")
+        reasons.append("Giữ trên MA20")
     if up_down_ratio and up_down_ratio >= 1.2:
-        reasons.append("volume phien tang tot")
+        reasons.append("Volume phiên tăng tốt")
     if contraction_score >= 60:
-        reasons.append("nen gia co hep")
+        reasons.append("Nền giá co hẹp")
     if pos20 >= 80:
-        reasons.append("gan dinh nen 20 phien")
+        reasons.append("Gần đỉnh nền 20 phiên")
     if vol_dry_ratio is not None and vol_dry_ratio <= 0.8:
-        reasons.append("volume can o gan dinh")
+        reasons.append("Volume cạn ở gần đỉnh")
 
     lp = (latest_prices or {}).get(symbol, {})
     fallback_price = round(last, 2)
