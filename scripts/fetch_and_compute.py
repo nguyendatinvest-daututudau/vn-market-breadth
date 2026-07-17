@@ -36,6 +36,7 @@ from luc_mach_signals import main as run_luc_mach_signals
 from khung4_tplus_signals import main as run_khung4_tplus_signals
 from mama_positional_signals import main as run_mama_positional_signals
 from advanced_trailstop_signals import main as run_advanced_trailstop_signals
+from accumulation_radar import main as run_accumulation_radar
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
@@ -499,7 +500,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data():
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "latest_prices.json"):
+    for f in ("breadth_latest.json", "breadth_history.json", "market_commentary.json", "strategy_signals.json", "ensemble_signals.json", "backtest_weights.json", "momentum_signals.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "latest_prices.json"):
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
         if src.exists():
@@ -684,6 +685,12 @@ def main():
         print(f"Da ghi tin hieu Advanced Trailstop.\n")
     except Exception as e:
         print(f"Loi sinh tin hieu Advanced Trailstop: {e}")
+
+    try:
+        run_accumulation_radar()
+        print(f"Da ghi Accumulation Radar.\n")
+    except Exception as e:
+        print(f"Loi sinh Accumulation Radar: {e}")
 
     try:
         run_backtest_momentum()

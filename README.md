@@ -15,6 +15,7 @@ lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua G
 - **Khung4/Tplus Signals**: hub mua riêng theo state Khung4/Tplus, có giá mua tại phiên phát tín hiệu
 - **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
 - **Session Compare**: So sánh phiên sáng vs đóng cửa
+- **Accumulation Radar**: hub riêng phát hiện cổ phiếu khỏe âm thầm trong thị trường xấu
 
 ## Cấu trúc repo
 
@@ -30,6 +31,7 @@ scripts/
   khung4_tplus_signals.py # Khung4/Tplus standalone: buy + buy_price
   mama_positional_signals.py # MAMA positional: Ehlers MAMA/FAMA + xác nhận High/Low setup
   advanced_trailstop_signals.py # Advanced Trailstop: bs ATR + Close cross
+  accumulation_radar.py # Accumulation Radar: RS + resilience + volume accumulation + base contraction
   market_commentary.py    # Nhận định thị trường (breadth + technical)
   embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
@@ -44,10 +46,12 @@ data/
   khung4_tplus_signals.json # tín hiệu mua Khung4/Tplus
   mama_positional_signals.json # tín hiệu MAMA positional
   advanced_trailstop_signals.json # tín hiệu Advanced Trailstop
+  accumulation_radar.json # ứng viên tích lũy khỏe hơn market proxy
   market_commentary.json  # nhận định thị trường
   ohlc_cache/             # cache OHLCV theo mã
 docs/
   index.html              # dashboard source (fetch JSON từ data/)
+  accumulation-radar.html # hub riêng Accumulation Radar
   dashboard.html          # embedded version (mở trực tiếp không cần server)
   data/                   # JSON copies cho GitHub Pages
 .github/workflows/update.yml  # cron: 15:10 VN (T2-T6)
@@ -72,9 +76,11 @@ Sau khi chạy:
 - `data/luc_mach_signals.json` — Lục Mạch signals
 - `data/mama_positional_signals.json` — MAMA positional signals
 - `data/advanced_trailstop_signals.json` — Advanced Trailstop signals
+- `data/accumulation_radar.json` — Accumulation Radar candidates
 - `data/market_commentary.json` — nhận định thị trường
 
 Mở `docs/index.html` qua Live Server (VSCode) hoặc `python -m http.server`.
+Mở `docs/accumulation-radar.html` qua Live Server để xem hub Accumulation Radar.
 Mở `docs/dashboard.html` trực tiếp bằng double-click (file://) — đã embed data.
 
 ## Dashboard tabs
