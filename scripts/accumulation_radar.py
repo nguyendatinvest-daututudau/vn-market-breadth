@@ -98,6 +98,7 @@ def _accumulation_distribution_days(df: pd.DataFrame, days: int = 30) -> tuple[i
 
 def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
     rets20 = []
+    rets20_5ago = []
     rets60 = []
     dd60 = []
     for symbol in symbols:
@@ -108,6 +109,11 @@ def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
         r20 = _pct_change(close, 20)
         r60 = _pct_change(close, 60)
         d60 = _drawdown(close, 60)
+        if len(close) >= 26:
+            start_5ago = close.iloc[-26]
+            end_5ago = close.iloc[-6]
+            if not pd.isna(start_5ago) and start_5ago > 0 and not pd.isna(end_5ago):
+                rets20_5ago.append(float((end_5ago / start_5ago - 1.0) * 100.0))
         if r20 is not None:
             rets20.append(r20)
         if r60 is not None:
@@ -116,6 +122,7 @@ def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
             dd60.append(d60)
     return {
         "return_20d": round(float(np.nanmedian(rets20)), 2) if rets20 else 0.0,
+        "return_20d_5ago": round(float(np.nanmedian(rets20_5ago)), 2) if rets20_5ago else 0.0,
         "return_60d": round(float(np.nanmedian(rets60)), 2) if rets60 else 0.0,
         "drawdown_60d": round(float(np.nanmedian(dd60)), 2) if dd60 else 0.0,
     }
@@ -151,7 +158,8 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
     if len(close) >= 26:
         try:
             ret20_5ago = float((close.iloc[-6] / close.iloc[-26] - 1.0) * 100.0)
-            rs_trend = round(ret20 - ret20_5ago, 2) if not pd.isna(ret20_5ago) else None
+            rs20_5ago = ret20_5ago - benchmark["return_20d_5ago"]
+            rs_trend = round(rs20 - rs20_5ago, 2) if not pd.isna(ret20_5ago) else None
         except Exception:
             rs_trend = None
     else:
@@ -175,19 +183,20 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
     r5_hi = recent_5["High"].max()
     r5_lo = recent_5["Low"].min()
     if r5_hi > r5_lo and "Volume" in recent_5.columns:
-        price_pos_5 = (recent_5["Close"] - r5_lo) / (r5_hi - r5_lo)
-        near_top = price_pos_5 >= 0.7
-        if near_top.any():
-            near_vol = recent_5.loc[near_top, "Volume"].mean()
-            far_vol = recent_5.loc[~near_top, "Volume"].mean() if (~near_top).any() else near_vol
-            vol_dry_ratio = float(near_vol / far_vol) if far_vol > 0 else 1.0
+        latest_pos_5 = float((recent_5["Close"].iloc[-1] - r5_lo) / (r5_hi - r5_lo))
+        prior_vol = recent_5["Volume"].iloc[:-1].mean()
+        latest_vol = recent_5["Volume"].iloc[-1]
+        if latest_pos_5 >= 0.7 and prior_vol > 0 and not pd.isna(latest_vol):
+            vol_dry_ratio = float(latest_vol / prior_vol)
+            vol_dry_score = max(0.0, 100.0 - _score_between(vol_dry_ratio, 0.5, 1.5))
         else:
-            vol_dry_ratio = 1.0
+            vol_dry_ratio = None
+            vol_dry_score = 0.0
     else:
-        vol_dry_ratio = 1.0
-    vol_dry_score = max(0.0, 100.0 - _score_between(vol_dry_ratio, 0.5, 1.5))
+        vol_dry_ratio = None
+        vol_dry_score = 0.0
 
-    volume_score = 0.40 * vol_ratio_score + 0.30 * acc_day_score + 0.30 * vol_dry_score
+    volume_score = 0.60 * vol_ratio_score + 0.40 * acc_day_score
 
     contraction = max(0.0, min(1.0, (range60 - range20) / range60)) if range60 > 0 else 0.0
     tightness_score = 100.0 - _score_between(range20, 8.0, 35.0)
@@ -231,7 +240,7 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
         reasons.append("nen gia co hep")
     if pos20 >= 80:
         reasons.append("gan dinh nen 20 phien")
-    if vol_dry_ratio <= 0.8:
+    if vol_dry_ratio is not None and vol_dry_ratio <= 0.8:
         reasons.append("volume can o gan dinh")
 
     lp = (latest_prices or {}).get(symbol, {})
@@ -255,7 +264,7 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
         "range60": round(float(range60), 2),
         "position20": round(float(pos20), 1),
         "up_down_volume_ratio": round(float(up_down_ratio), 2) if up_down_ratio else None,
-        "vol_dry_ratio": round(float(vol_dry_ratio), 2),
+        "vol_dry_ratio": round(float(vol_dry_ratio), 2) if vol_dry_ratio is not None else None,
         "accumulation_days": acc_days,
         "distribution_days": dist_days,
         "component_scores": {

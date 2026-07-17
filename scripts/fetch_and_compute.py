@@ -122,8 +122,11 @@ def generate_latest_prices() -> None:
     prices = {}
     for path in CACHE_DIR.glob("*.csv"):
         try:
-            df = pd.read_csv(path)
+            df = _load_cache(path.stem.upper(), CACHE_DIR)
             if df.empty or "Close" not in df.columns:
+                continue
+            df = df.dropna(subset=["TradingDate"]).sort_values("TradingDate")
+            if df.empty:
                 continue
             row = df.iloc[-1]
             close = pd.to_numeric(row.get("Close"), errors="coerce")
@@ -131,7 +134,7 @@ def generate_latest_prices() -> None:
                 continue
             prices[path.stem.upper()] = {
                 "close": float(close),
-                "date": str(row.get("TradingDate", "")),
+                "date": row["TradingDate"].strftime(DATE_FMT),
             }
         except Exception:
             continue

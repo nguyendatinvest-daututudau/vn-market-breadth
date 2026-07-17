@@ -12,6 +12,19 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+def parse_trading_date(series: pd.Series) -> pd.Series:
+    """Parse cache dates safely across dd/mm/YYYY and ISO YYYY-mm-dd formats."""
+    text = series.astype(str).str.strip()
+    parsed = pd.to_datetime(text, format="%d/%m/%Y", errors="coerce")
+    missing = parsed.isna()
+    if missing.any():
+        parsed.loc[missing] = pd.to_datetime(text.loc[missing], format="%Y-%m-%d", errors="coerce")
+    missing = parsed.isna()
+    if missing.any():
+        parsed.loc[missing] = pd.to_datetime(text.loc[missing], errors="coerce")
+    return parsed
+
+
 def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
     """Load OHLC cache for a symbol. Returns DataFrame with TradingDate, OHLC, Volume when available."""
     path = cache_dir / f"{symbol}.csv"
@@ -20,7 +33,7 @@ def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
             df = pd.read_csv(path)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)
-                df["TradingDate"] = pd.to_datetime(df["TradingDate"], dayfirst=True, errors="coerce")
+                df["TradingDate"] = parse_trading_date(df["TradingDate"])
             df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
             for col in ("Open", "High", "Low", "Volume"):
                 if col in df.columns:

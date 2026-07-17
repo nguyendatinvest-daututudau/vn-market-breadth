@@ -41,6 +41,12 @@
   .sym{font-weight:900;font-size:14px;}.score{font-size:18px;font-weight:900;}.tag{display:inline-block;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:900;letter-spacing:.05em;}.tag.LEADER{background:rgba(40,209,124,.14);color:var(--green);}.tag.WATCHLIST{background:rgba(245,185,76,.14);color:var(--amber);}.tag.EARLY{background:rgba(104,168,255,.14);color:var(--blue);}.tag.IGNORE{background:rgba(148,163,184,.14);color:var(--muted);}
   .reasons{display:flex;gap:5px;flex-wrap:wrap;max-width:280px;}.reason{font-size:10px;color:#C8D5E6;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:999px;padding:3px 7px;}
   .bar{width:110px;height:7px;background:#1D2C42;border-radius:999px;overflow:hidden;margin-top:6px;}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px;}
+  .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.025);}
+  .legend-item{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;background:rgba(255,255,255,.035);}
+  .legend-item b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:#DDE7F5;}
+  .legend-item span{display:block;font-size:11px;color:var(--muted);line-height:1.45;}
+  .hint{color:var(--blue);cursor:help;margin-left:4px;font-weight:900;}
+  @media(max-width:820px){.legend{grid-template-columns:1fr;}}
   .loading,.err{padding:34px;text-align:center;color:var(--muted);}.err{color:var(--red);} footer{color:var(--faint);font-size:11px;text-align:center;margin-top:18px;}
 </style>
 </head>
@@ -78,6 +84,14 @@
       </div>
       <div class="small" id="count"></div>
     </div>
+    <div class="legend">
+      <div class="legend-item"><b>Score</b><span>Diem tong hop: RS 30%, suc ben 20%, volume 20%, nen gia 15%, breakout 15%.</span></div>
+      <div class="legend-item"><b>RS</b><span>So sanh return cua co phieu voi benchmark. RS trend duong = suc manh tuong doi dang cai thien.</span></div>
+      <div class="legend-item"><b>Suc ben</b><span>Do giam DD60, kha nang giu MA20/MA50 va vi tri trong range 20 phien.</span></div>
+      <div class="legend-item"><b>Volume</b><span>Up/Down cao va ngay tich luy nhieu hon phan phoi cho thay dong tien dang ung ho.</span></div>
+      <div class="legend-item"><b>Nen gia</b><span>Range20/Range60 cang co hep, nen gia cang chat, rui ro rung lac thap hon.</span></div>
+      <div class="legend-item"><b>Breakout</b><span>Pos20 cao, range 10 phien chat va volume can gan dinh la dau hieu san sang vuot nen.</span></div>
+    </div>
     <div class="table-wrap" id="table"><div class="loading">Dang tai du lieu...</div></div>
   </section>
   <footer>Khong phai khuyen nghi dau tu. Dung nhu radar loc watchlist, can xac nhan voi nen gia va quan tri rui ro.</footer>
@@ -90,6 +104,10 @@ let sortKey = 'score';
 
 const fmt = (v, d = 1) => v === null || v === undefined ? '-' : Number(v).toFixed(d);
 const signed = (v, d = 2) => v === null || v === undefined ? '-' : `${v >= 0 ? '+' : ''}${Number(v).toFixed(d)}`;
+const parseViDate = (s) => {
+  const m = String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  return m ? new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
+};
 
 async function loadData(){
   try{
@@ -109,8 +127,9 @@ function renderMeta(){
   const b = DATA.benchmark || {};
   const cacheDate = DATA.latest_data_date || DATA.date || '';
   const genDate = new Date(DATA.generated_at);
-  const stalenessDays = Math.floor((new Date() - genDate) / 86400000);
-  if(stalenessDays >= 2) document.getElementById('staleWarning').style.display = 'block';
+  const dataDate = parseViDate(cacheDate);
+  const stalenessDays = dataDate ? Math.floor((new Date() - dataDate) / 86400000) : 0;
+  document.getElementById('staleWarning').style.display = stalenessDays >= 2 ? 'block' : 'none';
   document.getElementById('meta').innerHTML = `
     <span class="pill">Cap nhat: ${genDate.toLocaleString('vi-VN')}</span>
     <span class="pill">Gia moi nhat: ${cacheDate}</span>
@@ -149,15 +168,23 @@ function renderTable(){
     return;
   }
   const html = `<table><thead><tr>
-    <th>Ma</th><th>Trang thai</th><th>Score</th><th>RS</th><th>Suc ben</th><th>Volume</th><th>Nen gia</th><th>Breakout</th><th>Ly do</th>
+    <th>Ma <span class="hint" title="Ma co phieu, gia dong cua moi nhat va ngay du lieu dung de hien thi.">?</span></th>
+    <th>Trang thai <span class="hint" title="LEADER: score >= 80; WATCHLIST: 65-79.9; EARLY: 50-64.9.">?</span></th>
+    <th>Score <span class="hint" title="Diem tong hop 0-100 tu 5 nhom: Relative Strength, Resilience, Volume, Base Contraction, Breakout Readiness.">?</span></th>
+    <th>RS <span class="hint" title="RS20/RS60 = return co phieu tru benchmark 20/60 phien. Trend = RS20 hien tai tru RS20 cua 5 phien truoc.">?</span></th>
+    <th>Suc ben <span class="hint" title="Co phieu duoc cong diem khi giu tren MA20/MA50, drawdown 60 phien nho hon benchmark va nam cao trong range 20 phien.">?</span></th>
+    <th>Volume <span class="hint" title="Up/Down = volume trung binh phien tang chia phien giam. Dry-up thap gan dinh la volume can, Acc/Dist dem ngay tang/giam manh kem volume cao.">?</span></th>
+    <th>Nen gia <span class="hint" title="Range20 va Range60 do bien do gia. Range20 nho va co hep so voi Range60 la nen gia chat hon.">?</span></th>
+    <th>Breakout <span class="hint" title="Pos20 la vi tri gia trong range 20 phien; cang cao cang gan dinh nen va gan vung breakout.">?</span></th>
+    <th>Ly do <span class="hint" title="Cac tag tom tat nhung dieu kien noi bat nhat lam co phieu duoc dua vao radar.">?</span></th>
   </tr></thead><tbody>${out.map(r => `
     <tr>
       <td><div class="sym">${r.symbol}</div><div class="small">${fmt(r.last_price,0)} - ${r.last_date || ''}</div></td>
       <td><span class="tag ${r.status}">${r.status}</span></td>
       <td><div class="score">${fmt(r.score)}</div>${scoreBar(r.score)}</td>
-      <td><b class="${r.rs20 >= 0 ? 'green' : 'red'}">RS20 ${signed(r.rs20)}</b><div class="small">RS60 ${signed(r.rs60)}</div></td>
+      <td><b class="${r.rs20 >= 0 ? 'green' : 'red'}">RS20 ${signed(r.rs20)}</b><div class="small">RS60 ${signed(r.rs60)} | Trend ${signed(r.rs_trend)}</div></td>
       <td><div>DD60 ${signed(r.drawdown60)}%</div><div class="small">Ret20 ${signed(r.return20)}%</div></td>
-      <td><div>Up/Down ${fmt(r.up_down_volume_ratio,2)}</div><div class="small">Acc ${r.accumulation_days} / Dist ${r.distribution_days}</div></td>
+      <td><div>Up/Down ${fmt(r.up_down_volume_ratio,2)}</div><div class="small">Dry-up ${fmt(r.vol_dry_ratio,2)} | Acc ${r.accumulation_days} / Dist ${r.distribution_days}</div></td>
       <td><div>Range20 ${fmt(r.range20)}%</div><div class="small">Range60 ${fmt(r.range60)}%</div></td>
       <td><div>Pos20 ${fmt(r.position20)}%</div>${scoreBar(r.position20)}</td>
       <td><div class="reasons">${(r.reasons || []).map(x => `<span class="reason">${x}</span>`).join('')}</div></td>
