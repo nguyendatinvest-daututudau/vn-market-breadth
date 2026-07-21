@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import fetch_and_compute as pipeline
 import khung4_tplus_signals as khung4
+from cache_utils import load_cache
 from market_commentary import generate_commentary
 
 
@@ -87,6 +88,25 @@ def test_close_pipeline_does_not_publish_intraday_data(monkeypatch):
     assert pipeline.should_run_close_pipeline(datetime(2026, 7, 21, 15, 10))
     monkeypatch.setenv("ALLOW_PRE_CLOSE_RUN", "1")
     assert pipeline.should_run_close_pipeline(datetime(2026, 7, 21, 12, 0))
+
+
+def test_manual_latest_completed_close_uses_previous_business_day_before_close():
+    before_close = datetime(2026, 7, 20, 12, 0)  # Monday
+    after_close = datetime(2026, 7, 21, 15, 10)
+    assert pipeline.resolve_pipeline_date(before_close, "latest_completed_close").date().isoformat() == "2026-07-17"
+    assert pipeline.resolve_pipeline_date(after_close, "latest_completed_close").date().isoformat() == "2026-07-21"
+    assert pipeline.resolve_pipeline_date(before_close, "current_session") == before_close
+    assert pipeline.resolve_pipeline_date(before_close, "scheduled_close") is None
+
+
+def test_cache_respects_manual_as_of_date(tmp_path, monkeypatch):
+    pd.DataFrame({
+        "TradingDate": ["17/07/2026", "20/07/2026"],
+        "Close": [10.0, 11.0],
+    }).to_csv(tmp_path / "AAA.csv", index=False)
+    monkeypatch.setenv("PIPELINE_AS_OF_DATE", "17/07/2026")
+    loaded = load_cache("AAA", tmp_path)
+    assert loaded["TradingDate"].max() == pd.Timestamp("2026-07-17")
 
 
 def test_commentary_keeps_zero_ad_ratio_as_valid_data():

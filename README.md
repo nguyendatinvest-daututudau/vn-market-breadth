@@ -66,7 +66,7 @@ export SSI_CONSUMER_SECRET="..."
 python fetch_and_compute.py
 ```
 
-Pipeline chỉ xuất snapshot đóng cửa từ 15:10 giờ Việt Nam; dùng `ALLOW_PRE_CLOSE_RUN=1` chỉ khi chủ động cần chạy trước giờ đóng cửa.
+Pipeline schedule chỉ xuất snapshot đóng cửa từ 15:10 giờ Việt Nam. Trong GitHub Actions, chọn **Run workflow** rồi dùng `latest_completed_close` để chạy thủ công trước 15:10 với phiên đóng cửa gần nhất; `current_session` chỉ dùng khi chủ động muốn đánh giá dữ liệu intraday.
 
 Sau khi chạy:
 - `data/breadth_latest.json` — breadth snapshot

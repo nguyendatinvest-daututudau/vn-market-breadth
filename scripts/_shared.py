@@ -91,7 +91,7 @@ def is_market_data_fresh(last_date, reference_date=None, max_days: int | None = 
     if last is None or reference is None:
         return False
     allowed_gap = max_signal_staleness_days() if max_days is None else max_days
-    return last >= reference - timedelta(days=allowed_gap)
+    return reference - timedelta(days=allowed_gap) <= last <= reference
 
 
 def is_market_date_stale(market_date, as_of=None, max_days: int | None = None) -> bool:

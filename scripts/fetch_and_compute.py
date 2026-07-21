@@ -119,6 +119,27 @@ def should_run_close_pipeline(now: datetime) -> bool:
     return now.weekday() >= 5 or (now.hour, now.minute) >= (CLOSE_HOUR, CLOSE_MINUTE)
 
 
+def previous_business_close(now: datetime) -> datetime:
+    """Return the preceding weekday as a safe fallback before today's close."""
+    previous = now - timedelta(days=1)
+    while previous.weekday() >= 5:
+        previous -= timedelta(days=1)
+    return previous.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def resolve_pipeline_date(now: datetime, run_mode: str | None = None) -> datetime | None:
+    """Resolve the as-of date for scheduled and manual data runs."""
+    mode = (run_mode or os.environ.get("PIPELINE_RUN_MODE", "scheduled_close")).strip().lower()
+    market_closed = now.weekday() >= 5 or (now.hour, now.minute) >= (CLOSE_HOUR, CLOSE_MINUTE)
+    if mode == "scheduled_close":
+        return now if should_run_close_pipeline(now) else None
+    if mode == "latest_completed_close":
+        return now if market_closed else previous_business_close(now)
+    if mode == "current_session":
+        return now
+    raise ValueError(f"PIPELINE_RUN_MODE khong hop le: {mode}")
+
+
 # --- Cache OHLC ---------------------------------------------------------------
 
 def save_cache(symbol: str, df: pd.DataFrame) -> None:
@@ -698,11 +719,18 @@ def append_signals_history(expected_date: str) -> None:
 
 def main():
     client = SSIClient()
-    today = vn_today()
-    if not should_run_close_pipeline(today):
-        print(f"Bo qua pipeline close truoc {CLOSE_HOUR:02d}:{CLOSE_MINUTE:02d} gio VN. Dat ALLOW_PRE_CLOSE_RUN=1 de override.")
+    now = vn_today()
+    run_mode = os.environ.get("PIPELINE_RUN_MODE", "scheduled_close").strip().lower()
+    try:
+        today = resolve_pipeline_date(now, run_mode)
+    except ValueError as exc:
+        print(exc)
         return
-    print(f"Ngay xu ly: {today.strftime(DATE_FMT)}")
+    if today is None:
+        print(f"Bo qua pipeline close truoc {CLOSE_HOUR:02d}:{CLOSE_MINUTE:02d} gio VN. Dung workflow_dispatch latest_completed_close de chay thu voi phien truoc.")
+        return
+    os.environ["PIPELINE_AS_OF_DATE"] = today.strftime(DATE_FMT)
+    print(f"Ngay xu ly: {today.strftime(DATE_FMT)} ({run_mode})")
     print(f"Nguong thanh khoan: TB 20 phien >= {MIN_AVG_VOLUME:,} cp\n")
 
     markets_dict = {}
@@ -719,6 +747,8 @@ def main():
     output = {
         "generated_at": vn_now().isoformat(),
         "session": "close",
+        "run_mode": run_mode,
+        "as_of_date": today.strftime(DATE_FMT),
         "markets": markets_dict,
     }
     _write_json(LATEST_JSON, output)

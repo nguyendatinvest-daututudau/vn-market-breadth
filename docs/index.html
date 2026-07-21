@@ -538,7 +538,8 @@ function render(){
   let summary = buildSummary(activeSignalDate);
   let actionHTML = buildActionBoard(summary);
   let adDistributionHTML = buildAdDistributionPanel(m);
-  let rsiPulseHTML = buildRsiPulsePanel(m);
+  let rsiSentimentHTML = buildRsiSentimentPanel(m);
+  let rsiPulseChartHTML = buildRsiPulseChartPanel(m);
   let backtestHTML = buildBacktestSnapshot();
   let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
@@ -561,6 +562,8 @@ function render(){
       </div>
     </div>
 
+    ${rsiSentimentHTML}
+
     <div class="kpi-grid">
       <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
       <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
@@ -579,8 +582,6 @@ function render(){
     ${actionHTML}
 
     ${adDistributionHTML}
-
-    ${rsiPulseHTML}
 
     ${backtestHTML}
 
@@ -612,6 +613,7 @@ function render(){
 
     ${lucMachHTML}
     ${chartHTML}
+    ${rsiPulseChartHTML}
     ${commentaryHTML}
     ${appendixHTML}
     ${historyHTML}
@@ -803,9 +805,12 @@ function buildAdDistributionPanel(m){
   </div>`;
 }
 
-function buildRsiPulsePanel(m){
+function buildRsiSentimentPanel(m){
   const p = m?.rsi_pulse;
-  if (!p) return '';
+  if (!p) return `<div class="panel">
+    <h2>Đồng hồ tâm lý RSI <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">Đang chờ dữ liệu sau phiên đóng cửa</span></h2>
+    <div class="note" style="margin:0;">RSI Market Pulse sẽ hiển thị tỷ lệ mã RSI dưới 30, trên 70 và trên 50 ngay khi pipeline đóng cửa tạo dữ liệu mới.</div>
+  </div>`;
   const total = Number(p.total) || 0;
   const pct = v => total ? `${(Number(v || 0) / total * 100).toFixed(1)}%` : '0.0%';
   const sentiment = rsiSentiment(p);
@@ -828,6 +833,13 @@ function buildRsiPulsePanel(m){
       <div class="rsi-pulse-card overbought"><div class="lab">RSI trên 70</div><div class="num">${(p.over_70 || 0).toLocaleString('vi-VN')}</div><div class="sub">Quá mua · ${pct(p.over_70)}</div></div>
       <div class="rsi-pulse-card bullish"><div class="lab">RSI trên 50</div><div class="num">${(p.over_50 || 0).toLocaleString('vi-VN')}</div><div class="sub">Nghiêng tăng · ${pct(p.over_50)}</div></div>
     </div>
+  </div>`;
+}
+
+function buildRsiPulseChartPanel(m){
+  if (!m?.rsi_pulse) return '';
+  return `<div class="panel">
+    <h2>Diễn biến RSI Market Pulse <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">Số mã RSI14 dưới 30, trên 70 và trên 50</span></h2>
     <div class="chart-wrap" id="rsiPulseWrap">
       <canvas id="rsiPulseChart"></canvas>
       <div class="chart-tooltip" id="rsiPulseTooltip"></div>

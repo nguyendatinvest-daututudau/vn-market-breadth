@@ -139,9 +139,9 @@ class SSIClient:
                 "pageSize": 1000,
             })
             rows = data.get("data") or []
-            print("[" + market + "] Page " + str(page) + " trả về " + str(len(rows)) + " mã")
+            print("[" + market + "] Page " + str(page) + " returned " + str(len(rows)) + " symbols")
             if rows:
-                print("[" + market + "] Ví dụ mã đầu: " + str(rows[0]))
+                print("[" + market + "] First symbol: " + str(rows[0]))
                 out.extend(rows)
             if len(rows) < 1000:
                 break

@@ -9,7 +9,16 @@ on:
   schedule:
     # 08:10 UTC = 15:10 gio VN (sau gio dong cua)
     - cron: "10 8 * * 1-5"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "Manual mode: previous close is safe before 15:10; current session may contain intraday data"
+        required: true
+        default: latest_completed_close
+        type: choice
+        options:
+          - latest_completed_close
+          - current_session
 
 permissions:
   contents: write
@@ -55,6 +64,7 @@ jobs:
         env:
           SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
           SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+          PIPELINE_RUN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode || 'scheduled_close' }}
 
       - name: Run fetch + compute
         run: python scripts/fetch_and_compute.py

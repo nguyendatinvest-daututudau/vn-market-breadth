@@ -4,6 +4,7 @@ Dung chung cho fetch_and_compute, strategy_signals, ensemble_signals, market_com
 """
 from __future__ import annotations
 import logging
+import os
 import warnings
 from pathlib import Path
 import numpy as np
@@ -34,6 +35,11 @@ def load_cache(symbol: str, cache_dir: Path) -> pd.DataFrame:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)
                 df["TradingDate"] = parse_trading_date(df["TradingDate"])
+            as_of = os.environ.get("PIPELINE_AS_OF_DATE")
+            if as_of:
+                as_of_date = parse_trading_date(pd.Series([as_of])).iloc[0]
+                if not pd.isna(as_of_date):
+                    df = df[df["TradingDate"] <= as_of_date]
             df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
             for col in ("Open", "High", "Low", "Volume"):
                 if col in df.columns:
