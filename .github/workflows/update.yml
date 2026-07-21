@@ -64,13 +64,13 @@ jobs:
         env:
           SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
           SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
-          PIPELINE_RUN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode || 'scheduled_close' }}
 
       - name: Run fetch + compute
         run: python scripts/fetch_and_compute.py
         env:
           SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
           SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+          PIPELINE_RUN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode || 'scheduled_close' }}
 
       - name: Generate dashboard.html (embedded data)
         run: python scripts/embed_data.py
