@@ -1,12 +1,15 @@
 {
   "mode": "khung4_tplus_original",
-  "generated_at": "2026-07-20T22:42:47.152001+00:00",
+  "generated_at": "2026-07-21T14:03:08.343079+07:00",
   "date": "20/07/2026",
+  "market_date": "20/07/2026",
+  "freshness_reference_date": "20/07/2026",
   "min_volume": 20000,
   "min_history": 20,
   "total_symbols_analyzed": 650,
-  "total_signals": 5,
+  "total_signals": 4,
   "skipped_missing_ohlc": 0,
+  "skipped_stale_quotes": 55,
   "buy": [
     {
       "symbol": "SAB",
@@ -52,22 +55,6 @@
       "buy_price": 154900.0,
       "last_price": 154900.0,
       "last_volume": 280800.0,
-      "strategies": [
-        "khung4_tplus_buy"
-      ]
-    },
-    {
-      "symbol": "SPI",
-      "status": "BUY",
-      "signal_type": "khung4_tplus_buy",
-      "score": 100,
-      "khung4_tplus_buy": true,
-      "khung4_tplus_sell": false,
-      "khung4_tplus_state": 1,
-      "khung4_tplus_d": 1500.0,
-      "buy_price": 1800.0,
-      "last_price": 1800.0,
-      "last_volume": 195200.0,
       "strategies": [
         "khung4_tplus_buy"
       ]
@@ -139,22 +126,6 @@
       ]
     },
     {
-      "symbol": "SPI",
-      "status": "BUY",
-      "signal_type": "khung4_tplus_buy",
-      "score": 100,
-      "khung4_tplus_buy": true,
-      "khung4_tplus_sell": false,
-      "khung4_tplus_state": 1,
-      "khung4_tplus_d": 1500.0,
-      "buy_price": 1800.0,
-      "last_price": 1800.0,
-      "last_volume": 195200.0,
-      "strategies": [
-        "khung4_tplus_buy"
-      ]
-    },
-    {
       "symbol": "LBE",
       "status": "BUY",
       "signal_type": "khung4_tplus_buy",
@@ -186,17 +157,17 @@
       "has_ohlcv": true,
       "reason": "no_buy_signal",
       "last_date": "20/07/2026",
-      "last_open": 7200.0,
-      "last_high": 7220.0,
-      "last_low": 7000.0,
-      "last_close": 7170.0,
+      "last_open": 6899.0,
+      "last_high": 6918.0,
+      "last_low": 6707.0,
+      "last_close": 6870.0,
       "last_volume": 1465600.0,
-      "recent_high_4": 7280.0,
-      "recent_low_4": 7050.0,
+      "recent_high_4": 7260.0,
+      "recent_low_4": 6755.0,
       "break_up": false,
       "break_down": false,
-      "d": 7700.0,
-      "prev_d": 7700.0,
+      "d": 7290.0,
+      "prev_d": 7290.0,
       "state": 0,
       "prev_state": 0,
       "cross_up": false,
@@ -498,7 +469,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "01/07/2026",
       "last_open": 17400.0,
       "last_high": 17400.0,
@@ -508,7 +479,8 @@
       "recent_high_4": 19000.0,
       "recent_low_4": 17100.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "ADG",
@@ -972,7 +944,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "16/03/2026",
       "last_open": 45798.0,
       "last_high": 45798.0,
@@ -982,7 +954,8 @@
       "recent_high_4": 45701.0,
       "recent_low_4": 43548.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "ASG",
@@ -1112,7 +1085,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "30/06/2026",
       "last_open": 24700.0,
       "last_high": 24700.0,
@@ -1122,7 +1095,8 @@
       "recent_high_4": 27400.0,
       "recent_low_4": 21400.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BAB",
@@ -1194,7 +1168,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "02/07/2026",
       "last_open": 31700.0,
       "last_high": 31700.0,
@@ -1204,7 +1178,8 @@
       "recent_high_4": 31700.0,
       "recent_low_4": 30000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BBC",
@@ -1218,7 +1193,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "15/01/2026",
       "last_open": 85000.0,
       "last_high": 97000.0,
@@ -1228,7 +1203,8 @@
       "recent_high_4": 91000.0,
       "recent_low_4": 80000.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BBS",
@@ -1358,7 +1334,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_buy_signal",
+      "reason": "stale_quote",
       "last_date": "08/10/2025",
       "last_open": 2610.0,
       "last_high": 2620.0,
@@ -1369,16 +1345,7 @@
       "recent_low_4": 2430.0,
       "break_up": false,
       "break_down": false,
-      "d": 3010.0,
-      "prev_d": 3010.0,
-      "state": 0,
-      "prev_state": 0,
-      "cross_up": false,
-      "cross_down": false,
-      "buy": false,
-      "sell": false,
-      "buy_price": null,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BCM",
@@ -1426,7 +1393,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "13/08/2025",
       "last_open": 7400.0,
       "last_high": 7400.0,
@@ -1436,7 +1403,8 @@
       "recent_high_4": 8600.0,
       "recent_low_4": 7300.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BFC",
@@ -1760,7 +1728,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "11/06/2026",
       "last_open": 12500.0,
       "last_high": 12500.0,
@@ -1770,7 +1738,8 @@
       "recent_high_4": 12500.0,
       "recent_low_4": 12500.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BRC",
@@ -1876,7 +1845,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "28/08/2025",
       "last_open": 9000.0,
       "last_high": 10000.0,
@@ -1886,7 +1855,8 @@
       "recent_high_4": 9500.0,
       "recent_low_4": 9300.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BTP",
@@ -1948,17 +1918,18 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "08/07/2026",
-      "last_open": 45500.0,
-      "last_high": 45500.0,
-      "last_low": 45500.0,
-      "last_close": 45500.0,
+      "last_open": 42502.0,
+      "last_high": 42502.0,
+      "last_low": 42502.0,
+      "last_close": 42502.0,
       "last_volume": 200.0,
-      "recent_high_4": 45200.0,
+      "recent_high_4": 43200.0,
       "recent_low_4": 40200.0,
-      "break_up": true,
-      "break_down": false
+      "break_up": false,
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "BTW",
@@ -2098,7 +2069,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_buy_signal",
+      "reason": "stale_quote",
       "last_date": "09/07/2026",
       "last_open": 14500.0,
       "last_high": 14500.0,
@@ -2109,16 +2080,7 @@
       "recent_low_4": 12000.0,
       "break_up": false,
       "break_down": false,
-      "d": 15700.0,
-      "prev_d": 15700.0,
-      "state": 0,
-      "prev_state": 0,
-      "cross_up": false,
-      "cross_down": false,
-      "buy": false,
-      "sell": false,
-      "buy_price": null,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "CAG",
@@ -2204,7 +2166,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "05/06/2026",
       "last_open": 13600.0,
       "last_high": 13600.0,
@@ -2214,7 +2176,8 @@
       "recent_high_4": 13600.0,
       "recent_low_4": 13500.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "CCC",
@@ -2259,10 +2222,10 @@
       "last_low": 17900.0,
       "last_close": 17900.0,
       "last_volume": 100.0,
-      "recent_high_4": 20500.0,
-      "recent_low_4": 18000.0,
+      "recent_high_4": 18901.0,
+      "recent_low_4": 16734.0,
       "break_up": false,
-      "break_down": true
+      "break_down": false
     },
     {
       "symbol": "CCL",
@@ -2918,7 +2881,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "06/07/2026",
       "last_open": 32900.0,
       "last_high": 32900.0,
@@ -2928,7 +2891,8 @@
       "recent_high_4": 31500.0,
       "recent_low_4": 28750.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "CPC",
@@ -2948,7 +2912,7 @@
       "last_high": 16000.0,
       "last_low": 16000.0,
       "last_close": 16000.0,
-      "last_volume": 0.0,
+      "last_volume": 100.0,
       "recent_high_4": 16000.0,
       "recent_low_4": 15800.0,
       "break_up": false,
@@ -3412,7 +3376,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "26/06/2026",
       "last_open": 15600.0,
       "last_high": 15600.0,
@@ -3422,7 +3386,8 @@
       "recent_high_4": 17000.0,
       "recent_low_4": 16000.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "CVN",
@@ -3518,7 +3483,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "17/06/2026",
       "last_open": 14500.0,
       "last_high": 14500.0,
@@ -3528,7 +3493,8 @@
       "recent_high_4": 14500.0,
       "recent_low_4": 13200.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "DAH",
@@ -4142,7 +4108,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "06/07/2026",
       "last_open": 50000.0,
       "last_high": 50000.0,
@@ -4152,7 +4118,8 @@
       "recent_high_4": 50000.0,
       "recent_low_4": 49500.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "DNP",
@@ -4896,7 +4863,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "26/06/2026",
       "last_open": 8500.0,
       "last_high": 9200.0,
@@ -4906,7 +4873,8 @@
       "recent_high_4": 10000.0,
       "recent_low_4": 9200.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "EIB",
@@ -5526,7 +5494,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "06/07/2026",
       "last_open": 30600.0,
       "last_high": 30600.0,
@@ -5536,7 +5504,8 @@
       "recent_high_4": 40000.0,
       "recent_low_4": 31500.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "GEE",
@@ -5768,7 +5737,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "24/12/2025",
       "last_open": 57000.0,
       "last_high": 57000.0,
@@ -5778,7 +5747,8 @@
       "recent_high_4": 52500.0,
       "recent_low_4": 41000.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "GMD",
@@ -5908,7 +5878,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "06/07/2026",
       "last_open": 8770.0,
       "last_high": 8770.0,
@@ -5918,7 +5888,8 @@
       "recent_high_4": 9190.0,
       "recent_low_4": 8300.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "GVR",
@@ -5966,7 +5937,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "03/07/2026",
       "last_open": 13400.0,
       "last_high": 13400.0,
@@ -5976,7 +5947,8 @@
       "recent_high_4": 13400.0,
       "recent_low_4": 13000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "HAG",
@@ -6314,7 +6286,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "30/03/2026",
       "last_open": 10600.0,
       "last_high": 10600.0,
@@ -6324,7 +6296,8 @@
       "recent_high_4": 10900.0,
       "recent_low_4": 9900.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "HDA",
@@ -6464,7 +6437,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "30/06/2026",
       "last_open": 7600.0,
       "last_high": 7600.0,
@@ -6474,7 +6447,8 @@
       "recent_high_4": 7000.0,
       "recent_low_4": 5500.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "HGM",
@@ -6706,7 +6680,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "07/07/2026",
       "last_open": 26700.0,
       "last_high": 28900.0,
@@ -6716,7 +6690,8 @@
       "recent_high_4": 30000.0,
       "recent_low_4": 26500.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "HKT",
@@ -7500,13 +7475,13 @@
       "has_ohlcv": true,
       "reason": "volume_filter",
       "last_date": "20/07/2026",
-      "last_open": 17400.0,
-      "last_high": 17800.0,
-      "last_low": 17400.0,
-      "last_close": 17400.0,
+      "last_open": 16400.0,
+      "last_high": 16777.0,
+      "last_low": 16400.0,
+      "last_close": 16400.0,
       "last_volume": 5800.0,
       "recent_high_4": 17900.0,
-      "recent_low_4": 17400.0,
+      "recent_low_4": 16400.0,
       "break_up": false,
       "break_down": false
     },
@@ -7730,7 +7705,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "04/05/2026",
       "last_open": 13000.0,
       "last_high": 13000.0,
@@ -7740,7 +7715,8 @@
       "recent_high_4": 13000.0,
       "recent_low_4": 12000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "INN",
@@ -8180,7 +8156,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "03/07/2026",
       "last_open": 5900.0,
       "last_high": 5900.0,
@@ -8190,7 +8166,8 @@
       "recent_high_4": 5900.0,
       "recent_low_4": 5500.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "KMR",
@@ -8228,7 +8205,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "15/06/2026",
       "last_open": 13200.0,
       "last_high": 13200.0,
@@ -8238,7 +8215,8 @@
       "recent_high_4": 12200.0,
       "recent_low_4": 10200.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "KOS",
@@ -8286,7 +8264,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_buy_signal",
+      "reason": "stale_quote",
       "last_date": "25/02/2025",
       "last_open": 1210.0,
       "last_high": 1250.0,
@@ -8297,16 +8275,7 @@
       "recent_low_4": 1300.0,
       "break_up": false,
       "break_down": true,
-      "d": 1580.0,
-      "prev_d": 1580.0,
-      "state": 0,
-      "prev_state": 0,
-      "cross_up": false,
-      "cross_down": false,
-      "buy": false,
-      "sell": false,
-      "buy_price": null,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "KSB",
@@ -8736,7 +8705,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "29/04/2026",
       "last_open": 64800.0,
       "last_high": 64800.0,
@@ -8746,7 +8715,8 @@
       "recent_high_4": 60700.0,
       "recent_low_4": 56800.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "LGL",
@@ -9002,7 +8972,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "01/06/2026",
       "last_open": 34800.0,
       "last_high": 34800.0,
@@ -9012,7 +8982,8 @@
       "recent_high_4": 35000.0,
       "recent_low_4": 35000.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "MBB",
@@ -9306,7 +9277,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "13/05/2026",
       "last_open": 18400.0,
       "last_high": 18400.0,
@@ -9316,7 +9287,8 @@
       "recent_high_4": 20400.0,
       "recent_low_4": 18400.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "MEL",
@@ -9609,10 +9581,10 @@
       "reason": "volume_filter",
       "last_date": "10/07/2026",
       "last_open": 16000.0,
-      "last_high": 16000.0,
+      "last_high": 16700.0,
       "last_low": 16000.0,
-      "last_close": 16000.0,
-      "last_volume": 0.0,
+      "last_close": 16700.0,
+      "last_volume": 2200.0,
       "recent_high_4": 16800.0,
       "recent_low_4": 15500.0,
       "break_up": false,
@@ -9896,7 +9868,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "02/07/2026",
       "last_open": 33400.0,
       "last_high": 33400.0,
@@ -9906,7 +9878,8 @@
       "recent_high_4": 38500.0,
       "recent_low_4": 35800.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "NCT",
@@ -9994,7 +9967,7 @@
       "last_high": 6800.0,
       "last_low": 6800.0,
       "last_close": 6800.0,
-      "last_volume": 0.0,
+      "last_volume": 100.0,
       "recent_high_4": 6800.0,
       "recent_low_4": 6700.0,
       "break_up": false,
@@ -10071,8 +10044,8 @@
       "recent_low_4": 8373.0,
       "break_up": false,
       "break_down": false,
-      "d": 9036.0,
-      "prev_d": 9036.0,
+      "d": 10250.0,
+      "prev_d": 10250.0,
       "state": 0,
       "prev_state": 0,
       "cross_up": false,
@@ -10094,7 +10067,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "25/06/2026",
       "last_open": 23700.0,
       "last_high": 23700.0,
@@ -10104,7 +10077,8 @@
       "recent_high_4": 22500.0,
       "recent_low_4": 19100.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "NHH",
@@ -11062,7 +11036,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "02/06/2026",
       "last_open": 10500.0,
       "last_high": 10500.0,
@@ -11072,7 +11046,8 @@
       "recent_high_4": 11000.0,
       "recent_low_4": 10600.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PET",
@@ -11380,7 +11355,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "05/06/2026",
       "last_open": 24000.0,
       "last_high": 24000.0,
@@ -11390,7 +11365,8 @@
       "recent_high_4": 27100.0,
       "recent_low_4": 24600.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PIC",
@@ -11406,13 +11382,13 @@
       "has_ohlcv": true,
       "reason": "volume_filter",
       "last_date": "20/07/2026",
-      "last_open": 15000.0,
-      "last_high": 15100.0,
-      "last_low": 14100.0,
-      "last_close": 14100.0,
+      "last_open": 13937.0,
+      "last_high": 14029.0,
+      "last_low": 13100.0,
+      "last_close": 13100.0,
       "last_volume": 3500.0,
-      "recent_high_4": 15800.0,
-      "recent_low_4": 14700.0,
+      "recent_high_4": 15300.0,
+      "recent_low_4": 13658.0,
       "break_up": false,
       "break_down": true
     },
@@ -11674,7 +11650,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "29/06/2026",
       "last_open": 12000.0,
       "last_high": 12000.0,
@@ -11684,7 +11660,8 @@
       "recent_high_4": 13300.0,
       "recent_low_4": 12000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PMS",
@@ -11722,7 +11699,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "08/07/2026",
       "last_open": 29900.0,
       "last_high": 29900.0,
@@ -11732,7 +11709,8 @@
       "recent_high_4": 31800.0,
       "recent_low_4": 29600.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PNJ",
@@ -12132,7 +12110,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_buy_signal",
+      "reason": "stale_quote",
       "last_date": "11/03/2025",
       "last_open": 1770.0,
       "last_high": 1890.0,
@@ -12143,16 +12121,7 @@
       "recent_low_4": 1900.0,
       "break_up": false,
       "break_down": true,
-      "d": 2190.0,
-      "prev_d": 2450.0,
-      "state": 0,
-      "prev_state": 0,
-      "cross_up": false,
-      "cross_down": false,
-      "buy": false,
-      "sell": false,
-      "buy_price": null,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PSI",
@@ -12388,7 +12357,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "09/07/2026",
       "last_open": 19000.0,
       "last_high": 19000.0,
@@ -12398,7 +12367,8 @@
       "recent_high_4": 20700.0,
       "recent_low_4": 17300.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "PVB",
@@ -12491,8 +12461,8 @@
       "recent_low_4": 18300.0,
       "break_up": false,
       "break_down": false,
-      "d": 33400.0,
-      "prev_d": 33400.0,
+      "d": 33800.0,
+      "prev_d": 33800.0,
       "state": 0,
       "prev_state": 0,
       "cross_up": false,
@@ -12780,7 +12750,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "25/06/2026",
       "last_open": 39000.0,
       "last_high": 39000.0,
@@ -12790,7 +12760,8 @@
       "recent_high_4": 36300.0,
       "recent_low_4": 33000.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "RAL",
@@ -13312,7 +13283,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "09/07/2026",
       "last_open": 6900.0,
       "last_high": 6900.0,
@@ -13322,7 +13293,8 @@
       "recent_high_4": 8200.0,
       "recent_low_4": 6600.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SDG",
@@ -13336,7 +13308,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "26/06/2026",
       "last_open": 9900.0,
       "last_high": 9900.0,
@@ -13346,7 +13318,8 @@
       "recent_high_4": 10000.0,
       "recent_low_4": 9300.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SDN",
@@ -13384,7 +13357,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "24/06/2026",
       "last_open": 6600.0,
       "last_high": 6600.0,
@@ -13394,7 +13367,8 @@
       "recent_high_4": 8000.0,
       "recent_low_4": 7100.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SEB",
@@ -13528,7 +13502,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "08/07/2026",
       "last_open": 15300.0,
       "last_high": 15300.0,
@@ -13538,7 +13512,8 @@
       "recent_high_4": 21500.0,
       "recent_low_4": 16300.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SGC",
@@ -14262,7 +14237,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "buy_signal",
+      "reason": "stale_quote",
       "last_date": "14/02/2025",
       "last_open": 1800.0,
       "last_high": 1800.0,
@@ -14273,16 +14248,7 @@
       "recent_low_4": 1500.0,
       "break_up": true,
       "break_down": false,
-      "d": 1500.0,
-      "prev_d": 2100.0,
-      "state": 1,
-      "prev_state": 0,
-      "cross_up": true,
-      "cross_down": false,
-      "buy": true,
-      "sell": false,
-      "buy_price": 1800.0,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SPM",
@@ -14327,7 +14293,7 @@
       "last_low": 1800.0,
       "last_close": 1800.0,
       "last_volume": 268600.0,
-      "recent_high_4": 1800.0,
+      "recent_high_4": 1900.0,
       "recent_low_4": 1500.0,
       "break_up": false,
       "break_down": false,
@@ -14436,7 +14402,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "29/06/2026",
       "last_open": 29300.0,
       "last_high": 29300.0,
@@ -14446,7 +14412,8 @@
       "recent_high_4": 29850.0,
       "recent_low_4": 27900.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SSI",
@@ -14696,7 +14663,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "13/02/2026",
       "last_open": 35000.0,
       "last_high": 37200.0,
@@ -14706,7 +14673,8 @@
       "recent_high_4": 37000.0,
       "recent_low_4": 34450.0,
       "break_up": true,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "SVN",
@@ -14894,7 +14862,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "01/12/2025",
       "last_open": 10000.0,
       "last_high": 10000.0,
@@ -14904,7 +14872,8 @@
       "recent_high_4": 10200.0,
       "recent_low_4": 10200.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "TCB",
@@ -14952,7 +14921,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_buy_signal",
+      "reason": "stale_quote",
       "last_date": "08/10/2025",
       "last_open": 1810.0,
       "last_high": 1920.0,
@@ -14963,16 +14932,7 @@
       "recent_low_4": 1830.0,
       "break_up": false,
       "break_down": false,
-      "d": 2250.0,
-      "prev_d": 2250.0,
-      "state": 0,
-      "prev_state": 0,
-      "cross_up": false,
-      "cross_down": false,
-      "buy": false,
-      "sell": false,
-      "buy_price": null,
-      "sell_price": null
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "TCH",
@@ -15576,7 +15536,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "28/04/2026",
       "last_open": 9100.0,
       "last_high": 9100.0,
@@ -15586,7 +15546,8 @@
       "recent_high_4": 10100.0,
       "recent_low_4": 9173.0,
       "break_up": false,
-      "break_down": true
+      "break_down": true,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "THT",
@@ -16272,7 +16233,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "09/07/2025",
       "last_open": 12100.0,
       "last_high": 12100.0,
@@ -16282,7 +16243,8 @@
       "recent_high_4": 13500.0,
       "recent_low_4": 11000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "TPP",
@@ -16322,13 +16284,13 @@
       "has_ohlcv": true,
       "reason": "volume_filter",
       "last_date": "20/07/2026",
-      "last_open": 77800.0,
-      "last_high": 78000.0,
-      "last_low": 76200.0,
-      "last_close": 76200.0,
+      "last_open": 37881.0,
+      "last_high": 37978.0,
+      "last_low": 37102.0,
+      "last_close": 37102.0,
       "last_volume": 13900.0,
       "recent_high_4": 82800.0,
-      "recent_low_4": 78400.0,
+      "recent_low_4": 38173.0,
       "break_up": false,
       "break_down": true
     },
@@ -16494,7 +16456,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "01/07/2026",
       "last_open": 33950.0,
       "last_high": 33950.0,
@@ -16504,7 +16466,8 @@
       "recent_high_4": 39100.0,
       "recent_low_4": 33900.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "TTF",
@@ -17092,7 +17055,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "09/07/2026",
       "last_open": 8800.0,
       "last_high": 8800.0,
@@ -17102,7 +17065,8 @@
       "recent_high_4": 8800.0,
       "recent_low_4": 8000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "VCS",
@@ -18634,7 +18598,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "06/07/2026",
       "last_open": 9000.0,
       "last_high": 9000.0,
@@ -18644,7 +18608,8 @@
       "recent_high_4": 9300.0,
       "recent_low_4": 9000.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "VTJ",
@@ -18658,7 +18623,7 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "volume_filter",
+      "reason": "stale_quote",
       "last_date": "03/07/2026",
       "last_open": 3800.0,
       "last_high": 3800.0,
@@ -18668,7 +18633,8 @@
       "recent_high_4": 3800.0,
       "recent_low_4": 3600.0,
       "break_up": false,
-      "break_down": false
+      "break_down": false,
+      "reference_date": "20/07/2026"
     },
     {
       "symbol": "VTO",
@@ -18727,8 +18693,8 @@
       "recent_low_4": 48300.0,
       "break_up": false,
       "break_down": false,
-      "d": 64000.0,
-      "prev_d": 64000.0,
+      "d": 64500.0,
+      "prev_d": 64500.0,
       "state": 0,
       "prev_state": 0,
       "cross_up": false,
