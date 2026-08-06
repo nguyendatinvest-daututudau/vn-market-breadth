@@ -84,6 +84,21 @@ def _empty_ad_distribution() -> list[dict]:
     return [{"bucket": label, "count": 0, "side": side} for label, _lo, _hi, side in AD_BUCKETS]
 
 
+TREND_KEYS = ("uptrend", "weak", "neutral", "downtrend")
+
+
+def _empty_trend_distribution() -> dict:
+    return {**{key: 0 for key in TREND_KEYS}, "total": 0}
+
+
+def classify_trend_ma_stack(last: float, ma20: float, ma50: float, ma200: float) -> str | None:
+    """Classify a symbol by Close > MA20 > MA50 > MA200 alignment."""
+    if any(pd.isna(value) for value in (last, ma20, ma50, ma200)):
+        return None
+    bullish_conditions = sum((last > ma20, ma20 > ma50, ma50 > ma200))
+    return {3: "uptrend", 2: "weak", 1: "neutral", 0: "downtrend"}[bullish_conditions]
+
+
 def _ad_bucket_index(pct_change: float) -> int:
     if pct_change <= -7:
         return 0
@@ -274,6 +289,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     ad_distribution = _empty_ad_distribution()
     total_distribution = 0
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
+    trend_distribution = _empty_trend_distribution()
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
@@ -357,6 +373,17 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                     elif not is_above and was_above:
                         newly_below[w].append(sym)
 
+        if len(close) >= 200:
+            trend = classify_trend_ma_stack(
+                last_close,
+                float(pd.Series(close[-20:]).mean()),
+                float(pd.Series(close[-50:]).mean()),
+                float(pd.Series(close[-200:]).mean()),
+            )
+            if trend:
+                trend_distribution[trend] += 1
+                trend_distribution["total"] += 1
+
     bar.close()
 
     pct = {
@@ -389,6 +416,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         "ad_distribution": ad_distribution,
         "ad_distribution_total": total_distribution,
         "rsi_pulse": rsi_pulse,
+        "trend_distribution": trend_distribution,
         "latest_ohlc_date": format_market_date(max(latest_dates)) if latest_dates else "",
     }
 
@@ -536,6 +564,7 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
         "ad_distribution": ma.get("ad_distribution", _empty_ad_distribution()),
         "ad_distribution_total": ma.get("ad_distribution_total", 0),
         "rsi_pulse": ma.get("rsi_pulse", {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}),
+        "trend_distribution": ma.get("trend_distribution", _empty_trend_distribution()),
     }
 
 
@@ -544,6 +573,7 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
 def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
     ad_distribution = _empty_ad_distribution()
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
+    trend_distribution = _empty_trend_distribution()
     for snap in snapshots:
         for idx, bucket in enumerate(snap.get("ad_distribution", [])):
             if idx < len(ad_distribution):
@@ -551,6 +581,10 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         snap_rsi = snap.get("rsi_pulse", {})
         for key in ("under_30", "over_70", "over_50", "total"):
             rsi_pulse[key] += int(snap_rsi.get(key, 0) or 0)
+        snap_trend = snap.get("trend_distribution", {})
+        for key in TREND_KEYS:
+            trend_distribution[key] += int(snap_trend.get(key, 0) or 0)
+        trend_distribution["total"] += int(snap_trend.get("total", 0) or 0)
     ad_distribution_total = sum(b["count"] for b in ad_distribution)
 
     adv  = sum(s["advances"] for s in snapshots)
@@ -620,6 +654,7 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "ad_distribution": ad_distribution,
         "ad_distribution_total": ad_distribution_total,
         "rsi_pulse": rsi_pulse,
+        "trend_distribution": trend_distribution,
     }
 
 

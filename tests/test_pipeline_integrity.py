@@ -82,6 +82,13 @@ def test_ad_distribution_keeps_exact_limit_moves_in_outer_buckets():
     assert pipeline._ad_bucket_index(7.0) == 10
 
 
+def test_ma_stack_trend_categories_are_exhaustive():
+    assert pipeline.classify_trend_ma_stack(110, 105, 100, 95) == "uptrend"
+    assert pipeline.classify_trend_ma_stack(110, 105, 100, 105) == "weak"
+    assert pipeline.classify_trend_ma_stack(100, 105, 100, 105) == "neutral"
+    assert pipeline.classify_trend_ma_stack(90, 95, 100, 105) == "downtrend"
+
+
 def test_close_pipeline_does_not_publish_intraday_data(monkeypatch):
     monkeypatch.delenv("ALLOW_PRE_CLOSE_RUN", raising=False)
     assert not pipeline.should_run_close_pipeline(datetime(2026, 7, 21, 15, 9))
