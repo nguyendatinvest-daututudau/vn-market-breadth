@@ -192,6 +192,14 @@
   .chart-wrap{position:relative;width:100%;}
   .chart-wrap canvas{width:100%;display:block;border-radius:10px;}
   .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10.5px;box-shadow:var(--shadow-md);font-family:var(--font-all);display:none;white-space:nowrap;line-height:1.5;}
+  .chart-range-control{margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;}
+  .chart-range-label{display:block;font-family:var(--font-all);font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;}
+  .chart-range-control input[type=range]{width:100%;height:18px;margin:2px 0;accent-color:#4F46E5;cursor:pointer;}
+  .chart-range-control input[type=range] + input[type=range]{margin-top:-6px;}
+  .chart-range-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .chart-range-chip{border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font-all);font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:999px;cursor:pointer;transition:all .15s;}
+  .chart-range-chip:hover{border-color:var(--accent-1);color:var(--accent-1);}
+  .chart-range-chip.active{background:var(--accent-1);border-color:var(--accent-1);color:#fff;}
 
   .commentary{font-size:13px;line-height:1.7;color:var(--text);padding:2px 0;}
   .commentary h2{font-size:15px;font-weight:600;margin:14px 0 8px;color:var(--accent-1);}
@@ -1410,6 +1418,17 @@ function buildChartSection(){
       <div class="chart-wrap" id="chartWrap">
         <canvas id="breadthChart"></canvas>
         <div class="chart-tooltip" id="chartTooltip"></div>
+        <div class="chart-range-control">
+          <span class="chart-range-label" id="chartRangeLabel">Từ 04/2016 · đến 08/2026</span>
+          <input type="range" id="chartRangeStart" min="0" max="1000" value="0" step="1">
+          <input type="range" id="chartRangeEnd" min="0" max="1000" value="1000" step="1">
+          <div class="chart-range-chips">
+            <button class="chart-range-chip" data-months="12">1 năm</button>
+            <button class="chart-range-chip" data-months="36">3 năm</button>
+            <button class="chart-range-chip" data-months="60">5 năm</button>
+            <button class="chart-range-chip active" data-months="0">Toàn bộ</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>`;
@@ -1425,19 +1444,34 @@ function toggleAccordion(el){
   }
 }
 
+let chartRange = { s: 0, e: 1 };
+
 function renderBreadthChart(m){
   if (!m) return;
   const cv = document.getElementById('breadthChart'), tt = document.getElementById('chartTooltip'), wr = document.getElementById('chartWrap');
   if (!cv || !tt || !wr) return;
-  const pts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v10: k.pct_above_ma10, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
-  if (pts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Chưa đủ dữ liệu lịch sử.</div>'; return; }
-  pts.sort((a,b) => { const da = a.date.split('/'), db = b.date.split('/'); return da[2]-db[2] || da[1]-db[1] || da[0]-db[0]; });
+  const allPts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v10: k.pct_above_ma10, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
+  if (allPts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Chưa đủ dữ liệu lịch sử.</div>'; return; }
+  allPts.sort((a,b) => { const da = a.date.split('/'), db = b.date.split('/'); return da[2]-db[2] || da[1]-db[1] || da[0]-db[0]; });
+  let s0 = Math.max(0, Math.floor(chartRange.s * (allPts.length - 1)));
+  let e0 = Math.min(allPts.length - 1, Math.ceil(chartRange.e * (allPts.length - 1)));
+  if (e0 - s0 < 1) e0 = Math.min(allPts.length - 1, s0 + 1);
+  const pts = allPts.slice(s0, e0 + 1);
+  const rs = document.getElementById('chartRangeStart'), re = document.getElementById('chartRangeEnd');
+  if (rs && re) { rs.value = Math.round(chartRange.s * 1000); re.value = Math.round(chartRange.e * 1000); }
+  const rl = document.getElementById('chartRangeLabel');
+  if (rl) { const fd = pts[0].date.split('/'), ld = pts[pts.length - 1].date.split('/'); rl.textContent = 'Từ ' + fd[0] + '/' + fd[1] + ' · đến ' + ld[0] + '/' + ld[1]; }
   const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, h = 260;
   cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   const P = { t: 30, r: 14, b: 38, l: 44 }, cw = w - P.l - P.r, ch = h - P.t - P.b;
   const xp = i => P.l + (i / (pts.length - 1)) * cw, yp = v => P.t + ch - (v / 100) * ch;
   const lines = [{ k: 'v10', c: '#9333EA', l: 'MA10' }, { k: 'v20', c: '#4F46E5', l: 'MA20' }, { k: 'v50', c: '#F5A524', l: 'MA50' }, { k: 'v200', c: '#06B6D4', l: 'MA200' }];
+  const maxTicks = Math.max(2, Math.floor(cw / 55));
+  const months = [];
+  let lastKey = null;
+  pts.forEach((p, i) => { const k = p.date.slice(3, 7) + '-' + p.date.slice(0, 2); if (k !== lastKey) { lastKey = k; months.push({ i: i, d: p.date }); } });
+  const mStep = Math.max(1, Math.ceil(months.length / maxTicks));
   function drw(idx){
     ctx.clearRect(0, 0, w, h);
     [0, 25, 50, 75, 100].forEach(pct => {
@@ -1457,8 +1491,8 @@ function renderBreadthChart(m){
     });
     ctx.fillStyle = '#6B7395'; ctx.font = '9px Inter,sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    const step = Math.max(1, Math.floor(pts.length / Math.max(1, Math.floor(cw / 50))));
-    pts.forEach((p, i) => { if (i % step === 0 || i === pts.length - 1) { const d = p.date.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(i), h - P.b + 8); } });
+    months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h - P.b + 8); } });
+    const ld = pts[pts.length - 1].date.split('/'); ctx.fillText(ld[0] + '/' + ld[1], xp(pts.length - 1), h - P.b + 8);
     ctx.strokeStyle = '#E4E9F7'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P.l, h - P.b); ctx.lineTo(w - P.r, h - P.b); ctx.stroke();
     lines.forEach((s, i) => {
@@ -1481,6 +1515,21 @@ function renderBreadthChart(m){
   let hi = -1; drw(-1);
   cv.onmousemove = function(e) { const cr = cv.getBoundingClientRect(), mx = e.clientX - cr.left; let cl = 0, md = Infinity; pts.forEach((_, i) => { const d = Math.abs(xp(i) - mx); if (d < md) { md = d; cl = i; } }); if (cl !== hi) { hi = cl; drw(cl); } };
   cv.onmouseleave = function() { if (hi !== -1) { hi = -1; drw(-1); } };
+  if (rs && re) {
+    rs.oninput = function() { chartRange.s = Math.min(parseInt(rs.value, 10) / 1000, parseInt(re.value, 10) / 1000 - 0.01); renderBreadthChart(m); };
+    re.oninput = function() { chartRange.e = Math.max(parseInt(re.value, 10) / 1000, parseInt(rs.value, 10) / 1000 + 0.01); renderBreadthChart(m); };
+  }
+  const chips = wr.querySelectorAll('.chart-range-chip');
+  chips.forEach(ch => {
+    ch.onclick = function() {
+      const monthsBack = parseInt(ch.dataset.months, 10) || 0;
+      const span = monthsBack > 0 ? monthsBack * 21 : allPts.length;
+      chartRange.s = Math.max(0, (allPts.length - span) / (allPts.length - 1));
+      chartRange.e = 1;
+      chips.forEach(c => c.classList.toggle('active', c === ch));
+      renderBreadthChart(m);
+    };
+  });
 }
 
 function renderRsiPulseChart(){
