@@ -168,17 +168,26 @@ class SSIClient:
         print("[" + market + "] Sau lọc còn: " + str(len(symbols)) + " mã")
         return symbols
 
-    def daily_ohlc(self, symbol, from_date, to_date, page_size=500):
-        """OHLCV theo ngày. Định dạng ngày: dd/mm/yyyy"""
-        data = self._get("DailyOhlc", {
-            "symbol": symbol,
-            "fromDate": from_date,
-            "toDate": to_date,
-            "pageIndex": 1,
-            "pageSize": page_size,
-            "ascending": "true",
-        })
-        return data.get("data") or []
+    def daily_ohlc(self, symbol, from_date, to_date, page_size=3000, max_pages=30):
+        """OHLCV theo ngay. Dinh dang ngay: dd/mm/yyyy.
+        Tu dong phan trang khi doan ngay dai hon page_size (VD: lich su 10 nam)."""
+        all_rows = []
+        page = 1
+        while True:
+            data = self._get("DailyOhlc", {
+                "symbol": symbol,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "pageIndex": page,
+                "pageSize": page_size,
+                "ascending": "true",
+            })
+            rows = data.get("data") or []
+            all_rows.extend(rows)
+            if len(rows) < page_size or page >= max_pages:
+                break
+            page += 1
+        return all_rows
 
     def daily_index(self, index_id, from_date, to_date, page_size=100):
         """Advances/Declines/Nochanges theo chỉ số."""

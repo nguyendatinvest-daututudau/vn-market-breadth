@@ -56,8 +56,8 @@ MARKET_INDEX_ID = {
     "HOSE": "VNINDEX",
     "HNX": "HNXIndex",
 }
-MA_WINDOWS = [20, 50, 200]
-HISTORY_DAYS_LOOKBACK = 800   # du ~500 phien, giup ZeroLagTEMA(65) on dinh hon cho Luc Mach
+MA_WINDOWS = [10, 20, 50, 200]
+HISTORY_DAYS_LOOKBACK = 4200  # du tu ~giua 2015 (MA200 co the tinh tu 01/01/2016) cho chart lich su 10 nam
 INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tranh thieu sau ky nghi dai)
 REQUEST_SLEEP_SEC = 0.5       # cho giua cac lan goi API de tranh rate limit                                                         
 MIN_AVG_VOLUME = 300_000      # loc thanh khoan: TB 20 phien >= 300,000 cp
@@ -211,8 +211,14 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
         cached = cached.dropna(subset=["TradingDate"])
         if not {"Open", "High", "Low"}.issubset(cached.columns) or cached[["Open", "High", "Low"]].tail(80).isna().any().any():
             cached = pd.DataFrame()
-    if cached.empty:
-        from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
+    force_full = os.environ.get("PIPELINE_FORCE_FULL_HISTORY") == "1"
+    start_override = os.environ.get("PIPELINE_HISTORY_START")
+    if cached.empty or force_full:
+        if start_override:
+            override_date = parse_market_date(start_override)
+            from_date = override_date if override_date else today - timedelta(days=HISTORY_DAYS_LOOKBACK)
+        else:
+            from_date = today - timedelta(days=HISTORY_DAYS_LOOKBACK)
     else:
         # Always re-fetch the overlap. Daily bars can be preliminary or corrected
         # after their first appearance, including the current session.
@@ -283,8 +289,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     counts = {w: 0 for w in MA_WINDOWS}
     eligible = {w: 0 for w in MA_WINDOWS}
     above_syms = {w: [] for w in MA_WINDOWS}
-    newly_above = {20: [], 50: []}
-    newly_below = {20: [], 50: []}
+    newly_above = {10: [], 20: [], 50: []}
+    newly_below = {10: [], 20: [], 50: []}
     volume_breakout = []
     ad_distribution = _empty_ad_distribution()
     total_distribution = 0
@@ -364,7 +370,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                     if w == 20 and avg_vol is not None and volume_today is not None and avg_vol > 0 and volume_today > avg_vol * volume_threshold:
                         volume_breakout.append(sym)
 
-                if w in (20, 50) and len(close) >= w + 1:
+                if w in (10, 20, 50) and len(close) >= w + 1:
                     prev_close = close[-2]
                     prev_ma = close[-(w + 1):-1].mean()
                     was_above = prev_close >= prev_ma
@@ -392,21 +398,26 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     }
 
     tqdm.write(f"[{market}] Xong: valid={total_valid} | bo_kl={skipped_volume} | it_data={skipped_data}")
-    tqdm.write(f"[{market}] MA20={counts[20]} ({pct[20]}%) | MA50={counts[50]} ({pct[50]}%) | MA200={counts[200]} ({pct[200]}%)")
+    tqdm.write(f"[{market}] MA10={counts[10]} ({pct[10]}%) | MA20={counts[20]} ({pct[20]}%) | MA50={counts[50]} ({pct[50]}%) | MA200={counts[200]} ({pct[200]}%)")
     tqdm.write(f"[{market}] Volume breakout={len(volume_breakout)} (nguong={volume_threshold}x TB20)")
 
     return {
         "ma_total_symbols":   total_valid,
         "ma_eligible_symbols": {str(w): eligible[w] for w in MA_WINDOWS},
+        "above_ma10_count":   counts[10],
         "above_ma20_count":   counts[20],
         "above_ma50_count":   counts[50],
         "above_ma200_count":  counts[200],
+        "pct_above_ma10":     pct[10],
         "pct_above_ma20":     pct[20],
         "pct_above_ma50":     pct[50],
         "pct_above_ma200":    pct[200],
+        "above_ma10_symbols":  sorted(above_syms[10]),
         "above_ma20_symbols":  sorted(above_syms[20]),
         "above_ma50_symbols":  sorted(above_syms[50]),
         "above_ma200_symbols": sorted(above_syms[200]),
+        "newly_above_ma10":   sorted(newly_above[10]),
+        "newly_below_ma10":   sorted(newly_below[10]),
         "newly_above_ma20":   sorted(newly_above[20]),
         "newly_below_ma20":   sorted(newly_below[20]),
         "newly_above_ma50":   sorted(newly_above[50]),
@@ -591,11 +602,13 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
     dec  = sum(s["declines"] for s in snapshots)
     unc  = sum(s["unchanged"] for s in snapshots)
     total = adv + dec + unc
+    ma10  = sum(s["above_ma10_count"] for s in snapshots)
     ma20  = sum(s["above_ma20_count"] for s in snapshots)
     ma50  = sum(s["above_ma50_count"] for s in snapshots)
     ma200 = sum(s["above_ma200_count"] for s in snapshots)
     ma_tot = sum(s["ma_total_symbols"] for s in snapshots)
     ma_eligible = {
+        10: sum(int(s.get("ma_eligible_symbols", {}).get("10", s["ma_total_symbols"]) or 0) for s in snapshots),
         20: sum(int(s.get("ma_eligible_symbols", {}).get("20", s["ma_total_symbols"]) or 0) for s in snapshots),
         50: sum(int(s.get("ma_eligible_symbols", {}).get("50", s["ma_total_symbols"]) or 0) for s in snapshots),
         200: sum(int(s.get("ma_eligible_symbols", {}).get("200", s["ma_total_symbols"]) or 0) for s in snapshots),
@@ -634,17 +647,22 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "declines_pct":    round(dec / total * 100, 1) if total else 0.0,
         "unchanged_pct":   round(unc / total * 100, 1) if total else 0.0,
         "ad_ratio":        round(adv / dec, 2) if dec else None,
+        "pct_above_ma10":  round(ma10 / ma_eligible[10] * 100, 1) if ma_eligible[10] else 0.0,
         "pct_above_ma20":  round(ma20 / ma_eligible[20] * 100, 1) if ma_eligible[20] else 0.0,
         "pct_above_ma50":  round(ma50 / ma_eligible[50] * 100, 1) if ma_eligible[50] else 0.0,
         "pct_above_ma200": round(ma200 / ma_eligible[200] * 100, 1) if ma_eligible[200] else 0.0,
+        "above_ma10_count":   ma10,
         "above_ma20_count":   ma20,
         "above_ma50_count":   ma50,
         "above_ma200_count":  ma200,
         "ma_total_symbols":   ma_tot,
         "ma_eligible_symbols": {str(w): ma_eligible[w] for w in MA_WINDOWS},
+        "above_ma10_symbols":  merge("above_ma10_symbols"),
         "above_ma20_symbols":  merge("above_ma20_symbols"),
         "above_ma50_symbols":  merge("above_ma50_symbols"),
         "above_ma200_symbols": merge("above_ma200_symbols"),
+        "newly_above_ma10":   merge("newly_above_ma10"),
+        "newly_below_ma10":   merge("newly_below_ma10"),
         "newly_above_ma20":   merge("newly_above_ma20"),
         "newly_below_ma20":   merge("newly_below_ma20"),
         "newly_above_ma50":   merge("newly_above_ma50"),
@@ -678,6 +696,20 @@ def _sync_docs_data(include_signal_outputs: bool = True):
             dst.write_bytes(src.read_bytes())
 
 
+def _compact_history_markets(markets_dict: dict) -> dict:
+    """Chi giu cac truong chart can de giam kich thuoc history 10 nam."""
+    compact = {}
+    for market, snap in markets_dict.items():
+        compact[market] = {
+            "pct_above_ma10":  round(float(snap.get("pct_above_ma10", 0.0) or 0.0), 1),
+            "pct_above_ma20":  round(float(snap.get("pct_above_ma20", 0.0) or 0.0), 1),
+            "pct_above_ma50":  round(float(snap.get("pct_above_ma50", 0.0) or 0.0), 1),
+            "pct_above_ma200": round(float(snap.get("pct_above_ma200", 0.0) or 0.0), 1),
+            "rsi_pulse": snap.get("rsi_pulse"),
+        }
+    return compact
+
+
 def append_history(markets_dict: dict) -> None:
     history = []
     if HISTORY_JSON.exists():
@@ -688,8 +720,8 @@ def append_history(markets_dict: dict) -> None:
 
     today_date = markets_dict["ALL"]["date"]
     history = [h for h in history if h.get("date") != today_date]
-    history.append({"date": today_date, "markets": markets_dict})
-    history = history[-120:]  # giu 120 phien gan nhat
+    history.append({"date": today_date, "markets": _compact_history_markets(markets_dict)})
+    history = history[-2900:]  # gioi han ~10 nam phien giao dich
 
     _write_json(HISTORY_JSON, history)
 

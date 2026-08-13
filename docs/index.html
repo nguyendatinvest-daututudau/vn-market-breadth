@@ -576,6 +576,7 @@ function render(){
       <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
       <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
       <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
+      <div class="kpi-card primary"><div class="lab">MA10</div><div class="num">${fmt1(m.pct_above_ma10)}%</div><div class="sub">${m.above_ma10_count} mã</div></div>
       <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
       <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
       <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
@@ -765,7 +766,7 @@ function buildActionBoard(summary){
   const watchList = topSymbols(rows, 'watch', 10);
   const sellList = topSymbols(rows, 'sell', 10);
   const m = LATEST?.markets?.[activeMarket];
-  const marketNote = m ? `${adRatioNote(m.ad_ratio)} · MA20 ${fmt1(m.pct_above_ma20)}% · MA50 ${fmt1(m.pct_above_ma50)}%` : '';
+  const marketNote = m ? `${adRatioNote(m.ad_ratio)} · MA10 ${fmt1(m.pct_above_ma10)}% · MA20 ${fmt1(m.pct_above_ma20)}% · MA50 ${fmt1(m.pct_above_ma50)}%` : '';
   return `<div class="action-grid">
     <div class="action-card buy">
       <div class="action-head"><div><div class="action-title">Buy candidates</div><div class="action-note">Ưu tiên kiểm tra điểm mua</div></div><div class="action-num">${summary.buySignals}</div></div>
@@ -1404,7 +1405,7 @@ function buildLucMachPanel(){
 // --- Chart ---
 function buildChartSection(){
   return `<div class="panel">
-    <h2 class="accordion" onclick="toggleAccordion(this)">Biểu đồ lịch sử — % trên MA20 / MA50 / MA200</h2>
+    <h2 class="accordion" onclick="toggleAccordion(this)">Biểu đồ lịch sử — % trên MA10 / MA20 / MA50 / MA200</h2>
     <div class="accordion-body collapsed">
       <div class="chart-wrap" id="chartWrap">
         <canvas id="breadthChart"></canvas>
@@ -1428,7 +1429,7 @@ function renderBreadthChart(m){
   if (!m) return;
   const cv = document.getElementById('breadthChart'), tt = document.getElementById('chartTooltip'), wr = document.getElementById('chartWrap');
   if (!cv || !tt || !wr) return;
-  const pts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
+  const pts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v10: k.pct_above_ma10, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
   if (pts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Chưa đủ dữ liệu lịch sử.</div>'; return; }
   pts.sort((a,b) => { const da = a.date.split('/'), db = b.date.split('/'); return da[2]-db[2] || da[1]-db[1] || da[0]-db[0]; });
   const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, h = 260;
@@ -1436,7 +1437,7 @@ function renderBreadthChart(m){
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   const P = { t: 30, r: 14, b: 38, l: 44 }, cw = w - P.l - P.r, ch = h - P.t - P.b;
   const xp = i => P.l + (i / (pts.length - 1)) * cw, yp = v => P.t + ch - (v / 100) * ch;
-  const lines = [{ k: 'v20', c: '#4F46E5', l: 'MA20' }, { k: 'v50', c: '#F5A524', l: 'MA50' }, { k: 'v200', c: '#06B6D4', l: 'MA200' }];
+  const lines = [{ k: 'v10', c: '#9333EA', l: 'MA10' }, { k: 'v20', c: '#4F46E5', l: 'MA20' }, { k: 'v50', c: '#F5A524', l: 'MA50' }, { k: 'v200', c: '#06B6D4', l: 'MA200' }];
   function drw(idx){
     ctx.clearRect(0, 0, w, h);
     [0, 25, 50, 75, 100].forEach(pct => {
@@ -1471,7 +1472,7 @@ function renderBreadthChart(m){
       ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ch); ctx.stroke(); ctx.restore();
       lines.forEach(s => { const dy = yp(p[s.k]); ctx.fillStyle = '#fff'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
       tt.style.display = 'block';
-      tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA20: <strong>${p.v20.toFixed(1)}%</strong> · MA50: <strong>${p.v50.toFixed(1)}%</strong> · MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
+      tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA10: <strong>${p.v10.toFixed(1)}%</strong> · MA20: <strong>${p.v20.toFixed(1)}%</strong> · MA50: <strong>${p.v50.toFixed(1)}%</strong> · MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
       const tw = tt.offsetWidth; let tx = Math.round(x - tw / 2);
       if (tx < 4) tx = 4; if (tx + tw > w - 4) tx = w - tw - 4;
       tt.style.left = tx + 'px'; tt.style.top = Math.max(4, P.t - 46) + 'px';
@@ -1611,11 +1612,17 @@ function buildAppendixSection(m){
       return `<span class="${cls}">${s}</span>`;
     }).join('');
   };
-  const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
+  const dualSet = new Set((m.above_ma10_symbols||[]).filter(x => (m.above_ma20_symbols||[]).includes(x)));
 
   return `<div class="panel">
     <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Phụ lục — Mới vượt/rớt MA + Danh sách đầy đủ</h2>
     <div class="accordion-body collapsed">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">↑ Mới vượt MA10 (${(m.newly_above_ma10||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_above_ma10, 'up')}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--down);margin-bottom:4px;">↓ Mới rớt MA10 (${(m.newly_below_ma10||[]).length})</div>
+          <div class="chip-wrap">${renderChips(m.newly_below_ma10, 'down')}</div></div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div><div style="font-size:11px;font-weight:600;color:var(--up);margin-bottom:4px;">↑ Mới vượt MA20 (${(m.newly_above_ma20||[]).length})</div>
           <div class="chip-wrap">${renderChips(m.newly_above_ma20, 'up')}</div></div>
@@ -1629,6 +1636,8 @@ function buildAppendixSection(m){
           <div class="chip-wrap">${renderChips(m.newly_below_ma50, 'down')}</div></div>
       </div>
       <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Trên MA10 (${(m.above_ma10_symbols||[]).length})</div>
+          <div class="chip-wrap" style="max-height:120px;overflow-y:auto;">${renderChips(m.above_ma10_symbols, 'neutral', dualSet)}</div></div>
         <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Trên MA20 (${(m.above_ma20_symbols||[]).length})</div>
           <div class="chip-wrap" style="max-height:120px;overflow-y:auto;">${renderChips(m.above_ma20_symbols, 'neutral', dualSet)}</div></div>
         <div><div style="font-size:11px;font-weight:600;margin-bottom:4px;">Trên MA50 (${(m.above_ma50_symbols||[]).length})</div>
