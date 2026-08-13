@@ -1701,9 +1701,7 @@ function buildAppendixSection(m){
       return `<span class="${cls}">${s}</span>`;
     }).join('');
   };
-  const dualSet = (m.above_ma10_symbols && m.above_ma10_symbols.length)
-    ? new Set((m.above_ma10_symbols||[]).filter(x => (m.above_ma20_symbols||[]).includes(x)))
-    : new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
+  const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
 
   return `<div class="panel">
     <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Phụ lục — Mới vượt/rớt MA + Danh sách đầy đủ</h2>
