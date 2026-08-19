@@ -1,7 +1,8 @@
 # VN Market Breadth Dashboard
 
 Dashboard độ rộng thị trường chứng khoán Việt Nam (A/D Ratio, % cổ phiếu trên MA20/50/200),
-lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua GitHub Actions, hiển thị qua GitHub Pages.
+lấy dữ liệu từ SSI FastConnect Data API **v3** (OAuth2, qua SDK chính thức `ssi-sdk`),
+tự động cập nhật qua GitHub Actions, hiển thị qua GitHub Pages.
 
 ## Tính năng
 
@@ -15,12 +16,15 @@ lấy dữ liệu từ SSI FastConnect Data API, tự động cập nhật qua G
 - **Khung4/Tplus Signals**: hub mua riêng theo state Khung4/Tplus, có giá mua tại phiên phát tín hiệu
 - **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
 - **Accumulation Radar**: hub riêng phát hiện cổ phiếu khỏe âm thầm trong thị trường xấu
+- **Market Regime**: thước đo trạng thái thị trường (điểm 0-100 + Risk-Off/Trung lập/Risk-On/Quá nóng), phân kỳ giá-breadth, breadth momentum
+- **Intraday Breadth (realtime)**: A/D theo phiên từ SSI v3 Streaming (trade + OHLCV 1m + quote), chạy thủ công khi đang giao dịch
 
 ## Cấu trúc repo
 
 ```
 scripts/
-  ssi_client.py           # client gọi SSI FastConnect Data API
+  ssi_client.py           # client gọi SSI FastConnect Data API v3 (bọc ssi-sdk)
+  ssi_auth_bootstrap.py   # xác thực 1 lần (OTP nếu cần) + in base64 cho CI
   cache_utils.py          # shared: load_cache + compute_rsi_wilder
   fetch_and_compute.py    # pipeline chính: fetch -> compute -> ghi JSON
   strategy_signals.py     # Pre-breakout detection (base + OBV + vol)
@@ -32,6 +36,9 @@ scripts/
   advanced_trailstop_signals.py # Advanced Trailstop: bs ATR + Close cross
   accumulation_radar.py # Accumulation Radar: RS + resilience + volume accumulation + base contraction
   market_commentary.py    # Nhận định thị trường (breadth + technical)
+  market_regime.py        # Regime gauge + phân kỳ + breadth momentum
+  backfill_index.py       # Backfill OHLCV VNINDEX/HNXINDEX (cho regime/divergence)
+  intraday_breadth.py     # Monitor A/D realtime (SSI v3 Streaming)
   embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
 data/
@@ -61,10 +68,16 @@ docs/
 cd scripts
 pip install -r requirements.txt
 
-export SSI_CONSUMER_ID="..."
-export SSI_CONSUMER_SECRET="..."
+# FastConnect v3 (thay cho SSI_CONSUMER_ID / SSI_CONSUMER_SECRET cua v2)
+export SSI_CLIENT_ID="..."
+export SSI_API_KEY="..."
+export SSI_API_SECRET="..."
 python fetch_and_compute.py
 ```
+
+Market Data v3 xác thực không cần OTP. Nếu lần xác thực đầu của tài khoản vẫn yêu cầu OTP,
+chạy một lần `python ssi_auth_bootstrap.py` để lưu `scripts/token_cache.json` và copy base64
+vào env `SSI_TOKEN_CACHE` (dùng cho CI). File `scripts/token_cache.json` nằm trong `.gitignore`.
 
 Pipeline schedule chỉ xuất snapshot đóng cửa từ 15:10 giờ Việt Nam. Trong GitHub Actions, chọn **Run workflow** rồi dùng `latest_completed_close` để chạy thủ công trước 15:10 với phiên đóng cửa gần nhất; `current_session` chỉ dùng khi chủ động muốn đánh giá dữ liệu intraday.
 
@@ -98,7 +111,7 @@ Mở `docs/dashboard.html` trực tiếp bằng double-click (`file://`) để d
 ## Triển khai GitHub
 
 1. Push lên GitHub
-2. Settings → Secrets: `SSI_CONSUMER_ID`, `SSI_CONSUMER_SECRET`
+2. Settings → Secrets: `SSI_CLIENT_ID`, `SSI_API_KEY`, `SSI_API_SECRET` (FastConnect v3). Thêm `SSI_TOKEN_CACHE` nếu lần auth đầu cần OTP.
 3. Settings → Pages: branch `main`, folder `/docs`
 4. Actions → Run workflow lần đầu
 

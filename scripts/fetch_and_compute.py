@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import warnings
 from datetime import datetime, timedelta
@@ -41,6 +42,8 @@ from advanced_trailstop_signals import main as run_advanced_trailstop_signals
 from backtest_mama_positional import main as run_backtest_mama_positional
 from backtest_advanced_trailstop import main as run_backtest_advanced_trailstop
 from accumulation_radar import main as run_accumulation_radar
+from market_regime import main as run_market_regime
+from backfill_index import main as run_backfill_index
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
@@ -256,7 +259,10 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
                 if col in new_df.columns:
                     cols.append(col)
             new_df = new_df[cols]
-            new_df["TradingDate"] = pd.to_datetime(new_df["TradingDate"], dayfirst=True, errors="coerce")
+            raw_dates = new_df["TradingDate"].astype(str).str.strip()
+            first_val = raw_dates.loc[raw_dates.ne("")].iloc[0] if (raw_dates.ne("")).any() else ""
+            day_first = not bool(re.match(r"^\d{4}[-/]", first_val))
+            new_df["TradingDate"] = pd.to_datetime(raw_dates, dayfirst=day_first, errors="coerce")
             for col in ["Open", "High", "Low", "Close", "Volume"]:
                 if col in new_df.columns:
                     new_df[col] = pd.to_numeric(new_df[col], errors="coerce")
@@ -294,6 +300,9 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     volume_breakout = []
     ad_distribution = _empty_ad_distribution()
     total_distribution = 0
+    ohlc_advances = 0
+    ohlc_declines = 0
+    ohlc_unchanged = 0
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
     trend_distribution = _empty_trend_distribution()
     total_valid = 0
@@ -343,9 +352,15 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         close = df["Close"].values
         last_close = close[-1]
         if len(close) >= 2 and close[-2] > 0:
-            pct_change = (last_close / close[-2] - 1) * 100
-            ad_distribution[_ad_bucket_index(round(float(pct_change), 6))]["count"] += 1
+            pct = round(float((last_close / close[-2] - 1) * 100), 6)
+            ad_distribution[_ad_bucket_index(pct)]["count"] += 1
             total_distribution += 1
+            if pct > 0:
+                ohlc_advances += 1
+            elif pct < 0:
+                ohlc_declines += 1
+            else:
+                ohlc_unchanged += 1
         if len(close) >= 15:
             rsi14 = compute_rsi_wilder(pd.Series(close), period=14)
             rsi_pulse["total"] += 1
@@ -426,6 +441,10 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         "volume_breakout_count": len(volume_breakout),
         "ad_distribution": ad_distribution,
         "ad_distribution_total": total_distribution,
+        "ohlc_advances": ohlc_advances,
+        "ohlc_declines": ohlc_declines,
+        "ohlc_unchanged": ohlc_unchanged,
+        "ohlc_ad_total": ohlc_advances + ohlc_declines + ohlc_unchanged,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
         "latest_ohlc_date": format_market_date(max(latest_dates)) if latest_dates else "",
@@ -514,9 +533,22 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
             print(f"[{market}] WARN: khong co universe cache rieng cho {market}!")
 
     ad = get_advance_decline(client, market, today)
-    print(f"[{market}] A/D: adv={ad['advances']} dec={ad['declines']} unc={ad['unchanged']}")
-
     ma = compute_ma_breadth(client, symbols, today, market)
+
+    # SSI v3 khong tra A/D cho HNX (indexSummary tra toan 0). Fallback: dem
+    # advance/decline/unchanged tu OHLC cua chinh universe dang loc.
+    ad_from_ohlc = False
+    ad_total = ad["advances"] + ad["declines"] + ad["unchanged"]
+    if ad_total == 0 and ma.get("ohlc_ad_total", 0) > 0:
+        ad = {
+            "advances": ma["ohlc_advances"],
+            "declines": ma["ohlc_declines"],
+            "unchanged": ma["ohlc_unchanged"],
+            "ad_ratio": round(ma["ohlc_advances"] / ma["ohlc_declines"], 2) if ma["ohlc_declines"] else None,
+            "trading_date": ma.get("latest_ohlc_date", ""),
+        }
+        ad_from_ohlc = True
+    print(f"[{market}] A/D: adv={ad['advances']} dec={ad['declines']} unc={ad['unchanged']}" + (" (tu OHLC)" if ad_from_ohlc else ""))
 
     total_ad = ad["advances"] + ad["declines"] + ad["unchanged"]
     authoritative_date = parse_market_date(ad.get("trading_date"))
@@ -691,7 +723,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data(include_signal_outputs: bool = True):
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "latest_prices.json"]
+    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "latest_prices.json"]
     if include_signal_outputs:
         files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json"])
     for f in files:
@@ -711,6 +743,12 @@ def _compact_history_markets(markets_dict: dict) -> dict:
             "pct_above_ma50":  round(float(snap.get("pct_above_ma50", 0.0) or 0.0), 1),
             "pct_above_ma200": round(float(snap.get("pct_above_ma200", 0.0) or 0.0), 1),
             "rsi_pulse": snap.get("rsi_pulse"),
+            "advances": snap.get("advances"),
+            "declines": snap.get("declines"),
+            "unchanged": snap.get("unchanged"),
+            "ad_ratio": snap.get("ad_ratio"),
+            "total_symbols": snap.get("total_symbols"),
+            "ma_total_symbols": snap.get("ma_total_symbols"),
         }
     return compact
 
@@ -829,6 +867,20 @@ def main():
 
     append_history(markets_dict)
     print(f"Da cap nhat history.")
+
+    # Backfill chi so (VNI/HNXINDEX) de regime gauge + phan ky co du lieu.
+    try:
+        run_backfill_index()
+        print(f"Da cap nhat cache chi so.")
+    except Exception as e:
+        print(f"Loi backfill chi so: {e}")
+
+    # Market regime (gauge + phan ky + breadth momentum)
+    try:
+        run_market_regime()
+        print(f"Da cap nhat market regime.")
+    except Exception as e:
+        print(f"Loi sinh market regime: {e}")
 
     # Generate market commentary
     try:

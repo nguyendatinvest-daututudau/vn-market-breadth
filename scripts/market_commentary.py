@@ -11,6 +11,7 @@ from _shared import DATA_DIR, CACHE_DIR as OHLC_CACHE_DIR, DOCS_DATA_DIR, vn_now
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
 COMMENTARY_JSON = DATA_DIR / "market_commentary.json"
 DOCS_COMMENTARY_JSON = DOCS_DATA_DIR / "market_commentary.json"
+REGIME_JSON = DATA_DIR / "market_regime.json"
 
 
 def load_json(path: Path):
@@ -68,23 +69,16 @@ def ma_trend(close_series, windows=(20, 50, 200)):
 
 
 def vnindex_technical():
-    df = load_ohlc("VNINDEX")
-    if df is None or len(df) < 200:
+    """Doc chi so tu market_regime.json (du lieu da duoc backfill tu SSI v3)."""
+    regime = load_json(REGIME_JSON)
+    if not regime:
         return {}
-    close = df["Close"]
-    last = close.iloc[-1]
-    ma = ma_trend(close)
-    rsi = compute_rsi(close)
-    macd, signal, hist = compute_macd(close)
-    return {
-        "close": round(last, 2),
-        "ma20": ma.get(20),
-        "ma50": ma.get(50),
-        "ma200": ma.get(200),
-        "rsi": round(rsi, 1) if rsi is not None else None,
-        "macd_hist": round(hist, 2) if hist is not None else None,
-        "macd_up": (hist > 0) if hist is not None else None,
-    }
+    indexes = regime.get("index") or {}
+    return indexes.get("VNI") or {}
+
+
+def load_market_regime() -> dict:
+    return load_json(REGIME_JSON) or {}
 
 
 def generate_commentary(breadth: dict) -> str:
@@ -132,16 +126,33 @@ def generate_commentary(breadth: dict) -> str:
         else:
             lines.append("- % trên MA20 < 30% → bán mạnh, có thể xuất hiện bounce.")
 
-    # 2. Kỹ thuật VN-Index
+    # 2. Trạng thái thị trường (regime gauge)
+    regime_data = load_market_regime()
+    regime = regime_data.get("regime") or {}
+    divergence = regime_data.get("divergence") or {}
+    momentum = regime_data.get("breadth_momentum") or {}
+    if regime:
+        lines.append("\n## 2. Trạng thái thị trường")
+        tone_icon = {"risk_off": "🔴", "neutral": "🟡", "risk_on": "🟢", "overheated": "🔥"}.get(regime.get("tone"), "")
+        lines.append(f"- {tone_icon} **{regime.get('label')}** — điểm **{regime.get('score')}/100**")
+        comps = regime.get("components") or {}
+        def _pts(key):
+            c = comps.get(key) or {}
+            return c.get("points")
+        lines.append(f"- A/D **{_pts('ad_ratio')}/100** | %MA20 **{_pts('pct_above_ma20')}/100** | "
+                     f"%MA50 **{_pts('pct_above_ma50')}/100** | Chỉ số **{_pts('index_position')}/100** | "
+                     f"RSI pulse **{_pts('rsi_pulse')}/100** | KL tăng/giảm **{_pts('volume_ud')}/100**")
+
+    # 3. Kỹ thuật chỉ số
     vni = vnindex_technical()
     if vni:
-        lines.append("\n## 2. Kỹ thuật VN-Index")
-        lines.append(f"- Giá: **{vni['close']:.2f}**")
+        lines.append("\n## 3. Kỹ thuật chỉ số")
+        lines.append(f"- VN-Index: **{vni.get('close')}**")
         ma_lines = []
-        if vni.get("ma20") is True: ma_lines.append("MA20 ↑")
-        if vni.get("ma50") is True: ma_lines.append("MA50 ↑")
-        if vni.get("ma200") is True: ma_lines.append("MA200 ↑")
-        lines.append(f"- Đường MA: {' | '.join(ma_lines) if ma_lines else 'Dưới các MA chính'}")
+        if vni.get("above_ma20") is True: ma_lines.append("MA20 ↑")
+        if vni.get("above_ma50") is True: ma_lines.append("MA50 ↑")
+        if vni.get("above_ma200") is True: ma_lines.append("MA200 ↑")
+        lines.append(f"- VN-Index đường MA: {' | '.join(ma_lines) if ma_lines else 'Dưới các MA chính'}")
         if vni.get("rsi") is not None:
             rsi_txt = f"RSI = **{vni['rsi']}**"
             if vni["rsi"] >= 70: rsi_txt += " (quá mua)"
@@ -151,9 +162,29 @@ def generate_commentary(breadth: dict) -> str:
             hist = vni["macd_hist"]
             macd_state = "MACD histogram dương ⬆️" if hist > 0 else "MACD histogram âm ⬇️"
             lines.append(f"- {macd_state} ({hist:.2f})")
+        hnx = (regime_data.get("index") or {}).get("HNXINDEX")
+        if hnx:
+            lines.append(f"- HNX-Index: **{hnx.get('close')}** | RSI = **{hnx.get('rsi')}**")
 
-    # 3. Tín hiệu mới (newly above/below)
-    lines.append("\n## 3. Tín hiệu mới trong phiên")
+    # 4. Phân kỳ & Breadth momentum
+    if divergence or momentum:
+        lines.append("\n## 4. Phân kỳ & Breadth momentum")
+        if divergence.get("state") == "bearish":
+            lines.append(f"- ⚠️ **Phân kỳ âm (bearish)**: {divergence.get('note')}")
+        elif divergence.get("state") == "bullish":
+            lines.append(f"- ✅ **Phân kỳ dương (bullish)**: {divergence.get('note')}")
+        elif divergence.get("state") == "none":
+            lines.append(f"- Phân kỳ giá/breadth: {divergence.get('note')}")
+        if momentum.get("available"):
+            mo_txt = f"Osc = **{momentum.get('oscillator')}**"
+            if momentum.get("extreme") == "overbought":
+                mo_txt += " (quá mua → rủi ro điều chỉnh)"
+            elif momentum.get("extreme") == "oversold":
+                mo_txt += " (quá bán → có thể bounce)"
+            lines.append(f"- Breadth momentum: {mo_txt} | Hist = **{momentum.get('histogram')}**")
+
+    # 5. Tín hiệu mới (newly above/below)
+    lines.append("\n## 5. Tín hiệu mới trong phiên")
     na20 = hose.get("newly_above_ma20", [])
     nb20 = hose.get("newly_below_ma20", [])
     na50 = hose.get("newly_above_ma50", [])
@@ -167,21 +198,29 @@ def generate_commentary(breadth: dict) -> str:
     if nb50:
         lines.append(f"- **Mới < MA50 (HOSE)**: {', '.join(nb50[:10])}")
 
-    # 4. Volume breakout
+    # 6. Volume breakout
     vb = hose.get("volume_breakout_symbols", [])
     if vb:
-        lines.append("\n## 4. Volume breakout (giá ≥ MA20 + KL đột biến)")
+        lines.append("\n## 6. Volume breakout (giá ≥ MA20 + KL đột biến)")
         lines.append(f"- **HOSE**: {', '.join(vb[:20])}")
 
-    # 5. Tóm tắt hành động
-    lines.append("\n## 5. Gợi ý hành động")
+    # 7. Tóm tắt hành động (theo regime)
+    lines.append("\n## 7. Gợi ý hành động")
+    tone = (regime or {}).get("tone")
     action = []
-    if ad is not None and ad > 1.2 and ma20 is not None and ma20 > 50:
-        action.append("✅ Mua dần các mã leader vừa breakout MA20 + volume")
-    elif ad is not None and ad < 0.8:
-        action.append("⚠️ Giảm vị thế, chờ A/D hồi về > 1.0")
+    if tone == "risk_on":
+        action.append("✅ **Mua chủ động**: thị trường Risk-On, ưu tiên mã leader breakout MA20 + volume.")
+    elif tone == "overheated":
+        action.append("⚠️ **Chốt lời dần / không đuổi cao**: thị trường quá nóng, rủi ro điều chỉnh tăng.")
+    elif tone == "risk_off":
+        action.append("🔴 **Giảm vị thế, giữ tiền mặt**: thị trường Risk-Off, chờ A/D và %MA20 phục hồi.")
     else:
-        action.append("⏳ Chờ tín hiệu rõ ràng hơn (A/D hoặc MA20% breakout)")
+        if ad is not None and ad < 0.8:
+            action.append("⚠️ **Giảm vị thế**: thị trường trung lập nhưng A/D yếu, chờ A/D hồi về > 1.0.")
+        else:
+            action.append("⏳ **Chờ tín hiệu rõ ràng**: thị trường trung lập, chờ A/D hồi > 1.0 hoặc %MA20 breakout.")
+    if divergence.get("state") == "bearish":
+        action.append("⚠️ Cảnh báo phân kỳ âm — hạn chế mua mới khi giá ở vùng đỉnh.")
     if vb:
         action.append(f"👀 Theo dõi volume breakout: {', '.join(vb[:5])}")
     lines.append("\n".join(action))

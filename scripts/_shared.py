@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import warnings
 from datetime import datetime, time, timedelta
 from pathlib import Path
@@ -35,7 +36,11 @@ def parse_market_date(value) -> datetime | None:
     """Normalize API/JSON market dates to a timezone-naive midnight datetime."""
     if value is None or value == "":
         return None
-    parsed = pd.to_datetime(value, dayfirst=True, errors="coerce")
+    value = str(value).strip()
+    if re.match(r"^\d{4}[-/]", value):
+        parsed = pd.to_datetime(value, errors="coerce")
+    else:
+        parsed = pd.to_datetime(value, dayfirst=True, errors="coerce")
     if pd.isna(parsed):
         return None
     if getattr(parsed, "tzinfo", None) is not None:

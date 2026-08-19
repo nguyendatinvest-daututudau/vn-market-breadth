@@ -59,17 +59,31 @@ jobs:
 
       - name: Validate SSI secrets
         run: |
-          test -n "$SSI_CONSUMER_ID"
-          test -n "$SSI_CONSUMER_SECRET"
+          test -n "$SSI_CLIENT_ID"
+          test -n "$SSI_API_KEY"
+          test -n "$SSI_API_SECRET"
         env:
-          SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
-          SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+          SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
+          SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
+          SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
+
+      - name: Restore FastConnect token cache (optional, cho CI khong can OTP)
+        run: |
+          if [ -n "$SSI_TOKEN_CACHE" ]; then
+            echo "$SSI_TOKEN_CACHE" | base64 -d > scripts/token_cache.json
+            echo "Token cache restored."
+          else
+            echo "SSI_TOKEN_CACHE chua duoc dat — thu authenticate() khong OTP."
+          fi
+        env:
+          SSI_TOKEN_CACHE: ${{ secrets.SSI_TOKEN_CACHE }}
 
       - name: Run fetch + compute
         run: python scripts/fetch_and_compute.py
         env:
-          SSI_CONSUMER_ID: ${{ secrets.SSI_CONSUMER_ID }}
-          SSI_CONSUMER_SECRET: ${{ secrets.SSI_CONSUMER_SECRET }}
+          SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
+          SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
+          SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
           PIPELINE_RUN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode || 'scheduled_close' }}
 
       - name: Generate dashboard.html (embedded data)
