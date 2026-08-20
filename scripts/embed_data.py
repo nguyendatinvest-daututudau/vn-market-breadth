@@ -20,6 +20,8 @@ ADVANCED_TRAILSTOP_JSON = ROOT / "data" / "advanced_trailstop_signals.json"
 SIGNALS_HISTORY_JSON = ROOT / "data" / "signals_history.json"
 LATEST_PRICES_JSON = ROOT / "data" / "latest_prices.json"
 ACCUMULATION_RADAR_JSON = ROOT / "data" / "accumulation_radar.json"
+REGIME_JSON = ROOT / "data" / "market_regime.json"
+INTRADAY_JSON = ROOT / "data" / "intraday_breadth.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
 
@@ -40,6 +42,8 @@ advanced_trailstop = json.loads(ADVANCED_TRAILSTOP_JSON.read_text(encoding="utf-
 signals_history = json.loads(SIGNALS_HISTORY_JSON.read_text(encoding="utf-8")) if SIGNALS_HISTORY_JSON.exists() else None
 latest_prices = json.loads(LATEST_PRICES_JSON.read_text(encoding="utf-8")) if LATEST_PRICES_JSON.exists() else None
 accumulation_radar = json.loads(ACCUMULATION_RADAR_JSON.read_text(encoding="utf-8")) if ACCUMULATION_RADAR_JSON.exists() else None
+regime = json.loads(REGIME_JSON.read_text(encoding="utf-8")) if REGIME_JSON.exists() else None
+intraday = json.loads(INTRADAY_JSON.read_text(encoding="utf-8")) if INTRADAY_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
 
@@ -75,6 +79,8 @@ const EMBEDDED_ADVANCED_TRAILSTOP = {inline_json(advanced_trailstop)};
 const EMBEDDED_SIGNALS_HISTORY = {inline_json(signals_history)};
 const EMBEDDED_LATEST_PRICES = {inline_json(latest_prices)};
 const EMBEDDED_ACCUMULATION_RADAR = {inline_json(accumulation_radar)};
+const EMBEDDED_REGIME = {inline_json(regime)};
+const EMBEDDED_INTRADAY = {inline_json(intraday)};
 </script>
 """
 
