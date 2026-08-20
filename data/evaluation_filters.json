@@ -1,0 +1,1616 @@
+{
+  "generated_at": "2026-08-20T16:00:04.126066+07:00",
+  "date": "20/08/2026",
+  "num_symbols_tested": 583,
+  "observations": 288351,
+  "lookforward_days": [
+    5,
+    10,
+    20
+  ],
+  "baseline_all": {
+    "n": 148448,
+    "hit0": 0.483,
+    "hit2": 0.2934,
+    "hit7": 0.1137,
+    "median": -0.0033,
+    "mean": 0.0007,
+    "yearly": {
+      "2025": 0.318,
+      "2026": 0.2478
+    },
+    "train_hit2": null,
+    "test_hit2": 0.2934
+  },
+  "baseline_liquid": {
+    "n": 57055,
+    "hit0": 0.4903,
+    "hit2": 0.3483,
+    "hit7": 0.1538,
+    "median": -0.0028,
+    "mean": 0.0015,
+    "yearly": {
+      "2025": 0.3782,
+      "2026": 0.2757
+    },
+    "train_hit2": null,
+    "test_hit2": 0.3483
+  },
+  "filters": {
+    "mom_any": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score >= 30 (common filters on)",
+      "desc": "Baseline buy gate of the momentum system",
+      "metrics": {
+        "n": 1187,
+        "hit0": 0.5105,
+        "hit2": 0.4044,
+        "hit7": 0.2367,
+        "median": 0.0,
+        "mean": 0.0104,
+        "yearly": {
+          "2025": 0.4312,
+          "2026": 0.2767
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4044
+      },
+      "metrics_liq": {
+        "n": 1187,
+        "hit0": 0.5105,
+        "hit2": 0.4044,
+        "hit7": 0.2367,
+        "median": 0.0,
+        "mean": 0.0104,
+        "yearly": {
+          "2025": 0.4312,
+          "2026": 0.2767
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4044
+      },
+      "lift2_liq": 0.0561,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0561
+    },
+    "mom_watch": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum watch (30-59)",
+      "desc": "",
+      "metrics": {
+        "n": 772,
+        "hit0": 0.522,
+        "hit2": 0.4223,
+        "hit7": 0.2487,
+        "median": 0.0024,
+        "mean": 0.0138,
+        "yearly": {
+          "2025": 0.442,
+          "2026": 0.32
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4223
+      },
+      "metrics_liq": {
+        "n": 772,
+        "hit0": 0.522,
+        "hit2": 0.4223,
+        "hit7": 0.2487,
+        "median": 0.0024,
+        "mean": 0.0138,
+        "yearly": {
+          "2025": 0.442,
+          "2026": 0.32
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4223
+      },
+      "lift2_liq": 0.074,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.074
+    },
+    "mom_strong": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum strong (>=60)",
+      "desc": "",
+      "metrics": {
+        "n": 415,
+        "hit0": 0.4892,
+        "hit2": 0.3711,
+        "hit7": 0.2145,
+        "median": -0.0042,
+        "mean": 0.0042,
+        "yearly": {
+          "2025": 0.4102,
+          "2026": 0.2099
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3711
+      },
+      "metrics_liq": {
+        "n": 415,
+        "hit0": 0.4892,
+        "hit2": 0.3711,
+        "hit7": 0.2145,
+        "median": -0.0042,
+        "mean": 0.0042,
+        "yearly": {
+          "2025": 0.4102,
+          "2026": 0.2099
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3711
+      },
+      "lift2_liq": 0.0228,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0228
+    },
+    "b30_40": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 30-40",
+      "desc": "",
+      "metrics": {
+        "n": 276,
+        "hit0": 0.5217,
+        "hit2": 0.4529,
+        "hit7": 0.2754,
+        "median": 0.0034,
+        "mean": 0.0173,
+        "yearly": {
+          "2025": 0.4592,
+          "2026": 0.4186
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4529
+      },
+      "metrics_liq": {
+        "n": 276,
+        "hit0": 0.5217,
+        "hit2": 0.4529,
+        "hit7": 0.2754,
+        "median": 0.0034,
+        "mean": 0.0173,
+        "yearly": {
+          "2025": 0.4592,
+          "2026": 0.4186
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4529
+      },
+      "lift2_liq": 0.1046,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.1046
+    },
+    "b40_50": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 40-50",
+      "desc": "",
+      "metrics": {
+        "n": 255,
+        "hit0": 0.4627,
+        "hit2": 0.3412,
+        "hit7": 0.2039,
+        "median": -0.0084,
+        "mean": -0.0002,
+        "yearly": {
+          "2025": 0.372,
+          "2026": 0.2083
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3412
+      },
+      "metrics_liq": {
+        "n": 255,
+        "hit0": 0.4627,
+        "hit2": 0.3412,
+        "hit7": 0.2039,
+        "median": -0.0084,
+        "mean": -0.0002,
+        "yearly": {
+          "2025": 0.372,
+          "2026": 0.2083
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3412
+      },
+      "lift2_liq": -0.0071,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0071
+    },
+    "b50_60": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 50-60",
+      "desc": "",
+      "metrics": {
+        "n": 241,
+        "hit0": 0.5851,
+        "hit2": 0.473,
+        "hit7": 0.2656,
+        "median": 0.0164,
+        "mean": 0.0245,
+        "yearly": {
+          "2025": 0.4928,
+          "2026": 0.3529
+        },
+        "train_hit2": null,
+        "test_hit2": 0.473
+      },
+      "metrics_liq": {
+        "n": 241,
+        "hit0": 0.5851,
+        "hit2": 0.473,
+        "hit7": 0.2656,
+        "median": 0.0164,
+        "mean": 0.0245,
+        "yearly": {
+          "2025": 0.4928,
+          "2026": 0.3529
+        },
+        "train_hit2": null,
+        "test_hit2": 0.473
+      },
+      "lift2_liq": 0.1247,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.1247
+    },
+    "b60_70": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 60-70",
+      "desc": "",
+      "metrics": {
+        "n": 102,
+        "hit0": 0.4902,
+        "hit2": 0.3922,
+        "hit7": 0.2157,
+        "median": -0.0019,
+        "mean": 0.0072,
+        "yearly": {
+          "2025": 0.4625,
+          "2026": 0.1364
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3922
+      },
+      "metrics_liq": {
+        "n": 102,
+        "hit0": 0.4902,
+        "hit2": 0.3922,
+        "hit7": 0.2157,
+        "median": -0.0019,
+        "mean": 0.0072,
+        "yearly": {
+          "2025": 0.4625,
+          "2026": 0.1364
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3922
+      },
+      "lift2_liq": 0.0439,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0439
+    },
+    "b70_80": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 70-80",
+      "desc": "",
+      "metrics": {
+        "n": 63,
+        "hit0": 0.4921,
+        "hit2": 0.3492,
+        "hit7": 0.2381,
+        "median": -0.0038,
+        "mean": 0.0037,
+        "yearly": {
+          "2025": 0.3922,
+          "2026": 0.1667
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3492
+      },
+      "metrics_liq": {
+        "n": 63,
+        "hit0": 0.4921,
+        "hit2": 0.3492,
+        "hit7": 0.2381,
+        "median": -0.0038,
+        "mean": 0.0037,
+        "yearly": {
+          "2025": 0.3922,
+          "2026": 0.1667
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3492
+      },
+      "lift2_liq": 0.0009,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0009
+    },
+    "b80_plus": {
+      "group": "momentum_score_brackets",
+      "label": "Momentum score 80+",
+      "desc": "",
+      "metrics": {
+        "n": 250,
+        "hit0": 0.488,
+        "hit2": 0.368,
+        "hit7": 0.208,
+        "median": -0.0073,
+        "mean": 0.0031,
+        "yearly": {
+          "2025": 0.3941,
+          "2026": 0.2553
+        },
+        "train_hit2": null,
+        "test_hit2": 0.368
+      },
+      "metrics_liq": {
+        "n": 250,
+        "hit0": 0.488,
+        "hit2": 0.368,
+        "hit7": 0.208,
+        "median": -0.0073,
+        "mean": 0.0031,
+        "yearly": {
+          "2025": 0.3941,
+          "2026": 0.2553
+        },
+        "train_hit2": null,
+        "test_hit2": 0.368
+      },
+      "lift2_liq": 0.0197,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0197
+    },
+    "perm_trend": {
+      "group": "common_filter_permutation",
+      "label": "Trend only (close>ma50>ma200) + liquid",
+      "desc": "",
+      "metrics": {
+        "n": 17583,
+        "hit0": 0.482,
+        "hit2": 0.3675,
+        "hit7": 0.1926,
+        "median": -0.0042,
+        "mean": 0.0063,
+        "yearly": {
+          "2025": 0.3883,
+          "2026": 0.2859
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3675
+      },
+      "metrics_liq": {
+        "n": 17583,
+        "hit0": 0.482,
+        "hit2": 0.3675,
+        "hit7": 0.1926,
+        "median": -0.0042,
+        "mean": 0.0063,
+        "yearly": {
+          "2025": 0.3883,
+          "2026": 0.2859
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3675
+      },
+      "lift2_liq": 0.0192,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0192
+    },
+    "perm_trend_rsi": {
+      "group": "common_filter_permutation",
+      "label": "Trend + RSI band (48-72)",
+      "desc": "",
+      "metrics": {
+        "n": 13812,
+        "hit0": 0.4644,
+        "hit2": 0.3477,
+        "hit7": 0.1796,
+        "median": -0.007,
+        "mean": 0.0021,
+        "yearly": {
+          "2025": 0.3695,
+          "2026": 0.2661
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3477
+      },
+      "metrics_liq": {
+        "n": 13812,
+        "hit0": 0.4644,
+        "hit2": 0.3477,
+        "hit7": 0.1796,
+        "median": -0.007,
+        "mean": 0.0021,
+        "yearly": {
+          "2025": 0.3695,
+          "2026": 0.2661
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3477
+      },
+      "lift2_liq": -0.0006,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0006
+    },
+    "perm_trend_adx": {
+      "group": "common_filter_permutation",
+      "label": "Trend + ADX>=20",
+      "desc": "",
+      "metrics": {
+        "n": 9713,
+        "hit0": 0.5237,
+        "hit2": 0.4109,
+        "hit7": 0.2283,
+        "median": 0.0029,
+        "mean": 0.0147,
+        "yearly": {
+          "2025": 0.4295,
+          "2026": 0.3195
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4109
+      },
+      "metrics_liq": {
+        "n": 9713,
+        "hit0": 0.5237,
+        "hit2": 0.4109,
+        "hit7": 0.2283,
+        "median": 0.0029,
+        "mean": 0.0147,
+        "yearly": {
+          "2025": 0.4295,
+          "2026": 0.3195
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4109
+      },
+      "lift2_liq": 0.0626,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0626
+    },
+    "perm_full": {
+      "group": "common_filter_permutation",
+      "label": "Trend + RSI + ADX + liquid (full common filter)",
+      "desc": "",
+      "metrics": {
+        "n": 6843,
+        "hit0": 0.5002,
+        "hit2": 0.3816,
+        "hit7": 0.2072,
+        "median": 0.0,
+        "mean": 0.0079,
+        "yearly": {
+          "2025": 0.4009,
+          "2026": 0.29
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3816
+      },
+      "metrics_liq": {
+        "n": 6843,
+        "hit0": 0.5002,
+        "hit2": 0.3816,
+        "hit7": 0.2072,
+        "median": 0.0,
+        "mean": 0.0079,
+        "yearly": {
+          "2025": 0.4009,
+          "2026": 0.29
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3816
+      },
+      "lift2_liq": 0.0333,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0333
+    },
+    "bonus_vol": {
+      "group": "bonus_conditions",
+      "label": "Momentum + vol surge (>2.0x)",
+      "desc": "",
+      "metrics": {
+        "n": 333,
+        "hit0": 0.5315,
+        "hit2": 0.4414,
+        "hit7": 0.2703,
+        "median": 0.0042,
+        "mean": 0.0173,
+        "yearly": {
+          "2025": 0.5,
+          "2026": 0.24
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4414
+      },
+      "metrics_liq": {
+        "n": 333,
+        "hit0": 0.5315,
+        "hit2": 0.4414,
+        "hit7": 0.2703,
+        "median": 0.0042,
+        "mean": 0.0173,
+        "yearly": {
+          "2025": 0.5,
+          "2026": 0.24
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4414
+      },
+      "lift2_liq": 0.0931,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0931
+    },
+    "bonus_adx": {
+      "group": "bonus_conditions",
+      "label": "Momentum + ADX>28",
+      "desc": "",
+      "metrics": {
+        "n": 3349,
+        "hit0": 0.5261,
+        "hit2": 0.4177,
+        "hit7": 0.2356,
+        "median": 0.0038,
+        "mean": 0.0132,
+        "yearly": {
+          "2025": 0.4279,
+          "2026": 0.3531
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4177
+      },
+      "metrics_liq": {
+        "n": 3349,
+        "hit0": 0.5261,
+        "hit2": 0.4177,
+        "hit7": 0.2356,
+        "median": 0.0038,
+        "mean": 0.0132,
+        "yearly": {
+          "2025": 0.4279,
+          "2026": 0.3531
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4177
+      },
+      "lift2_liq": 0.0694,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0694
+    },
+    "bonus_rsi": {
+      "group": "bonus_conditions",
+      "label": "Momentum + RSI gold (50-68)",
+      "desc": "",
+      "metrics": {
+        "n": 5443,
+        "hit0": 0.4938,
+        "hit2": 0.3746,
+        "hit7": 0.2063,
+        "median": -0.0021,
+        "mean": 0.0071,
+        "yearly": {
+          "2025": 0.3926,
+          "2026": 0.2902
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3746
+      },
+      "metrics_liq": {
+        "n": 5443,
+        "hit0": 0.4938,
+        "hit2": 0.3746,
+        "hit7": 0.2063,
+        "median": -0.0021,
+        "mean": 0.0071,
+        "yearly": {
+          "2025": 0.3926,
+          "2026": 0.2902
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3746
+      },
+      "lift2_liq": 0.0263,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0263
+    },
+    "ens_any": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble total >= 0.35 (current gate)",
+      "desc": "",
+      "metrics": {
+        "n": 6387,
+        "hit0": 0.498,
+        "hit2": 0.3895,
+        "hit7": 0.1992,
+        "median": -0.0013,
+        "mean": 0.007,
+        "yearly": {
+          "2025": 0.428,
+          "2026": 0.2635
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3895
+      },
+      "metrics_liq": {
+        "n": 6387,
+        "hit0": 0.498,
+        "hit2": 0.3895,
+        "hit7": 0.1992,
+        "median": -0.0013,
+        "mean": 0.007,
+        "yearly": {
+          "2025": 0.428,
+          "2026": 0.2635
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3895
+      },
+      "lift2_liq": 0.0412,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0412
+    },
+    "ens_weak": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble weak (0.35-0.65)",
+      "desc": "Currently shown as 'buy' on the dashboard",
+      "metrics": {
+        "n": 5687,
+        "hit0": 0.4987,
+        "hit2": 0.3868,
+        "hit7": 0.1955,
+        "median": -0.0012,
+        "mean": 0.0067,
+        "yearly": {
+          "2025": 0.4226,
+          "2026": 0.2684
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3868
+      },
+      "metrics_liq": {
+        "n": 5687,
+        "hit0": 0.4987,
+        "hit2": 0.3868,
+        "hit7": 0.1955,
+        "median": -0.0012,
+        "mean": 0.0067,
+        "yearly": {
+          "2025": 0.4226,
+          "2026": 0.2684
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3868
+      },
+      "lift2_liq": 0.0385,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0385
+    },
+    "ens_strong": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble strong (>=0.65)",
+      "desc": "",
+      "metrics": {
+        "n": 700,
+        "hit0": 0.4929,
+        "hit2": 0.4114,
+        "hit7": 0.2286,
+        "median": -0.0029,
+        "mean": 0.0092,
+        "yearly": {
+          "2025": 0.4733,
+          "2026": 0.2273
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4114
+      },
+      "metrics_liq": {
+        "n": 700,
+        "hit0": 0.4929,
+        "hit2": 0.4114,
+        "hit7": 0.2286,
+        "median": -0.0029,
+        "mean": 0.0092,
+        "yearly": {
+          "2025": 0.4733,
+          "2026": 0.2273
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4114
+      },
+      "lift2_liq": 0.0631,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0631
+    },
+    "e35_50": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble 0.35-0.50",
+      "desc": "",
+      "metrics": {
+        "n": 989,
+        "hit0": 0.4307,
+        "hit2": 0.2902,
+        "hit7": 0.1274,
+        "median": -0.0124,
+        "mean": -0.0078,
+        "yearly": {
+          "2025": 0.2918,
+          "2026": 0.2844
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2902
+      },
+      "metrics_liq": {
+        "n": 989,
+        "hit0": 0.4307,
+        "hit2": 0.2902,
+        "hit7": 0.1274,
+        "median": -0.0124,
+        "mean": -0.0078,
+        "yearly": {
+          "2025": 0.2918,
+          "2026": 0.2844
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2902
+      },
+      "lift2_liq": -0.0581,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0581
+    },
+    "e50_65": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble 0.50-0.65",
+      "desc": "",
+      "metrics": {
+        "n": 4698,
+        "hit0": 0.513,
+        "hit2": 0.4072,
+        "hit7": 0.2099,
+        "median": 0.0,
+        "mean": 0.0098,
+        "yearly": {
+          "2025": 0.451,
+          "2026": 0.2653
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4072
+      },
+      "metrics_liq": {
+        "n": 4698,
+        "hit0": 0.513,
+        "hit2": 0.4072,
+        "hit7": 0.2099,
+        "median": 0.0,
+        "mean": 0.0098,
+        "yearly": {
+          "2025": 0.451,
+          "2026": 0.2653
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4072
+      },
+      "lift2_liq": 0.0589,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0589
+    },
+    "e80_plus": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble 0.80+",
+      "desc": "",
+      "metrics": {
+        "n": 682,
+        "hit0": 0.4985,
+        "hit2": 0.4194,
+        "hit7": 0.2346,
+        "median": -0.0012,
+        "mean": 0.0101,
+        "yearly": {
+          "2025": 0.4805,
+          "2026": 0.2321
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4194
+      },
+      "metrics_liq": {
+        "n": 682,
+        "hit0": 0.4985,
+        "hit2": 0.4194,
+        "hit7": 0.2346,
+        "median": -0.0012,
+        "mean": 0.0101,
+        "yearly": {
+          "2025": 0.4805,
+          "2026": 0.2321
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4194
+      },
+      "lift2_liq": 0.0711,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0711
+    },
+    "ens_2of4": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble 2-of-4 strategies agree",
+      "desc": "",
+      "metrics": {
+        "n": 6387,
+        "hit0": 0.498,
+        "hit2": 0.3895,
+        "hit7": 0.1992,
+        "median": -0.0013,
+        "mean": 0.007,
+        "yearly": {
+          "2025": 0.428,
+          "2026": 0.2635
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3895
+      },
+      "metrics_liq": {
+        "n": 6387,
+        "hit0": 0.498,
+        "hit2": 0.3895,
+        "hit7": 0.1992,
+        "median": -0.0013,
+        "mean": 0.007,
+        "yearly": {
+          "2025": 0.428,
+          "2026": 0.2635
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3895
+      },
+      "lift2_liq": 0.0412,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0412
+    },
+    "ens_3of4": {
+      "group": "ensemble_brackets",
+      "label": "Ensemble 3-of-4 strategies agree",
+      "desc": "",
+      "metrics": {
+        "n": 700,
+        "hit0": 0.4929,
+        "hit2": 0.4114,
+        "hit7": 0.2286,
+        "median": -0.0029,
+        "mean": 0.0092,
+        "yearly": {
+          "2025": 0.4733,
+          "2026": 0.2273
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4114
+      },
+      "metrics_liq": {
+        "n": 700,
+        "hit0": 0.4929,
+        "hit2": 0.4114,
+        "hit7": 0.2286,
+        "median": -0.0029,
+        "mean": 0.0092,
+        "yearly": {
+          "2025": 0.4733,
+          "2026": 0.2273
+        },
+        "train_hit2": null,
+        "test_hit2": 0.4114
+      },
+      "lift2_liq": 0.0631,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0631
+    },
+    "confluence_2": {
+      "group": "confluence",
+      "label": "2+ independent systems agree",
+      "desc": "The dashboard 'Đồng thuận' metric",
+      "metrics": {
+        "n": 5556,
+        "hit0": 0.4147,
+        "hit2": 0.2745,
+        "hit7": 0.1233,
+        "median": -0.0125,
+        "mean": -0.0049,
+        "yearly": {
+          "2025": 0.3027,
+          "2026": 0.2219
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2745
+      },
+      "metrics_liq": {
+        "n": 2744,
+        "hit0": 0.4548,
+        "hit2": 0.3316,
+        "hit7": 0.1629,
+        "median": -0.0085,
+        "mean": -0.0024,
+        "yearly": {
+          "2025": 0.3664,
+          "2026": 0.2452
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3316
+      },
+      "lift2_liq": -0.0167,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0167
+    },
+    "confluence_3": {
+      "group": "confluence",
+      "label": "3+ independent systems agree",
+      "desc": "",
+      "metrics": {
+        "n": 1346,
+        "hit0": 0.4079,
+        "hit2": 0.2682,
+        "hit7": 0.13,
+        "median": -0.0141,
+        "mean": -0.0077,
+        "yearly": {
+          "2025": 0.309,
+          "2026": 0.1988
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2682
+      },
+      "metrics_liq": {
+        "n": 695,
+        "hit0": 0.4532,
+        "hit2": 0.3324,
+        "hit7": 0.1712,
+        "median": -0.0104,
+        "mean": -0.0017,
+        "yearly": {
+          "2025": 0.3675,
+          "2026": 0.2437
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3324
+      },
+      "lift2_liq": -0.0159,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0159
+    },
+    "confluence_4": {
+      "group": "confluence",
+      "label": "4+ independent systems agree",
+      "desc": "",
+      "metrics": {
+        "n": 187,
+        "hit0": 0.385,
+        "hit2": 0.2727,
+        "hit7": 0.1123,
+        "median": -0.0139,
+        "mean": -0.0022,
+        "yearly": {
+          "2025": 0.296,
+          "2026": 0.2258
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2727
+      },
+      "metrics_liq": {
+        "n": 132,
+        "hit0": 0.4318,
+        "hit2": 0.3409,
+        "hit7": 0.1439,
+        "median": -0.0133,
+        "mean": 0.0033,
+        "yearly": {
+          "2025": 0.3542,
+          "2026": 0.3056
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3409
+      },
+      "lift2_liq": -0.0074,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0074
+    },
+    "luc_valid": {
+      "group": "unvalidated_systems",
+      "label": "Luc-Mach valid (>=3/6 VUDD+Tplus aligned)",
+      "desc": "",
+      "metrics": {
+        "n": 6696,
+        "hit0": 0.397,
+        "hit2": 0.2373,
+        "hit7": 0.0972,
+        "median": -0.013,
+        "mean": -0.0073,
+        "yearly": {
+          "2025": 0.2553,
+          "2026": 0.2075
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2373
+      },
+      "metrics_liq": {
+        "n": 2156,
+        "hit0": 0.4453,
+        "hit2": 0.314,
+        "hit7": 0.1419,
+        "median": -0.0096,
+        "mean": -0.0043,
+        "yearly": {
+          "2025": 0.3356,
+          "2026": 0.2648
+        },
+        "train_hit2": null,
+        "test_hit2": 0.314
+      },
+      "lift2_liq": -0.0343,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0343
+    },
+    "luc_watch": {
+      "group": "unvalidated_systems",
+      "label": "Luc-Mach watch",
+      "desc": "",
+      "metrics": {
+        "n": 15052,
+        "hit0": 0.4939,
+        "hit2": 0.2948,
+        "hit7": 0.1141,
+        "median": -0.0018,
+        "mean": 0.0008,
+        "yearly": {
+          "2025": 0.3145,
+          "2026": 0.2582
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2948
+      },
+      "metrics_liq": {
+        "n": 5663,
+        "hit0": 0.5026,
+        "hit2": 0.3516,
+        "hit7": 0.1543,
+        "median": 0.0,
+        "mean": 0.0027,
+        "yearly": {
+          "2025": 0.3756,
+          "2026": 0.2915
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3516
+      },
+      "lift2_liq": 0.0033,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0033
+    },
+    "k4_buy": {
+      "group": "unvalidated_systems",
+      "label": "Khung4-Tplus buy",
+      "desc": "",
+      "metrics": {
+        "n": 5426,
+        "hit0": 0.4042,
+        "hit2": 0.2556,
+        "hit7": 0.1062,
+        "median": -0.0132,
+        "mean": -0.0077,
+        "yearly": {
+          "2025": 0.2715,
+          "2026": 0.2283
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2556
+      },
+      "metrics_liq": {
+        "n": 2155,
+        "hit0": 0.4394,
+        "hit2": 0.3044,
+        "hit7": 0.1378,
+        "median": -0.0109,
+        "mean": -0.006,
+        "yearly": {
+          "2025": 0.3244,
+          "2026": 0.2601
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3044
+      },
+      "lift2_liq": -0.0439,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0439
+    },
+    "pre_any": {
+      "group": "unvalidated_systems",
+      "label": "Pre-breakout composite >= 60 (approx)",
+      "desc": "Rolling approximation, vol-gradient approximated",
+      "metrics": {
+        "n": 2566,
+        "hit0": 0.4517,
+        "hit2": 0.2284,
+        "hit7": 0.0698,
+        "median": -0.0042,
+        "mean": 0.0031,
+        "yearly": {
+          "2025": 0.2588,
+          "2026": 0.1644
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2284
+      },
+      "metrics_liq": {
+        "n": 288,
+        "hit0": 0.4757,
+        "hit2": 0.3299,
+        "hit7": 0.1285,
+        "median": -0.0025,
+        "mean": 0.0117,
+        "yearly": {
+          "2025": 0.3899,
+          "2026": 0.1429
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3299
+      },
+      "lift2_liq": -0.0184,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0184
+    },
+    "pre_strong": {
+      "group": "unvalidated_systems",
+      "label": "Pre-breakout strong (>=75, approx)",
+      "desc": "",
+      "metrics": {
+        "n": 1031,
+        "hit0": 0.4374,
+        "hit2": 0.2144,
+        "hit7": 0.0611,
+        "median": -0.0049,
+        "mean": 0.0003,
+        "yearly": {
+          "2025": 0.2387,
+          "2026": 0.1556
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2144
+      },
+      "metrics_liq": {
+        "n": 109,
+        "hit0": 0.5596,
+        "hit2": 0.3853,
+        "hit7": 0.1468,
+        "median": 0.0026,
+        "mean": 0.0204,
+        "yearly": {
+          "2025": 0.4286,
+          "2026": 0.24
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3853
+      },
+      "lift2_liq": 0.037,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.037
+    },
+    "luc_sell": {
+      "group": "sell_signals",
+      "label": "Luc-Mach sell_warning",
+      "desc": "Probability of drop after signal",
+      "metrics": {
+        "n": 6450,
+        "hit0": 0.5685,
+        "hit2": 0.3434,
+        "hit7": 0.1226,
+        "median": 0.0029,
+        "mean": 0.0068,
+        "yearly": {
+          "2025": 0.3509,
+          "2026": 0.3316
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3434
+      },
+      "metrics_liq": {
+        "n": 2123,
+        "hit0": 0.5054,
+        "hit2": 0.3698,
+        "hit7": 0.1762,
+        "median": 0.0,
+        "mean": 0.0033,
+        "yearly": {
+          "2025": 0.3828,
+          "2026": 0.3409
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3698
+      },
+      "lift2_liq": 0.0215,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0215
+    },
+    "k4_sell": {
+      "group": "sell_signals",
+      "label": "Khung4-Tplus sell",
+      "desc": "",
+      "metrics": {
+        "n": 5453,
+        "hit0": 0.5667,
+        "hit2": 0.3682,
+        "hit7": 0.1315,
+        "median": 0.0045,
+        "mean": 0.0067,
+        "yearly": {
+          "2025": 0.3727,
+          "2026": 0.3608
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3682
+      },
+      "metrics_liq": {
+        "n": 2266,
+        "hit0": 0.5221,
+        "hit2": 0.3897,
+        "hit7": 0.1752,
+        "median": 0.002,
+        "mean": 0.0067,
+        "yearly": {
+          "2025": 0.3969,
+          "2026": 0.3743
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3897
+      },
+      "lift2_liq": 0.0414,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0414
+    },
+    "mama_buy": {
+      "group": "unvalidated_systems",
+      "label": "MAMA positional buy",
+      "desc": "Backtest win rate ~17% (T+10 +7%)",
+      "metrics": {
+        "n": 1328,
+        "hit0": 0.4134,
+        "hit2": 0.2816,
+        "hit7": 0.1288,
+        "median": -0.0111,
+        "mean": -0.0028,
+        "yearly": {
+          "2025": 0.3392,
+          "2026": 0.1955
+        },
+        "train_hit2": null,
+        "test_hit2": 0.2816
+      },
+      "metrics_liq": {
+        "n": 504,
+        "hit0": 0.4524,
+        "hit2": 0.3413,
+        "hit7": 0.1766,
+        "median": -0.0066,
+        "mean": 0.0016,
+        "yearly": {
+          "2025": 0.4199,
+          "2026": 0.1908
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3413
+      },
+      "lift2_liq": -0.007,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.007
+    },
+    "ats_buy": {
+      "group": "unvalidated_systems",
+      "label": "ATS buy",
+      "desc": "Backtest win rate ~17% (T+10 +7%)",
+      "metrics": {
+        "n": 3257,
+        "hit0": 0.4157,
+        "hit2": 0.272,
+        "hit7": 0.1265,
+        "median": -0.0125,
+        "mean": -0.0048,
+        "yearly": {
+          "2025": 0.2963,
+          "2026": 0.2364
+        },
+        "train_hit2": null,
+        "test_hit2": 0.272
+      },
+      "metrics_liq": {
+        "n": 1110,
+        "hit0": 0.473,
+        "hit2": 0.3541,
+        "hit7": 0.1667,
+        "median": -0.0062,
+        "mean": 0.0007,
+        "yearly": {
+          "2025": 0.3979,
+          "2026": 0.2612
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3541
+      },
+      "lift2_liq": 0.0058,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0058
+    },
+    "mama_sell": {
+      "group": "sell_signals",
+      "label": "MAMA sell",
+      "desc": "Probability of drop after signal",
+      "metrics": {
+        "n": 1480,
+        "hit0": 0.5277,
+        "hit2": 0.3378,
+        "hit7": 0.1176,
+        "median": 0.0,
+        "mean": -0.0001,
+        "yearly": {
+          "2025": 0.3371,
+          "2026": 0.3392
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3378
+      },
+      "metrics_liq": {
+        "n": 614,
+        "hit0": 0.4528,
+        "hit2": 0.3322,
+        "hit7": 0.1336,
+        "median": -0.0067,
+        "mean": -0.0097,
+        "yearly": {
+          "2025": 0.3388,
+          "2026": 0.3175
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3322
+      },
+      "lift2_liq": -0.0161,
+      "lift2_liq_train": null,
+      "lift2_liq_test": -0.0161
+    },
+    "ats_sell": {
+      "group": "sell_signals",
+      "label": "ATS sell",
+      "desc": "Probability of drop after signal",
+      "metrics": {
+        "n": 3394,
+        "hit0": 0.548,
+        "hit2": 0.3471,
+        "hit7": 0.1338,
+        "median": 0.0002,
+        "mean": 0.0039,
+        "yearly": {
+          "2025": 0.3562,
+          "2026": 0.3331
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3471
+      },
+      "metrics_liq": {
+        "n": 1247,
+        "hit0": 0.506,
+        "hit2": 0.3528,
+        "hit7": 0.1676,
+        "median": 0.0,
+        "mean": 0.0011,
+        "yearly": {
+          "2025": 0.3893,
+          "2026": 0.2725
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3528
+      },
+      "lift2_liq": 0.0045,
+      "lift2_liq_train": null,
+      "lift2_liq_test": 0.0045
+    }
+  },
+  "sell_signals": {
+    "luc_sell": {
+      "n": 6450,
+      "p_drop0": 0.4315,
+      "p_drop2": 0.2758,
+      "median": 0.0029,
+      "mean": 0.0068
+    },
+    "k4_sell": {
+      "n": 5453,
+      "p_drop0": 0.4333,
+      "p_drop2": 0.293,
+      "median": 0.0045,
+      "mean": 0.0067
+    },
+    "mama_sell": {
+      "n": 1480,
+      "p_drop0": 0.4723,
+      "p_drop2": 0.3216,
+      "median": 0.0,
+      "mean": -0.0001
+    },
+    "ats_sell": {
+      "n": 3394,
+      "p_drop0": 0.452,
+      "p_drop2": 0.3044,
+      "median": 0.0002,
+      "mean": 0.0039
+    }
+  },
+  "regime_gating": {
+    "risk_off": {
+      "baseline_liq": {
+        "n": 2133,
+        "hit0": 0.6287,
+        "hit2": 0.488,
+        "hit7": 0.2471,
+        "median": 0.0175,
+        "mean": 0.0241,
+        "yearly": {
+          "2025": 0.4972,
+          "2026": 0.4444
+        },
+        "train_hit2": null,
+        "test_hit2": 0.488
+      }
+    },
+    "neutral": {
+      "baseline_liq": {
+        "n": 29517,
+        "hit0": 0.4608,
+        "hit2": 0.3161,
+        "hit7": 0.1319,
+        "median": -0.0067,
+        "mean": -0.005,
+        "yearly": {
+          "2025": 0.325,
+          "2026": 0.2984
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3161
+      },
+      "mom_any": {
+        "hit2": 0.3499,
+        "n": 543,
+        "lift2_vs_baseline_in_regime": 0.0338
+      },
+      "mom_strong": {
+        "hit2": 0.2989,
+        "n": 174,
+        "lift2_vs_baseline_in_regime": -0.0172
+      },
+      "ens_any": {
+        "hit2": 0.3317,
+        "n": 2638,
+        "lift2_vs_baseline_in_regime": 0.0156
+      },
+      "ens_strong": {
+        "hit2": 0.2967,
+        "n": 246,
+        "lift2_vs_baseline_in_regime": -0.0194
+      },
+      "confluence_2": {
+        "hit2": 0.3097,
+        "n": 1001,
+        "lift2_vs_baseline_in_regime": -0.0064
+      },
+      "confluence_3": {
+        "hit2": 0.3376,
+        "n": 237,
+        "lift2_vs_baseline_in_regime": 0.0215
+      }
+    },
+    "risk_on": {
+      "baseline_liq": {
+        "n": 25405,
+        "hit0": 0.513,
+        "hit2": 0.3741,
+        "hit7": 0.1715,
+        "median": 0.0,
+        "mean": 0.0071,
+        "yearly": {
+          "2025": 0.4222,
+          "2026": 0.2311
+        },
+        "train_hit2": null,
+        "test_hit2": 0.3741
+      },
+      "mom_any": {
+        "hit2": 0.4496,
+        "n": 625,
+        "lift2_vs_baseline_in_regime": 0.0755
+      },
+      "mom_strong": {
+        "hit2": 0.4274,
+        "n": 234,
+        "lift2_vs_baseline_in_regime": 0.0533
+      },
+      "ens_any": {
+        "hit2": 0.4306,
+        "n": 3704,
+        "lift2_vs_baseline_in_regime": 0.0565
+      },
+      "ens_strong": {
+        "hit2": 0.4677,
+        "n": 449,
+        "lift2_vs_baseline_in_regime": 0.0936
+      },
+      "confluence_2": {
+        "hit2": 0.3424,
+        "n": 1729,
+        "lift2_vs_baseline_in_regime": -0.0317
+      },
+      "confluence_3": {
+        "hit2": 0.3297,
+        "n": 455,
+        "lift2_vs_baseline_in_regime": -0.0444
+      }
+    },
+    "overheated": {
+      "baseline_liq": null
+    }
+  },
+  "regime_series": {
+    "n_dates": 2654,
+    "buckets": {
+      "risk_off": 12,
+      "neutral": 972,
+      "risk_on": 1670,
+      "overheated": 0
+    }
+  },
+  "walk_forward": {
+    "cutoff_year": 2022,
+    "weights_train": {
+      "ma_crossover": 0.3,
+      "pullback": 0.14,
+      "breakout": 0.28,
+      "momentum": 0.27
+    },
+    "weights_current": {
+      "ma_crossover": 0.2752,
+      "pullback": 0.1982,
+      "breakout": 0.2761,
+      "momentum": 0.2504
+    },
+    "current_strong": {
+      "train": [
+        null,
+        0
+      ],
+      "test": [
+        0.3649,
+        1373
+      ]
+    },
+    "oos_strong": {
+      "train": [
+        null,
+        0
+      ],
+      "test": [
+        0.3649,
+        1373
+      ]
+    },
+    "current_weak_low": {
+      "train": [
+        null,
+        0
+      ],
+      "test": [
+        0.3286,
+        14021
+      ]
+    },
+    "oos_weak_low": {
+      "train": [
+        null,
+        0
+      ],
+      "test": [
+        0.3286,
+        14021
+      ]
+    }
+  }
+}
