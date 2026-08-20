@@ -647,6 +647,9 @@ def main() -> int:
 
     frame = pd.concat(frames, ignore_index=True)
     print(f"Observations (rows): {len(frame)}")
+    frame["date"] = pd.to_datetime(frame["date"])
+    print(f"Date range: {frame['date'].min().date()} -> {frame['date'].max().date()}  "
+          f"({int((frame['date'].max() - frame['date'].min()).days / 365.25)} years)")
 
     # Baselines (T+10, hit2)
     baseline_all = metrics(frame, np.ones(len(frame), dtype=bool))

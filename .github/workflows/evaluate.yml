@@ -13,7 +13,7 @@ concurrency:
 jobs:
   evaluate:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
 
     steps:
       - name: Checkout repo
@@ -40,6 +40,34 @@ jobs:
           restore-keys: |
             ohlc-cache-v2-
 
+      - name: Validate SSI secrets
+        run: |
+          test -n "$SSI_CLIENT_ID"
+          test -n "$SSI_API_KEY"
+          test -n "$SSI_API_SECRET"
+        env:
+          SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
+          SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
+          SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
+
+      - name: Restore FastConnect token cache (optional, cho CI khong can OTP)
+        run: |
+          if [ -n "$SSI_TOKEN_CACHE" ]; then
+            echo "$SSI_TOKEN_CACHE" | base64 -d > scripts/token_cache.json
+            echo "Token cache restored."
+          else
+            echo "SSI_TOKEN_CACHE chua duoc dat — thu authenticate() khong OTP."
+          fi
+        env:
+          SSI_TOKEN_CACHE: ${{ secrets.SSI_TOKEN_CACHE }}
+
+      - name: Backfill full OHLC history (2015 -> now)
+        run: python scripts/backfill_history.py
+        env:
+          SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
+          SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
+          SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
+
       - name: Run filter evaluation
         run: python scripts/evaluate_filters.py
 
@@ -47,7 +75,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/evaluation_filters.json docs/data/evaluation_filters.json
+          git add data/ docs/
           if git diff --cached --quiet; then
             echo "No evaluation changes to commit."
           else
