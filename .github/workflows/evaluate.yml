@@ -36,8 +36,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/ohlc_cache
-          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', '.github/workflows/update.yml') }}
+          key: evaluate-ohlc-cache-v1-${{ hashFiles('scripts/**/*.py') }}
           restore-keys: |
+            evaluate-ohlc-cache-v1-
             ohlc-cache-v2-
 
       - name: Validate SSI secrets
@@ -78,7 +79,16 @@ jobs:
           git add data/ docs/
           if git diff --cached --quiet; then
             echo "No evaluation changes to commit."
-          else
-            git commit -m "chore: update filter evaluation results $(date -u +'%Y-%m-%d')"
-            git push
+            exit 0
           fi
+          git commit -m "chore: update filter evaluation results $(date -u +'%Y-%m-%d')"
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push attempt $attempt rejected; rebasing..."
+            git pull --rebase
+          done
+          echo "Push failed after 5 attempts."
+          exit 1

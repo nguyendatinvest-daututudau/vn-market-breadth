@@ -742,6 +742,17 @@ def main() -> int:
         if k in wf:
             v = wf[k]
             print(f"  {k:16s} train={v['train']} test={v['test']}")
+    print("\n--- Regime gating (T+10 hit2, liquid) ---")
+    for tone, row in regime_gating.items():
+        base = row["baseline_liq"]
+        base_s = (f"{base['hit2']:.3f} n={base['n']}") if base else "n/a"
+        parts = []
+        for key in ("mom_any", "mom_strong", "ens_any", "ens_strong", "confluence_2", "confluence_3"):
+            if key in row:
+                v = row[key]
+                lf = v.get("lift2_vs_baseline_in_regime")
+                parts.append(f"{key}={v['hit2']:.3f}({('%.3f' % lf) if lf is not None else '-'})")
+        print(f"  {tone:10s} base={base_s}  " + "  ".join(parts))
     print("\nDone.")
     return 0
 
