@@ -246,14 +246,14 @@
   .ad-bars{height:220px;display:grid;grid-template-columns:repeat(11,1fr);gap:8px;align-items:end;padding:18px 4px 4px;border-radius:12px;background:linear-gradient(180deg,rgba(247,249,255,0.9),rgba(255,255,255,0.5));}
   .ad-bar-col{min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
   .ad-bar-num{font-size:10px;font-weight:800;color:var(--muted);height:14px;}
-  .ad-bar{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;min-height:2px;box-shadow:0 8px 18px rgba(31,41,102,0.08);}
-  .ad-bar.down{background:linear-gradient(180deg,#F0473E,#D82735);}
-  .ad-bar.neutral{background:linear-gradient(180deg,#D8C91B,#B7A90D);}
-  .ad-bar.up{background:linear-gradient(180deg,#12C7A0,#0FAE72);}
+.ad-bar{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;min-height:2px;box-shadow:0 4px 12px rgba(0,0,0,0.35);}
+.ad-bar.down{background:linear-gradient(180deg,#FF6A5E,#E03540);}
+.ad-bar.neutral{background:linear-gradient(180deg,#F5C542,#D9A521);}
+.ad-bar.up{background:linear-gradient(180deg,#3DDC84,#1FB860);}
   .ad-bar-label{font-size:9px;color:var(--muted);white-space:nowrap;}
   .ad-dist-legend{height:7px;border-radius:999px;display:grid;grid-template-columns:5fr 1fr 5fr;overflow:hidden;margin-top:4px;}
   .ad-dist-legend span:nth-child(1){background:var(--down);}
-  .ad-dist-legend span:nth-child(2){background:#B7A90D;}
+  .ad-dist-legend span:nth-child(2){background:#D9A521;}
   .ad-dist-legend span:nth-child(3){background:var(--up);}
   .ad-dist-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;}
   @media (max-width:700px){.ad-bars{gap:4px;height:180px;overflow-x:auto;}.ad-bar-label{font-size:8px;writing-mode:vertical-rl;transform:rotate(180deg);}}
@@ -1558,7 +1558,7 @@ function renderBreadthChart(m){
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   const P = { t: 30, r: 14, b: 38, l: 44 }, cw = w - P.l - P.r, ch = h - P.t - P.b;
   const xp = i => P.l + (i / (pts.length - 1)) * cw, yp = v => P.t + ch - (v / 100) * ch;
-  const lines = [{ k: 'v10', c: '#A78BFA', l: 'MA10' }, { k: 'v20', c: '#818CF8', l: 'MA20' }, { k: 'v50', c: '#FBBF24', l: 'MA50' }, { k: 'v200', c: '#22D3EE', l: 'MA200' }];
+  const lines = [{ k: 'v10', c: '#FF4D2E', l: 'MA10' }, { k: 'v20', c: '#22D3EE', l: 'MA20' }, { k: 'v50', c: '#FBBF24', l: 'MA50' }, { k: 'v200', c: '#A78BFA', l: 'MA200' }];
   const maxTicks = Math.max(2, Math.floor(cw / 55));
   const months = [];
   let lastKey = null;
