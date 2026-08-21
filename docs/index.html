@@ -8,16 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-a:#F4F1EA; --bg-b:#EFEAE0; --bg-c:#FFF8EA;
-    --panel:#FFFDF8; --panel-tint:#F4EFE6; --border:#D8D0C2;
-    --text:#171717; --muted:#5F6773; --faint:#8A8172;
-    --up:#16A34A; --down:#C2413B;
+    --bg-a:#0C0F14; --bg-b:#0A0D11; --bg-c:#11151B;
+    --panel:#141920; --panel-tint:#1B2129; --border:#2A323D;
+    --text:#E8ECF1; --muted:#98A2AE; --faint:#6B7280;
+    --up:#22C55E; --down:#F87171;
     --neutral:#D6A84F;
-    --accent-1:#101820; --accent-2:#B88746;
-    --green:#16A34A; --blue:#2C6E9E; --red:#C2413B; --ink:#101820;
-    --accent-grad: linear-gradient(120deg, #101820, #B88746);
-    --shadow-sm: 0 2px 0 rgba(16,24,32,0.04);
-    --shadow-md: 0 18px 50px rgba(16,24,32,0.12);
+    --accent-1:#E6EBF2; --accent-2:#D8AA5A;
+    --green:#22C55E; --blue:#5BA3D9; --red:#F87171; --ink:#E6EBF2;
+    --accent-grad: linear-gradient(120deg, #B88746, #7A5A34);
+    --shadow-sm: 0 2px 0 rgba(0,0,0,0.25);
+    --shadow-md: 0 18px 50px rgba(0,0,0,0.45);
     --font-all:'Inter',sans-serif;
   }
   *{box-sizing:border-box; margin:0; padding:0; font-family:'Inter',sans-serif !important;}
@@ -25,7 +25,7 @@
   body{color:var(--text);}
   body{
     min-height:100vh; padding:0 0 44px;
-    background:linear-gradient(180deg,#F7F4ED 0%,#F2EDE4 46%,#FBFAF6 100%);
+    background:linear-gradient(180deg,#0C0F14 0%,#090C10 46%,#10141A 100%);
     background-attachment:fixed;
   }
   .wrap{max-width:1120px; margin:0 auto; padding:0 clamp(12px,3vw,36px);}
@@ -89,7 +89,7 @@
   .s-badge.active{opacity:1;box-shadow:0 0 0 2px var(--accent-1);}
   .summary-count{font-family:var(--font-all);font-size:14px;font-weight:600;color:var(--text);}
 
-  .mini-symbol{font-size:10px;font-weight:700;border:1px solid var(--border);background:rgba(255,255,255,0.7);border-radius:999px;padding:3px 8px;color:var(--text);}
+  .mini-symbol{font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--panel-tint);border-radius:999px;padding:3px 8px;color:var(--text);}
   .mini-symbol.sell{color:var(--down);border-color:rgba(240,71,62,0.20);}
   .mini-symbol.buy{color:var(--up);border-color:rgba(15,174,114,0.20);}
   .mini-symbol.watch{color:#B9760F;border-color:rgba(245,165,36,0.25);}
@@ -100,12 +100,12 @@
   .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent-1);}
   .filter-bar input{flex:1;min-width:120px;}
   .btn-copy{font-family:var(--font-all);font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
-  .btn-copy:hover{background:var(--accent-1);color:#fff;border-color:var(--accent-1);}
+  .btn-copy:hover{background:var(--accent-1);color:var(--bg-a);border-color:var(--accent-1);}
 
   table{width:100%;min-width:780px;border-collapse:collapse;font-size:12px;}
-  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--faint);font-weight:700;padding:9px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,0.96);z-index:2;}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--faint);font-weight:700;padding:9px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:2;}
   td{padding:11px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
-  tr:hover td{background:rgba(248,250,247,0.78);}
+  tr:hover td{background:rgba(255,255,255,0.04);}
   td.mono{font-family:var(--font-all);}
   .up-txt{color:var(--up); font-weight:700;}
   .down-txt{color:var(--down); font-weight:700;}
@@ -158,15 +158,15 @@
   .breadth-bar span{display:flex;align-items:center;justify-content:center;font-family:var(--font-all);font-size:10px;font-weight:700;color:#fff;}
   .chart-wrap{position:relative;width:100%;}
   .chart-wrap canvas{width:100%;display:block;border-radius:10px;}
-  .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10.5px;box-shadow:var(--shadow-md);font-family:var(--font-all);display:none;white-space:nowrap;line-height:1.5;}
-  .chart-range-control{margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;}
+  .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(20,25,32,0.97);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10.5px;box-shadow:var(--shadow-md);font-family:var(--font-all);display:none;white-space:nowrap;line-height:1.5;}
+  .chart-range-control{margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel-tint);}
   .chart-range-label{display:block;font-family:var(--font-all);font-size:11px;font-weight:600;color:var(--text);margin-bottom:6px;}
   .chart-range-control input[type=range]{width:100%;height:18px;margin:2px 0;accent-color:#4F46E5;cursor:pointer;}
   .chart-range-control input[type=range] + input[type=range]{margin-top:-6px;}
   .chart-range-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-  .chart-range-chip{border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font-all);font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:999px;cursor:pointer;transition:all .15s;}
+  .chart-range-chip{border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-family:var(--font-all);font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:999px;cursor:pointer;transition:all .15s;}
   .chart-range-chip:hover{border-color:var(--accent-1);color:var(--accent-1);}
-  .chart-range-chip.active{background:var(--accent-1);border-color:var(--accent-1);color:#fff;}
+  .chart-range-chip.active{background:var(--accent-1);border-color:var(--accent-1);color:var(--bg-a);}
 
   .loading,.err{font-family:var(--font-all);font-size:12px;color:var(--muted);padding:30px;text-align:center;}
   footer{font-family:var(--font-all);font-size:10.5px;color:var(--faint);text-align:center;margin-top:20px;}
@@ -178,19 +178,6 @@
   .buy-hub-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px;}
   .buy-hub-note{font-size:11px;color:var(--muted);line-height:1.5;max-width:560px;}
   .price-buy{color:var(--up);font-weight:800;}
-
-  .radar-table td{vertical-align:middle;}
-  .action-pill{font-size:10px;font-weight:800;border-radius:999px;padding:4px 10px;display:inline-block;letter-spacing:0.03em;}
-  .action-pill.buy{background:rgba(15,174,114,0.12);color:var(--up);}
-  .action-pill.sell{background:rgba(240,71,62,0.12);color:var(--down);}
-  .action-pill.watch{background:rgba(245,165,36,0.14);color:#B9760F;}
-  .action-pill.conflict{background:rgba(79,70,229,0.10);color:var(--accent-1);}
-  .method-tags{display:flex;flex-wrap:wrap;gap:4px;}
-  .method-tag{font-size:9px;font-weight:700;border-radius:999px;padding:3px 8px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);}
-  .method-tag.buy{color:var(--up);border-color:rgba(15,174,114,0.24);background:rgba(15,174,114,0.07);}
-  .method-tag.sell{color:var(--down);border-color:rgba(240,71,62,0.22);background:rgba(240,71,62,0.07);}
-  .method-tag.watch{color:#B9760F;border-color:rgba(245,165,36,0.25);background:rgba(245,165,36,0.08);}
-  .radar-note{font-size:10.5px;color:var(--muted);line-height:1.45;max-width:300px;}
   .bt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
   @media (max-width:850px){.bt-grid{grid-template-columns:repeat(2,1fr);}}
   @media (max-width:520px){.bt-grid{grid-template-columns:1fr;}}
@@ -205,7 +192,7 @@
   .ev-col-title.good{color:var(--up);}
   .ev-col-title.bad{color:#FF8A8A;}
   .ev-list{display:flex;flex-direction:column;gap:5px;}
-  .ev-cell{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(20,24,52,0.35);}
+  .ev-cell{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.04);}
   .ev-name{font-size:12px;font-weight:600;color:var(--text);}
   .ev-val{font-size:11px;color:var(--muted);white-space:nowrap;}
   .ev-cell.good{border-left:3px solid var(--up);}
@@ -256,17 +243,17 @@
   @media (max-width:700px){.ad-bars{gap:4px;height:180px;overflow-x:auto;}.ad-bar-label{font-size:8px;writing-mode:vertical-rl;transform:rotate(180deg);}}
 
   .rsi-pulse-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-  .sentiment-gauge{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:center;margin-bottom:14px;border:1px solid var(--border);background:linear-gradient(135deg,#FFFDF8,#F4EFE6);border-radius:6px;padding:16px;}
+  .sentiment-gauge{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:center;margin-bottom:14px;border:1px solid var(--border);background:var(--panel-tint);border-radius:6px;padding:16px;}
   .gauge-face{position:relative;height:142px;border-radius:142px 142px 0 0;overflow:hidden;background:conic-gradient(from 270deg at 50% 100%,#C2413B 0deg,#D6A84F 54deg,#0F9F6E 108deg,#D6A84F 144deg,#B88746 180deg,transparent 180deg);}
-  .gauge-face:after{content:'';position:absolute;left:28px;right:28px;bottom:0;height:86px;border-radius:86px 86px 0 0;background:#FFFDF8;border:1px solid rgba(216,208,194,.65);border-bottom:none;}
-  .gauge-needle{position:absolute;left:50%;bottom:0;width:3px;height:104px;background:#101820;border-radius:999px;transform-origin:50% 100%;transform:rotate(var(--needle,-90deg));z-index:2;box-shadow:0 0 0 1px rgba(255,255,255,.5);}
-  .gauge-center{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:#101820;z-index:3;border:3px solid #FFFDF8;}
-  .gauge-score{text-align:center;margin-top:8px;font-size:28px;font-weight:900;letter-spacing:-.04em;color:#101820;}
+  .gauge-face:after{content:'';position:absolute;left:28px;right:28px;bottom:0;height:86px;border-radius:86px 86px 0 0;background:var(--panel);border:1px solid var(--border);border-bottom:none;}
+  .gauge-needle{position:absolute;left:50%;bottom:0;width:3px;height:104px;background:var(--text);border-radius:999px;transform-origin:50% 100%;transform:rotate(var(--needle,-90deg));z-index:2;box-shadow:0 0 0 1px rgba(255,255,255,.2);}
+  .gauge-center{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:var(--text);z-index:3;border:3px solid var(--panel);}
+  .gauge-score{text-align:center;margin-top:8px;font-size:28px;font-weight:900;letter-spacing:-.04em;color:var(--text);}
   .gauge-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
   .sentiment-copy .label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--faint);font-weight:900;margin-bottom:6px;}
-   .sentiment-copy .state{font-family:'Lora',Georgia,'Times New Roman',serif !important;font-size:28px;line-height:1.1;font-weight:700;color:#101820;margin-bottom:8px;}
+   .sentiment-copy .state{font-family:'Lora',Georgia,'Times New Roman',serif !important;font-size:28px;line-height:1.1;font-weight:700;color:var(--text);margin-bottom:8px;}
   .sentiment-copy .note{font-size:12px;color:var(--muted);line-height:1.6;background:transparent;border-left:3px solid var(--accent-2);padding:0 0 0 12px;margin:0;}
-  .rsi-pulse-card{border:1px solid var(--border);border-radius:6px;padding:12px;background:#fff;box-shadow:var(--shadow-sm);}
+  .rsi-pulse-card{border:1px solid var(--border);border-radius:6px;padding:12px;background:var(--panel);box-shadow:var(--shadow-sm);}
   .rsi-pulse-card .lab{font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--faint);font-weight:800;}
   .rsi-pulse-card .num{font-size:22px;font-weight:850;margin-top:4px;}
   .rsi-pulse-card .sub{font-size:10px;color:var(--muted);margin-top:2px;}
@@ -327,7 +314,7 @@
   .regime-track-marker{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--accent-1);transition:left .3s;}
   .regime-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;}
   .regime-info{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px;}
-  .regime-info .ri{background:rgba(255,255,255,0.6);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:11px;}
+  .regime-info .ri{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:11px;}
   .regime-info .ri .ri-l{color:var(--faint);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
   .regime-info .ri .ri-v{font-family:var(--font-all);font-weight:700;font-size:13px;}
   .regime-alert{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:12px;color:#991b1b;display:flex;align-items:center;gap:6px;}
@@ -347,9 +334,11 @@
       <span class="brand-copy"><span class="brand-title">NguyenDat Market Atlas</span><span class="brand-sub">Breadth · Signals · Radar</span></span>
     </a>
     <div class="nav-links">
-      <a href="./index.html">Dashboard</a>
+      <a href="#home" onclick="switchView('home')">Trang chủ</a>
+      <a href="#market" onclick="switchView('market')">%MA &amp; Thị trường</a>
+      <a href="#rsi" onclick="switchView('rsi')">RSI</a>
+      <a href="#signals" onclick="switchView('signals')">Mã quan sát</a>
       <a href="#radar">Radar</a>
-      <a href="#dashboard" onclick="showDashboardContent(event)">Dữ liệu</a>
     </div>
   </div>
 </nav>
@@ -369,8 +358,11 @@
   </section>
 
   <div class="view-tabs">
-    <button class="view-tab active" data-view="dashboard" onclick="switchView('dashboard')">Dashboard</button>
-    <button class="view-tab" data-view="radar" onclick="switchView('radar')">Accumulation Radar</button>
+    <button class="view-tab active" data-view="home" onclick="switchView('home')">🏠 Trang chủ</button>
+    <button class="view-tab" data-view="market" onclick="switchView('market')">📊 %MA &amp; Thị trường</button>
+    <button class="view-tab" data-view="rsi" onclick="switchView('rsi')">📈 RSI</button>
+    <button class="view-tab" data-view="signals" onclick="switchView('signals')">🔎 Mã quan sát</button>
+    <button class="view-tab" data-view="radar" onclick="switchView('radar')">🛰 Accumulation Radar</button>
   </div>
 
   <div id="dashboardView">
@@ -381,7 +373,10 @@
       </div>
       <div class="market-tabs" id="marketTabs"></div>
     </header>
-    <div id="content"></div>
+    <div id="view-home"></div>
+    <div id="view-market" style="display:none;"></div>
+    <div id="view-rsi" style="display:none;"></div>
+    <div id="view-signals" style="display:none;"></div>
   </div>
 
   <div id="radarView" style="display:none">
@@ -478,7 +473,7 @@ async function loadData(){
     render();
   } catch(e){
     console.error(e);
-    document.getElementById('content').innerHTML = `<div class="err">❌ Không tải được dữ liệu<br><small>${escapeHtml(e.message)}</small></div>`;
+    document.getElementById('view-home').innerHTML = `<div class="err">❌ Không tải được dữ liệu<br><small>${escapeHtml(e.message)}</small></div>`;
   }
 }
 
@@ -552,8 +547,7 @@ function intradayChipHTML(m){
 
 function render(){
   const m = LATEST.markets[activeMarket];
-  if (!m) { document.getElementById('content').innerHTML = '<div class="loading">Chọn thị trường</div>'; return; }
-  const el = document.getElementById('content');
+  if (!m) { document.getElementById('view-home').innerHTML = '<div class="loading">Chọn thị trường</div>'; return; }
   const total = m.total_symbols || 0;
   const upW = total ? m.advances_pct : 0;
   const flatW = total ? m.unchanged_pct : 0;
@@ -569,7 +563,6 @@ function render(){
   let rsiPulseChartHTML = buildRsiPulseChartPanel(m);
   let backtestHTML = buildBacktestSnapshot();
   let evidenceHTML = buildEvidencePanel();
-  let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
   let chartHTML = buildChartSection();
   let appendixHTML = buildAppendixSection(m);
@@ -577,7 +570,8 @@ function render(){
   let regimeHTML = buildRegimePanel();
   let breadthMomentumHTML = buildBreadthMomentum();
 
-  el.innerHTML = `
+  // ===== VIEW: TRANG CHỦ — tín hiệu thị trường + tín hiệu chung =====
+  document.getElementById('view-home').innerHTML = `
     <div class="summary-bar status-bar">
       <div class="summary-top">
         <div>
@@ -603,42 +597,49 @@ function render(){
     ${regimeHTML}
 
     ${breadthMomentumHTML}
+  `;
 
+  // ===== VIEW: %MA & THỊ TRƯỜNG =====
+  document.getElementById('view-market').innerHTML = `
     <div class="panel">
       <h2>Bức tranh thị trường <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${m.date}</span></h2>
-      <div class="hub-tabs" id="contextTabs" style="margin-bottom:12px;"></div>
-      <div id="ctx-overview">
-        <div class="kpi-grid">
-          <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
-          <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
-          <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
-          <div class="kpi-card primary"><div class="lab">MA10</div><div class="num">${fmt1(m.pct_above_ma10)}%</div><div class="sub">${m.above_ma10_count} mã</div></div>
-          <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
-          <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
-          <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
-        </div>
-        <div style="font-size:10px;color:var(--faint);margin:-4px 0 12px 2px;">Ghi chú: %MA tính trên nhóm mã đủ điều kiện thanh khoản (không phải toàn bộ danh mục sàn). A/D ALL: HOSE toàn sàn, HNX chỉ nhóm mã lọc (SSI không cung cấp A/D HNX toàn sàn).</div>
-        <div class="breadth-bar">
-          <span style="width:${upW}%;background:var(--up);">${upW > 10 ? fmt1(upW)+'%' : ''}</span>
-          <span style="width:${flatW}%;background:var(--neutral);">${flatW > 8 ? fmt1(flatW)+'%' : ''}</span>
-          <span style="width:${downW}%;background:var(--down);">${downW > 10 ? fmt1(downW)+'%' : ''}</span>
-        </div>
+      <div class="kpi-grid">
+        <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
+        <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
+        <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
+        <div class="kpi-card primary"><div class="lab">MA10</div><div class="num">${fmt1(m.pct_above_ma10)}%</div><div class="sub">${m.above_ma10_count} mã</div></div>
+        <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
+        <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
+        <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
       </div>
-      <div id="ctx-dist" style="display:none;">
-        ${adDistributionHTML}
-        ${trendDistributionHTML}
-      </div>
-      <div id="ctx-rsi" style="display:none;">
-        ${rsiSentimentHTML}
-        ${rsiPulseChartHTML}
-      </div>
-      <div id="ctx-chart" style="display:none;">
-        ${chartHTML}
+      <div style="font-size:10px;color:var(--faint);margin:-4px 0 12px 2px;">Ghi chú: %MA tính trên nhóm mã đủ điều kiện thanh khoản (không phải toàn bộ danh mục sàn). A/D ALL: HOSE toàn sàn, HNX chỉ nhóm mã lọc (SSI không cung cấp A/D HNX toàn sàn).</div>
+      <div class="breadth-bar">
+        <span style="width:${upW}%;background:var(--up);">${upW > 10 ? fmt1(upW)+'%' : ''}</span>
+        <span style="width:${flatW}%;background:var(--neutral);">${flatW > 8 ? fmt1(flatW)+'%' : ''}</span>
+        <span style="width:${downW}%;background:var(--down);">${downW > 10 ? fmt1(downW)+'%' : ''}</span>
       </div>
     </div>
 
+    ${breadthMomentumHTML}
+
+    ${adDistributionHTML}
+
+    ${trendDistributionHTML}
+
+    ${chartHTML}
+  `;
+
+  // ===== VIEW: RSI =====
+  document.getElementById('view-rsi').innerHTML = `
+    ${rsiSentimentHTML}
+
+    ${rsiPulseChartHTML}
+  `;
+
+  // ===== VIEW: MÃ QUAN SÁT =====
+  document.getElementById('view-signals').innerHTML = `
     <div class="panel">
-      <h2>Tín hiệu theo tầng ưu tiên <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(gom theo mã${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
+      <h2>Mã quan sát theo tầng ưu tiên <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${activeSignalDate ? activeSignalDate : 'hôm nay'})</span></h2>
       <div class="filter-bar">
         <div class="hub-tabs" id="hubTabs"></div>
         <select id="signalDateSelect" onchange="onSignalDateChange(this.value)" style="margin-left:6px;width:auto;min-width:100px;">
@@ -647,8 +648,6 @@ function render(){
         <input id="searchInput" type="text" placeholder="Tìm mã..." oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
         <button class="btn-copy" id="copyBtn" onclick="copySymbols()">Copy DS</button>
       </div>
-      <div id="stockRadarContainer">${radarHTML}</div>
-      <div style="font-size:11px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 6px;">Chi tiết từng tín hiệu (${summary.totalSignals} dòng)</div>
       <div id="signalTableContainer">${signalsHTML}</div>
     </div>
 
@@ -671,14 +670,9 @@ function render(){
 
   populateSignalDateSelector();
   buildHubTabs();
-  buildContextTabs();
   restoreAccordions();
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = searchQuery;
-  requestAnimationFrame(() => {
-    if (activeContextTab === 'chart') renderBreadthChart(m);
-    if (activeContextTab === 'rsi') renderRsiPulseChart();
-  });
 }
 
 function adRatioNote(r){
@@ -957,15 +951,6 @@ function methodLabel(source){
   }[source] || source;
 }
 
-function signalSide(row){
-  if (row.signalType === 'sell_warning') return 'sell';
-  if (row.source === 'luc-mach' && row.signalType === 'watch' && row.watchDir === 'sell') return 'sell';
-  if (row.signalType === 'watch') return 'watch';
-  // Ensemble Weak co edge am theo backtest 10 nam -> khong dem la BUY
-  if (row.source === 'ensemble' && row.signalType === 'weak') return 'watch';
-  return 'buy';
-}
-
 function confirmCount(r){
   let c = 0;
   if (parseFloat(r.vol) >= 1.5) c++;          // Vol surge >= 1.5x
@@ -977,67 +962,6 @@ function confirmCount(r){
 
 function meterHTML(conf){
   return `<span class="meter">${[0,1,2].map(i => `<i class="${i < conf ? 'on' : ''}"></i>`).join('')}</span><span class="conf-num">${conf}/3</span>`;
-}
-
-function aggregateSignalRows(rows){
-  const bySymbol = new Map();
-  rows.forEach(r => {
-    if (!bySymbol.has(r.symbol)) {
-      bySymbol.set(r.symbol, {
-        symbol: r.symbol, rows: [], buy: 0, sell: 0, watch: 0,
-        maxScore: 0, price: r.price, priceValue: r.priceValue, buyPrice: r.buyPrice, buyPriceValue: r.buyPriceValue, methods: new Map(), notes: []
-      });
-    }
-    const g = bySymbol.get(r.symbol);
-    g.rows.push(r);
-    const side = signalSide(r);
-    g[side] += 1;
-    g.maxScore = Math.max(g.maxScore, Number(r.score) || 0);
-    if (!g.price && r.price) g.price = r.price;
-    if (g.priceValue == null && r.priceValue != null) g.priceValue = r.priceValue;
-    if (!g.buyPrice && r.buyPrice) g.buyPrice = r.buyPrice;
-    if (g.buyPriceValue == null && r.buyPriceValue != null) g.buyPriceValue = r.buyPriceValue;
-    const key = `${r.source}:${side}`;
-    g.methods.set(key, {label: methodLabel(r.source), side});
-    if (r.expl) g.notes.push(`${methodLabel(r.source)}: ${r.expl}`);
-  });
-  return [...bySymbol.values()].map(g => {
-    let action = 'WATCH';
-    let cls = 'watch';
-    if (g.buy && g.sell) { action = 'CONFLICT'; cls = 'conflict'; }
-    else if (g.sell) { action = 'SELL'; cls = 'sell'; }
-    else if (g.buy) { action = 'BUY'; cls = 'buy'; }
-    return { ...g, action, cls, methodList: [...g.methods.values()] };
-  }).sort((a, b) => {
-    const rank = {CONFLICT:4, BUY:3, SELL:2, WATCH:1};
-    return (rank[b.action] - rank[a.action]) || (b.rows.length - a.rows.length) || (b.maxScore - a.maxScore);
-  });
-}
-
-function buildStockRadar(dateStr){
-  const raw = applyFilters(collectAllSignals(dateStr), activeFilter, searchQuery);
-  if (!raw.length) return '<div class="note" style="margin-bottom:0;">Không có mã phù hợp bộ lọc.</div>';
-  let grouped = aggregateSignalRows(raw);
-  if (!grouped.length) return '<div class="note" style="margin-bottom:0;">Không có mã phù hợp bộ lọc.</div>';
-  const tbody = grouped.map(g => {
-    const methods = g.methodList.map(m => `<span class="method-tag ${m.side}">${m.label}</span>`).join('');
-    const note = g.notes.slice(0, 2).join(' · ');
-    const consensus = `${g.buy} Buy · ${g.watch} Watch · ${g.sell} Sell`;
-    const performance = fmtBuyPerformance(g.symbol, g.priceValue ?? g.price, g.buyPrice, g.buyPriceValue);
-    return `<tr>
-      <td class="mono" style="font-weight:900;font-size:13px;">${escapeHtml(g.symbol)}</td>
-      <td><span class="action-pill ${g.cls}">${g.action}</span></td>
-      <td class="mono" style="font-weight:800;">${g.rows.length} hệ</td>
-      <td><div class="method-tags">${methods}</div></td>
-      <td class="radar-note">${escapeHtml(consensus)}${note ? '<br>'+escapeHtml(note) : ''}</td>
-      <td class="mono">${escapeHtml(g.price ?? '—')}</td>
-      <td class="mono">${performance}</td>
-    </tr>`;
-  }).join('');
-  return `<table class="radar-table">
-    <thead><tr><th>Mã</th><th>Action</th><th>Số hệ báo</th><th>Hệ báo</th><th>Ghi chú nhanh</th><th>Giá</th><th>Hiệu quả</th></tr></thead>
-    <tbody>${tbody}</tbody>
-  </table>`;
 }
 
 // --- Star panel: mua chuẩn (da kiem chung) ---
@@ -1156,34 +1080,6 @@ function buildBreadthMomentum(){
     </div>
     <div style="font-size:12px;color:var(--muted);">${describe(rows[0])} · ${describe(rows[1])}</div>
   </div>`;
-}
-
-// --- Context tabs cho vung thi truong ---
-const CONTEXT_TABS = [
-  { value:'overview', label:'Tổng quan' },
-  { value:'dist', label:'Phân bố' },
-  { value:'rsi', label:'RSI' },
-  { value:'chart', label:'Biểu đồ lịch sử' },
-];
-let activeContextTab = 'overview';
-
-function buildContextTabs(){
-  const el = document.getElementById('contextTabs');
-  if (!el) return;
-  el.innerHTML = CONTEXT_TABS.map(t =>
-    `<button type="button" data-ctx="${t.value}" class="hub-tab ${activeContextTab === t.value ? 'active' : ''}" onclick="selectContextTab('${t.value}')">${t.label}</button>`
-  ).join('');
-}
-
-function selectContextTab(v){
-  activeContextTab = v;
-  buildContextTabs();
-  CONTEXT_TABS.forEach(t => {
-    const el = document.getElementById('ctx-' + t.value);
-    if (el) el.style.display = t.value === v ? '' : 'none';
-  });
-  if (v === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
-  if (v === 'chart') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
 }
 
 // --- Hub tabs ---
@@ -1512,8 +1408,6 @@ function selectFilter(value){
 
 function renderSignalTable(){
   buildHubTabs();
-  const radar = document.getElementById('stockRadarContainer');
-  if (radar) radar.innerHTML = buildStockRadar(activeSignalDate);
   const container = document.getElementById('signalTableContainer');
   if (!container) return;
   container.innerHTML = buildSignalHub(activeSignalDate);
@@ -1719,7 +1613,7 @@ function renderRsiPulseChart(){
     lines.forEach(s => { ctx.strokeStyle=s.c; ctx.lineWidth=2.4; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=xp(i), y=yp(p[s.k]); i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); }); ctx.stroke(); const lx=xp(pts.length-1), ly=yp(pts[pts.length-1][s.k]); ctx.fillStyle='#fff'; ctx.strokeStyle=s.c; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(lx,ly,4,0,Math.PI*2); ctx.fill(); ctx.stroke(); });
     ctx.fillStyle='#8A94A6'; ctx.font='9px Inter,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='top'; months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h-P.b+8); } }); const ld=pts[pts.length-1].date.split('/'); ctx.fillText(ld[0]+'/'+ld[1], xp(pts.length-1), h-P.b+8);
     lines.forEach((s,i)=>{ const lx=P.l+i*116, ly=12; ctx.strokeStyle=s.c; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+18,ly); ctx.stroke(); ctx.fillStyle='#0B132B'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(s.l,lx+24,ly); });
-    if(idx>=0 && idx<pts.length){ const p=pts[idx], x=xp(idx); ctx.save(); ctx.strokeStyle='rgba(11,19,43,0.15)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,P.t+ch); ctx.stroke(); ctx.restore(); lines.forEach(s=>{ const y=yp(p[s.k]); ctx.fillStyle='#fff'; ctx.strokeStyle=s.c; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); }); tt.style.display='block'; tt.innerHTML=`<div style="font-weight:700;margin-bottom:4px;font-size:11px;">${p.date}</div><div>RSI&lt;30: <strong>${p.u30}</strong> · RSI&gt;70: <strong>${p.o70}</strong> · RSI&gt;50: <strong>${p.o50}</strong></div>`; const tw=tt.offsetWidth; let tx=Math.round(x-tw/2); if(tx<4) tx=4; if(tx+tw>w-4) tx=w-tw-4; tt.style.left=tx+'px'; tt.style.top=Math.max(4,P.t-46)+'px'; }
+    if(idx>=0 && idx<pts.length){ const p=pts[idx], x=xp(idx); ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,P.t+ch); ctx.stroke(); ctx.restore(); lines.forEach(s=>{ const y=yp(p[s.k]); ctx.fillStyle='#141920'; ctx.strokeStyle=s.c; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); }); tt.style.display='block'; tt.innerHTML=`<div style="font-weight:700;margin-bottom:4px;font-size:11px;">${p.date}</div><div>RSI&lt;30: <strong>${p.u30}</strong> · RSI&gt;70: <strong>${p.o70}</strong> · RSI&gt;50: <strong>${p.o50}</strong></div>`; const tw=tt.offsetWidth; let tx=Math.round(x-tw/2); if(tx<4) tx=4; if(tx+tw>w-4) tx=w-tw-4; tt.style.left=tx+'px'; tt.style.top=Math.max(4,P.t-46)+'px'; }
     else tt.style.display='none';
   }
   let hi=-1; draw(-1); cv.onmousemove=e=>{ const cr=cv.getBoundingClientRect(), mx=e.clientX-cr.left; let cl=0, md=Infinity; pts.forEach((_,i)=>{ const d=Math.abs(xp(i)-mx); if(d<md){md=d; cl=i;} }); if(cl!==hi){hi=cl; draw(cl);} }; cv.onmouseleave=()=>{ if(hi!==-1){hi=-1; draw(-1);} };
@@ -1874,21 +1768,23 @@ let radarSortKey = 'score';
 
 function switchView(view){
   document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
-  document.getElementById('dashboardView').style.display = view === 'dashboard' ? '' : 'none';
+  const dashViews = ['home', 'market', 'rsi', 'signals'];
+  document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
+  if (dashViews.includes(view)) {
+    ['home', 'market', 'rsi', 'signals'].forEach(v => {
+      const el = document.getElementById('view-' + v);
+      if (el) el.style.display = v === view ? '' : 'none';
+    });
+    if (view === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
+    if (view === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
+  }
   if (window.location.hash !== `#${view}`) history.pushState(null, '', `#${view}`);
-  if (view === 'radar' && !radarDataLoaded) loadRadarData();
-}
-
-function showDashboardContent(event){
-  event.preventDefault();
-  switchView('dashboard');
-  requestAnimationFrame(() => document.getElementById('dashboardView').scrollIntoView({behavior:'smooth', block:'start'}));
 }
 
 window.addEventListener('hashchange', () => {
-  const v = window.location.hash.replace('#', '') || 'dashboard';
-  if (v === 'radar' || v === 'dashboard') switchView(v);
+  const v = window.location.hash.replace('#', '') || 'home';
+  if (['home', 'market', 'rsi', 'signals', 'radar'].includes(v)) switchView(v);
 });
 
 const RADAR_FMT = (v, d=1) => v==null||v===undefined?'-':Number(v).toFixed(d);
@@ -2076,8 +1972,8 @@ loadData();
 
 // Initial hash routing
 (function(){
-  const h = window.location.hash.replace('#', '') || 'dashboard';
-  if (h === 'radar') switchView('radar');
+  const h = window.location.hash.replace('#', '') || 'home';
+  if (['home', 'market', 'rsi', 'signals', 'radar'].includes(h)) switchView(h);
 })();
 
 // Auto-refresh regime + intraday
