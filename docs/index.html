@@ -719,6 +719,10 @@ function render(){
   restoreAccordions();
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = searchQuery;
+
+  // Re-draw visible charts after every re-render (canvas is rebuilt each time)
+  if (currentView === 'chart' || currentView === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
+  else if (currentView === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
 }
 
 function adRatioNote(r){
@@ -1809,7 +1813,9 @@ let radarData = null;
 let activeRadarFilters = new Set();
 let radarSortKey = 'score';
 
+let currentView = 'home';
 function switchView(view){
+  currentView = view;
   document.querySelectorAll('.nav-links a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === view));
   const dashViews = ['home', 'market', 'chart', 'rsi', 'signals'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
@@ -1829,6 +1835,15 @@ function switchView(view){
 window.addEventListener('hashchange', () => {
   const v = window.location.hash.replace('#', '') || 'home';
   if (['home', 'market', 'chart', 'rsi', 'signals', 'radar'].includes(v)) switchView(v);
+});
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (currentView === 'chart' || currentView === 'market') renderBreadthChart(LATEST?.markets?.[activeMarket]);
+    else if (currentView === 'rsi') renderRsiPulseChart();
+  }, 150);
 });
 
 const RADAR_FMT = (v, d=1) => v==null||v===undefined?'-':Number(v).toFixed(d);
