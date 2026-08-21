@@ -89,49 +89,16 @@
   .s-badge.active{opacity:1;box-shadow:0 0 0 2px var(--accent-1);}
   .summary-count{font-family:var(--font-all);font-size:14px;font-weight:600;color:var(--text);}
 
-  .action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
-  @media (max-width:850px){.action-grid{grid-template-columns:repeat(2,1fr);}}
-  @media (max-width:520px){.action-grid{grid-template-columns:1fr;}}
-  .action-card{border:1px solid var(--border);border-radius:4px;padding:16px;background:var(--panel);box-shadow:var(--shadow-sm);min-height:132px;}
-  .action-card.buy{border-color:rgba(22,163,74,0.24);background:#fff;}
-  .action-card.watch{border-color:rgba(214,168,79,0.30);background:#fff;}
-  .action-card.sell{border-color:rgba(194,65,59,0.24);background:#fff;}
-  .action-card.neutral{border-color:rgba(11,19,43,0.12);background:#fff;}
-  .action-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
-  .action-title{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:700;}
-  .action-num{font-size:24px;font-weight:800;line-height:1;color:var(--text);}
-  .action-card.buy .action-num{color:var(--up);} .action-card.watch .action-num{color:#B9760F;} .action-card.sell .action-num{color:var(--down);}
-  .action-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
-  .action-note{font-size:10.5px;color:var(--muted);line-height:1.45;margin-top:6px;}
   .mini-symbol{font-size:10px;font-weight:700;border:1px solid var(--border);background:rgba(255,255,255,0.7);border-radius:999px;padding:3px 8px;color:var(--text);}
   .mini-symbol.sell{color:var(--down);border-color:rgba(240,71,62,0.20);}
   .mini-symbol.buy{color:var(--up);border-color:rgba(15,174,114,0.20);}
   .mini-symbol.watch{color:#B9760F;border-color:rgba(245,165,36,0.25);}
+  .action-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
 
   .filter-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
   .filter-bar input,.filter-bar select{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-size:12px;font-family:var(--font-all);outline:none;}
   .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent-1);}
   .filter-bar input{flex:1;min-width:120px;}
-  .filter-menu{position:relative;min-width:220px;}
-  .filter-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:12px;font-weight:650;cursor:pointer;box-shadow:var(--shadow-sm);}
-  .filter-trigger:hover,.filter-trigger.open{border-color:rgba(46,125,50,0.35);box-shadow:0 0 0 3px rgba(46,125,50,0.08);}
-  .filter-caret{font-size:10px;color:var(--muted);}
-  .filter-popover{position:absolute;left:0;top:calc(100% + 8px);z-index:60;width:250px;max-height:440px;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 55px rgba(11,19,43,0.16);padding:10px;display:none;}
-  .filter-popover.open{display:block;}
-  .filter-group{padding:6px 0;border-bottom:1px solid rgba(227,232,239,0.75);}
-  .filter-group:last-child{border-bottom:none;}
-  .filter-group-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--faint);padding:4px 8px 7px;}
-  .filter-option{width:100%;border:none;background:transparent;border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;color:var(--text);text-align:left;}
-  .filter-option:hover{background:var(--panel-tint);}
-  .filter-option.active{background:rgba(46,125,50,0.10);box-shadow:inset 0 0 0 1px rgba(46,125,50,0.20);}
-  .filter-option-main{display:flex;align-items:center;gap:8px;min-width:0;}
-  .filter-chip{font-size:9px;font-weight:850;letter-spacing:0.08em;border-radius:999px;padding:4px 7px;min-width:42px;text-align:center;}
-  .filter-chip.buy{background:rgba(22,163,74,0.10);color:var(--up);}
-  .filter-chip.watch{background:rgba(214,168,79,0.14);color:#98732C;}
-  .filter-chip.sell{background:rgba(194,65,59,0.10);color:var(--down);}
-  .filter-chip.system{background:rgba(11,19,43,0.07);color:var(--accent-1);}
-  .filter-chip.neutral{background:rgba(85,96,112,0.08);color:var(--muted);}
-  .filter-label{font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .btn-copy{font-family:var(--font-all);font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
   .btn-copy:hover{background:var(--accent-1);color:#fff;border-color:var(--accent-1);}
 
@@ -201,26 +168,12 @@
   .chart-range-chip:hover{border-color:var(--accent-1);color:var(--accent-1);}
   .chart-range-chip.active{background:var(--accent-1);border-color:var(--accent-1);color:#fff;}
 
-  .commentary{font-size:13px;line-height:1.7;color:var(--text);padding:2px 0;}
-  .commentary h2{font-size:15px;font-weight:600;margin:14px 0 8px;color:var(--accent-1);}
-  .commentary h3{font-size:13px;font-weight:600;margin:12px 0 6px;color:var(--text);}
-  .commentary strong{color:var(--text);}
-
   .loading,.err{font-family:var(--font-all);font-size:12px;color:var(--muted);padding:30px;text-align:center;}
   footer{font-family:var(--font-all);font-size:10.5px;color:var(--faint);text-align:center;margin-top:20px;}
 
   .empty-note{font-size:11px;color:var(--faint);font-style:italic;}
 
   .signal-count{font-family:var(--font-all);font-weight:700;font-size:22px;}
-
-  .lm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-  @media (max-width:800px){.lm-grid{grid-template-columns:1fr;}}
-  .lm-box{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--panel-tint);}
-  .lm-box h3{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;color:var(--muted);}
-  .lm-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;}
-  .lm-row:last-child{border-bottom:none;}
-  .lm-sym{font-weight:800;color:var(--text);}
-  .lm-meta{color:var(--muted);text-align:right;}
 
   .buy-hub-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px;}
   .buy-hub-note{font-size:11px;color:var(--muted);line-height:1.5;max-width:560px;}
@@ -281,6 +234,8 @@
   .meter i.on{background:var(--up);}
   .conf-num{font-size:11px;color:var(--muted);font-weight:800;}
   .buy-empty{text-align:center;padding:28px 10px;color:var(--muted);font-size:13px;line-height:1.6;}
+  .status-bar{position:sticky;top:0;z-index:40;box-shadow:var(--shadow-md);}
+  .ctx-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--faint);margin:2px 0 8px;}
 
   .ad-dist-wrap{display:grid;grid-template-columns:1fr;gap:10px;}
   .ad-dist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
@@ -446,29 +401,6 @@
 let MARKETS = ['ALL'];
 let activeMarket = 'ALL';
 let activeFilter = 'strong';
-const FILTER_GROUPS = [
-  { title:'Tổng quan', items:[
-    {value:'all', label:'Tất cả tín hiệu', chip:'ALL', tone:'neutral', desc:'Toàn bộ tín hiệu đang hiển thị'},
-  ]},
-  { title:'Trạng thái hành động', items:[
-    {value:'buy', label:'Tất cả điểm mua', chip:'BUY', tone:'buy', desc:'Ứng viên cần kiểm tra điểm mua'},
-    {value:'watch', label:'Chờ xác nhận', chip:'WATCH', tone:'watch', desc:'Watch mọi hệ (Momentum 30-59 là vùng thắng tốt nhất)'},
-    {value:'sell-warning', label:'Cảnh báo bán', chip:'SELL', tone:'sell', desc:'Chưa kiểm chứng dự báo giảm (backtest median T+10 dương)'},
-  ]},
-  { title:'Cường độ tín hiệu', items:[
-    {value:'strong', label:'Momentum Strong', chip:'STR', tone:'buy', desc:'Score 30-59 — vùng thắng tốt nhất (backtest 10 năm)'},
-    {value:'hot', label:'Momentum Hot', chip:'HOT', tone:'sell', desc:'Score ≥60 — quá nóng, edge âm OOS, không nên mua đuổi'},
-    {value:'ensemble-strong', label:'Ensemble Strong', chip:'ENS', tone:'system', desc:'Điểm ensemble ≥0.65'},
-    {value:'ensemble-weak', label:'Ensemble Weak', chip:'ENS', tone:'neutral', desc:'Điểm ensemble 0.35-0.65'},
-  ]},
-  { title:'Hệ thống tham khảo (edge chưa rõ)', items:[
-    {value:'luc-mach-valid', label:'Lục Mạch Buy', chip:'LM', tone:'neutral', desc:'Backtest 10 năm: thắng thấp hơn baseline (-3pp)'},
-    {value:'luc-mach-watch', label:'Lục Mạch Watch', chip:'LM', tone:'watch', desc:'Lục Mạch chờ xác nhận'},
-    {value:'mama-buy', label:'MAMA Buy', chip:'MAMA', tone:'neutral', desc:'Backtest 10 năm: thắng thấp hơn baseline (-2pp)'},
-    {value:'ats-buy', label:'ATS Buy', chip:'ATS', tone:'neutral', desc:'Backtest 10 năm: không có edge'},
-    {value:'k4-buy', label:'K4 Buy', chip:'K4', tone:'neutral', desc:'Backtest 10 năm: thắng thấp hơn baseline (-1pp)'},
-  ]},
-];
 let searchQuery = '';
 let LATEST = null, HISTORY = null, COMMENTARY = null;
 let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, MAMA_BT = null, ATS_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null, MAMA_POSITIONAL = null, ADVANCED_TRAILSTOP = null;
@@ -628,8 +560,8 @@ function render(){
   const downW = total ? m.declines_pct : 0;
 
   let summary = buildSummary(activeSignalDate);
-  let actionHTML = buildActionBoard(summary);
   let buyHTML = buildBuyPanel(activeSignalDate);
+  let newOppHTML = buildNewOpportunities(activeSignalDate);
   let alertsHTML = buildAlertsPanel(activeSignalDate);
   let adDistributionHTML = buildAdDistributionPanel(m);
   let trendDistributionHTML = buildTrendDistributionPanel(m);
@@ -639,15 +571,14 @@ function render(){
   let evidenceHTML = buildEvidencePanel();
   let radarHTML = buildStockRadar(activeSignalDate);
   let signalsHTML = buildSignalHub(activeSignalDate);
-  let lucMachHTML = buildLucMachPanel();
   let chartHTML = buildChartSection();
-  let commentaryHTML = buildCommentarySection();
   let appendixHTML = buildAppendixSection(m);
   let historyHTML = buildHistorySection();
   let regimeHTML = buildRegimePanel();
+  let breadthMomentumHTML = buildBreadthMomentum();
 
   el.innerHTML = `
-    <div class="summary-bar">
+    <div class="summary-bar status-bar">
       <div class="summary-top">
         <div>
           <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
@@ -661,43 +592,50 @@ function render(){
       </div>
     </div>
 
-    ${regimeHTML}
-
     ${REGIME && REGIME.tone === 'risk_off' ? `<div style="border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>⚠️ RISK-OFF:</b> theo kiểm chứng 10 năm, các tín hiệu mua trong giai đoạn risk-off có tỉ lệ thắng <b>âm -7 đến -11pp</b> so với baseline. Hạn chế mua mới, ưu tiên bảo toàn vốn.</div>` : ''}
 
     ${buyHTML}
 
+    ${newOppHTML}
+
     ${alertsHTML}
 
-    ${rsiSentimentHTML}
+    ${regimeHTML}
 
-    <div class="kpi-grid">
-      <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
-      <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
-      <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
-      <div class="kpi-card primary"><div class="lab">MA10</div><div class="num">${fmt1(m.pct_above_ma10)}%</div><div class="sub">${m.above_ma10_count} mã</div></div>
-      <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
-      <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
-      <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
+    ${breadthMomentumHTML}
+
+    <div class="panel">
+      <h2>Bức tranh thị trường <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${m.date}</span></h2>
+      <div class="hub-tabs" id="contextTabs" style="margin-bottom:12px;"></div>
+      <div id="ctx-overview">
+        <div class="kpi-grid">
+          <div class="kpi-card up"><div class="lab">Tăng</div><div class="num">${m.advances}</div><div class="sub">${fmt1(m.advances_pct)}%</div></div>
+          <div class="kpi-card down"><div class="lab">Giảm</div><div class="num">${m.declines}</div><div class="sub">${fmt1(m.declines_pct)}%</div></div>
+          <div class="kpi-card" style="${m.ad_ratio >= 1 ? 'color:var(--up)' : m.ad_ratio !== null ? 'color:var(--down)' : ''}"><div class="lab">A/D</div><div class="num">${m.ad_ratio ?? '\u2014'}</div><div class="sub">${adRatioNote(m.ad_ratio)}</div></div>
+          <div class="kpi-card primary"><div class="lab">MA10</div><div class="num">${fmt1(m.pct_above_ma10)}%</div><div class="sub">${m.above_ma10_count} mã</div></div>
+          <div class="kpi-card primary"><div class="lab">MA20</div><div class="num">${fmt1(m.pct_above_ma20)}%</div><div class="sub">${m.above_ma20_count} mã</div></div>
+          <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
+          <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--faint);margin:-4px 0 12px 2px;">Ghi chú: %MA tính trên nhóm mã đủ điều kiện thanh khoản (không phải toàn bộ danh mục sàn). A/D ALL: HOSE toàn sàn, HNX chỉ nhóm mã lọc (SSI không cung cấp A/D HNX toàn sàn).</div>
+        <div class="breadth-bar">
+          <span style="width:${upW}%;background:var(--up);">${upW > 10 ? fmt1(upW)+'%' : ''}</span>
+          <span style="width:${flatW}%;background:var(--neutral);">${flatW > 8 ? fmt1(flatW)+'%' : ''}</span>
+          <span style="width:${downW}%;background:var(--down);">${downW > 10 ? fmt1(downW)+'%' : ''}</span>
+        </div>
+      </div>
+      <div id="ctx-dist" style="display:none;">
+        ${adDistributionHTML}
+        ${trendDistributionHTML}
+      </div>
+      <div id="ctx-rsi" style="display:none;">
+        ${rsiSentimentHTML}
+        ${rsiPulseChartHTML}
+      </div>
+      <div id="ctx-chart" style="display:none;">
+        ${chartHTML}
+      </div>
     </div>
-    <div style="font-size:10px;color:var(--faint);margin:-4px 0 12px 2px;">Ghi chú: %MA tính trên nhóm mã đủ điều kiện thanh khoản (không phải toàn bộ danh mục sàn). A/D ALL: HOSE toàn sàn, HNX chỉ nhóm mã lọc (SSI không cung cấp A/D HNX toàn sàn).</div>
-
-    <div class="breadth-bar">
-      <span style="width:${upW}%;background:var(--up);">${upW > 10 ? fmt1(upW)+'%' : ''}</span>
-      <span style="width:${flatW}%;background:var(--neutral);">${flatW > 8 ? fmt1(flatW)+'%' : ''}</span>
-      <span style="width:${downW}%;background:var(--down);">${downW > 10 ? fmt1(downW)+'%' : ''}</span>
-    </div>
-
-    ${trendDistributionHTML}
-
-    ${actionHTML}
-
-    ${adDistributionHTML}
-
-    ${backtestHTML}
-
-    ${evidenceHTML}
-
 
     <div class="panel">
       <h2>Tín hiệu theo tầng ưu tiên <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(gom theo mã${activeSignalDate ? ' · '+activeSignalDate : ''})</span></h2>
@@ -710,25 +648,18 @@ function render(){
         <button class="btn-copy" id="copyBtn" onclick="copySymbols()">Copy DS</button>
       </div>
       <div id="stockRadarContainer">${radarHTML}</div>
-    </div>
-
-    <div class="panel">
-      <h2>Chi tiết từng tín hiệu <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${summary.totalSignals} dòng · cùng bộ lọc tab ở trên)</span></h2>
+      <div style="font-size:11px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 6px;">Chi tiết từng tín hiệu (${summary.totalSignals} dòng)</div>
       <div id="signalTableContainer">${signalsHTML}</div>
     </div>
 
-    ${lucMachHTML}
-    ${chartHTML}
-    ${rsiPulseChartHTML}
-    ${commentaryHTML}
+    ${historyHTML}
+
     ${appendixHTML}
 
     <div class="panel">
       <h2 class="accordion collapsed" onclick="toggleAccordion(this)">📖 Phương pháp & bằng chứng backtest 10 năm</h2>
-      <div class="accordion-body collapsed">${evidenceHTML}</div>
+      <div class="accordion-body collapsed">${backtestHTML}${evidenceHTML}</div>
     </div>
-
-    ${historyHTML}
   `;
 
   // Attach badge click filters
@@ -740,12 +671,13 @@ function render(){
 
   populateSignalDateSelector();
   buildHubTabs();
+  buildContextTabs();
   restoreAccordions();
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = searchQuery;
   requestAnimationFrame(() => {
-    renderBreadthChart(m);
-    renderRsiPulseChart();
+    if (activeContextTab === 'chart') renderBreadthChart(m);
+    if (activeContextTab === 'rsi') renderRsiPulseChart();
   });
 }
 
@@ -845,52 +777,6 @@ function buildSummary(dateStr){
   return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
 }
 
-function currentSignalSources(dateStr){
-  if (dateStr && SIGNALS_HISTORY) {
-    const entry = SIGNALS_HISTORY.find(h => h.date === dateStr);
-    if (entry) return { mom: entry.momentum, strat: entry.strategy, ens: entry.ensemble, lm: entry.luc_mach, mama: entry.mama_positional, ats: entry.advanced_trailstop, k4: entry.khung4_tplus };
-  }
-  return { mom: MOMENTUM, strat: SIGNALS, ens: ENSEMBLE, lm: LUC_MACH, mama: MAMA_POSITIONAL, ats: ADVANCED_TRAILSTOP, k4: KHUNG4_TPLUS };
-}
-
-function topSymbols(rows, kind, limit=8){
-  return rows.filter(r => {
-    if (kind === 'buy') return r.signalType === 'strong' || r.signalType === 'valid';
-    if (kind === 'watch') return r.signalType === 'watch' && !(r.source === 'luc-mach' && r.watchDir === 'sell') || (r.source === 'ensemble' && r.signalType === 'weak');
-    if (kind === 'sell') return r.signalType === 'sell_warning' || (r.source === 'luc-mach' && r.signalType === 'watch' && r.watchDir === 'sell');
-    return true;
-  }).slice(0, limit).map(r => `<span class="mini-symbol ${kind}">${escapeHtml(r.symbol)}</span>`).join('') || '<span class="empty-note">Không có</span>';
-}
-
-function buildActionBoard(summary){
-  const rows = collectAllSignals(activeSignalDate);
-  const buyRows = rows.filter(r => r.source === 'momentum' && r.signalType === 'strong')
-    .sort((a, b) => confirmCount(b) - confirmCount(a) || (Number(b.score) || 0) - (Number(a.score) || 0));
-  const buyList = buyRows.slice(0, 10).map(r => `<span class="mini-symbol buy">${escapeHtml(r.symbol)}</span>`).join('') || '<span class="empty-note">Không có</span>';
-  const watchList = topSymbols(rows, 'watch', 10);
-  const sellList = topSymbols(rows, 'sell', 10);
-  const m = LATEST?.markets?.[activeMarket];
-  const marketNote = m ? `${adRatioNote(m.ad_ratio)} · MA10 ${fmt1(m.pct_above_ma10)}% · MA20 ${fmt1(m.pct_above_ma20)}% · MA50 ${fmt1(m.pct_above_ma50)}%` : '';
-  return `<div class="action-grid">
-    <div class="action-card buy">
-      <div class="action-head"><div><div class="action-title">Mua chuẩn</div><div class="action-note">Momentum Strong 30-59 — đã kiểm chứng 10 năm</div></div><div class="action-num">${buyRows.length}</div></div>
-      <div class="action-list">${buyList}</div>
-    </div>
-    <div class="action-card watch">
-      <div class="action-head"><div><div class="action-title">Watchlist</div><div class="action-note">Đổi trạng thái, chờ xác nhận</div></div><div class="action-num">${summary.watchSignals}</div></div>
-      <div class="action-list">${watchList}</div>
-    </div>
-    <div class="action-card sell">
-      <div class="action-head"><div><div class="action-title">Sell warning</div><div class="action-note">Cần rà lại vị thế đang nắm</div></div><div class="action-num">${summary.sellWarnings}</div></div>
-      <div class="action-list">${sellList}</div>
-    </div>
-    <div class="action-card neutral">
-      <div class="action-head"><div><div class="action-title">Market context</div><div class="action-note">${marketNote}</div></div><div class="action-num">${m?.ad_ratio ?? '—'}</div></div>
-      <div class="action-note"></div>
-    </div>
-  </div>`;
-}
-
 function buildAdDistributionPanel(m){
   const dist = m?.ad_distribution || [];
   if (!dist.length) return '';
@@ -907,30 +793,23 @@ function buildAdDistributionPanel(m){
       <div class="ad-bar-label">${b.bucket}</div>
     </div>`;
   }).join('');
-  return `<div class="panel">
-    <div class="ad-dist-head">
-      <h2 style="margin-bottom:0;">Phân bổ tăng/giảm theo biên độ giá</h2>
-      <div class="ad-dist-total">Tổng: ${total.toLocaleString('vi-VN')} mã</div>
-    </div>
+  return `
+    <div class="ctx-title">Phân bổ tăng/giảm theo biên độ giá · Tổng: ${total.toLocaleString('vi-VN')} mã</div>
     <div class="ad-dist-wrap">
       <div class="ad-bars">${bars}</div>
       <div class="ad-dist-legend"><span></span><span></span><span></span></div>
       <div class="ad-dist-foot"><span>Giảm: ${downCount.toLocaleString('vi-VN')}</span><span>Tăng: ${upCount.toLocaleString('vi-VN')}</span></div>
-    </div>
-  </div>`;
+    </div>`;
 }
 
 function buildRsiSentimentPanel(m){
   const p = m?.rsi_pulse;
-  if (!p) return `<div class="panel">
-    <h2>Đồng hồ tâm lý RSI <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">Đang chờ dữ liệu sau phiên đóng cửa</span></h2>
-    <div class="note" style="margin:0;">RSI Market Pulse sẽ hiển thị tỷ lệ mã RSI dưới 30, trên 70 và trên 50 ngay khi pipeline đóng cửa tạo dữ liệu mới.</div>
-  </div>`;
+  if (!p) return `<div class="note" style="margin:0;">RSI Market Pulse sẽ hiển thị tỷ lệ mã RSI dưới 30, trên 70 và trên 50 ngay khi pipeline đóng cửa tạo dữ liệu mới.</div>`;
   const total = Number(p.total) || 0;
   const pct = v => total ? `${(Number(v || 0) / total * 100).toFixed(1)}%` : '0.0%';
   const sentiment = rsiSentiment(p);
-  return `<div class="panel">
-    <h2>RSI Market Pulse <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">RSI14 · ${total.toLocaleString('vi-VN')} mã</span></h2>
+  return `
+    <div class="ctx-title">RSI Market Pulse · RSI14 · ${total.toLocaleString('vi-VN')} mã</div>
     <div class="sentiment-gauge">
       <div>
         <div class="gauge-face" style="--needle:${sentiment.angle}deg"><div class="gauge-needle"></div><div class="gauge-center"></div></div>
@@ -947,8 +826,7 @@ function buildRsiSentimentPanel(m){
       <div class="rsi-pulse-card oversold"><div class="lab">RSI dưới 30</div><div class="num">${(p.under_30 || 0).toLocaleString('vi-VN')}</div><div class="sub">Quá bán · ${pct(p.under_30)}</div></div>
       <div class="rsi-pulse-card overbought"><div class="lab">RSI trên 70</div><div class="num">${(p.over_70 || 0).toLocaleString('vi-VN')}</div><div class="sub">Quá mua · ${pct(p.over_70)}</div></div>
       <div class="rsi-pulse-card bullish"><div class="lab">RSI trên 50</div><div class="num">${(p.over_50 || 0).toLocaleString('vi-VN')}</div><div class="sub">Nghiêng tăng · ${pct(p.over_50)}</div></div>
-    </div>
-  </div>`;
+    </div>`;
 }
 
 function buildTrendDistributionPanel(m){
@@ -960,7 +838,7 @@ function buildTrendDistributionPanel(m){
     {key:'downtrend', label:'XH giảm', note:'0/3: Close < MA20 < MA50 < MA200', color:'#C2413B'},
   ];
   const total = Number(d?.total) || 0;
-  if (!total) return `<div class="panel"><h2>Phân bổ xu hướng theo MA stack <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">Đang chờ dữ liệu MA200</span></h2><div class="note" style="margin:0;">Panel sẽ phân loại các mã đủ 200 phiên và thanh khoản theo bốn trạng thái xu hướng.</div></div>`;
+  if (!total) return `<div class="note" style="margin:0;">Phân bổ xu hướng theo MA stack: đang chờ dữ liệu MA200.</div>`;
   let cursor = 0;
   const segments = keys.map(item => {
     const pct = Number(d[item.key] || 0) / total * 100;
@@ -973,13 +851,13 @@ function buildTrendDistributionPanel(m){
     const pct = count / total * 100;
     return `<div class="trend-item"><div class="trend-item-top"><span><i class="trend-dot" style="background:${item.color}"></i>${item.label}</span><span class="trend-item-pct">${pct.toFixed(1)}%</span></div><div class="trend-item-note">${count.toLocaleString('vi-VN')} mã · ${item.note}</div></div>`;
   }).join('');
-  return `<div class="panel"><h2>Phân bổ xu hướng theo MA stack <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${total.toLocaleString('vi-VN')} mã đủ MA200</span></h2><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div></div>`;
+  return `<div><div class="ctx-title">Phân bổ xu hướng theo MA stack · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div></div>`;
 }
 
 function buildRsiPulseChartPanel(m){
   if (!m?.rsi_pulse) return '';
-  return `<div class="panel">
-    <h2>Diễn biến RSI Market Pulse <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">Số mã RSI14 dưới 30, trên 70 và trên 50</span></h2>
+  return `<div>
+    <div class="ctx-title">Diễn biến RSI Market Pulse · Số mã RSI14 dưới 30, trên 70 và trên 50</div>
     <div class="chart-wrap" id="rsiPulseWrap">
       <canvas id="rsiPulseChart"></canvas>
       <div class="chart-tooltip" id="rsiPulseTooltip"></div>
@@ -1225,6 +1103,87 @@ function buildAlertsPanel(dateStr){
     ${(sells.length || lmSellWatch.length) ? `<div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin:${hot.length ? '12px' : '0'} 0 6px;">Sell warning — rà lại vị thế</div>
     <div class="table-scroll"><table class="hub-table"><thead><tr><th>Mã</th><th>Hệ</th><th>Ghi chú</th></tr></thead><tbody>${sellRows}</tbody></table></div>` : ''}
   </div>`;
+}
+
+// --- Co hoi moi: manh mua chuan xuat hien lan dau so voi hom qua ---
+function buildNewOpportunities(dateStr){
+  const todayRows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
+  if (!todayRows.length) return '';
+  const prev = previousSignalHistory(dateStr);
+  if (!prev) return '';
+  const prevSyms = new Set(_collectSignals(
+    prev.momentum, prev.strategy, prev.ensemble, prev.luc_mach,
+    prev.mama_positional, prev.advanced_trailstop, prev.khung4_tplus,
+  ).filter(r => r.source === 'momentum' && r.signalType === 'strong').map(r => r.symbol));
+  const fresh = todayRows.filter(r => !prevSyms.has(r.symbol));
+  if (!fresh.length) return '';
+  const chips = fresh.map(r => `<span class="mini-symbol buy" title="Score ${escapeHtml(String(r.score))} · ${escapeHtml(r.price ?? '')}">${escapeHtml(r.symbol)}</span>`).join('');
+  return `<div class="panel" style="border-color:rgba(22,163,74,0.4);">
+    <h2>🆕 Cơ hội mới hôm nay <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">mã lần đầu vào Mua chuẩn so với phiên trước</span></h2>
+    <div class="action-list">${chips}</div>
+  </div>`;
+}
+
+// --- Breadth momentum: do doc %MA10/MA20 (mo ta, chua phu de) ---
+function buildBreadthMomentum(){
+  if (!HISTORY || !Array.isArray(HISTORY) || HISTORY.length < 25) return '';
+  const val = (i, key) => HISTORY[HISTORY.length - 1 - i]?.markets?.ALL?.[key];
+  const delta = (key, back) => {
+    const now = val(0, key), then = val(back, key);
+    return (now == null || then == null) ? null : now - then;
+  };
+  const rows = [
+    { lab:'% trên MA10', d10: delta('pct_above_ma10', 10), d20: delta('pct_above_ma10', 20), now: val(0, 'pct_above_ma10') },
+    { lab:'% trên MA20', d10: delta('pct_above_ma20', 10), d20: delta('pct_above_ma20', 20), now: val(0, 'pct_above_ma20') },
+  ];
+  if (rows.every(r => r.d10 == null)) return '';
+  const fmtD = v => v == null ? '\u2014' : `${v >= 0 ? '+' : ''}${v.toFixed(1)}pp`;
+  const arrow = v => v == null ? '' : (v >= 5 ? '▲▲' : v >= 2 ? '▲' : v > -2 ? '◆' : v > -5 ? '▼' : '▼▼');
+  const tone = v => v == null ? 'var(--muted)' : (v >= 2 ? 'var(--up)' : v > -2 ? 'var(--neutral)' : 'var(--down)');
+  const describe = r => {
+    const avg = (r.d10 != null && r.d20 != null) ? (r.d10 + r.d20) / 2 : r.d10;
+    if (avg == null) return 'Không đủ dữ liệu';
+    if (avg >= 5) return 'Breadth cải thiện mạnh — tiền lan tỏa trở lại';
+    if (avg >= 2) return 'Breadth đang cải thiện';
+    if (avg > -2) return 'Breadth đi ngang';
+    if (avg > -5) return 'Breadth đang xấu đi';
+    return 'Breadth suy yếu nhanh — giai đoạn rủi ro cao';
+  };
+  return `<div class="panel">
+    <h2>Breadth momentum <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">độ biến động % mã trên MA trong 10/20 phiên · mô tả xu hướng, chưa phải khuyến nghị</span></h2>
+    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:8px;">
+      ${rows.map(r => `<div class="kpi-card"><div class="lab">${r.lab}</div><div class="num" style="color:${tone(r.d10)};">${arrow(r.d10)} ${fmtD(r.d10)}</div><div class="sub">hiện tại ${fmt1(r.now)}% · 20 phiên ${fmtD(r.d20)}</div></div>`).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--muted);">${describe(rows[0])} · ${describe(rows[1])}</div>
+  </div>`;
+}
+
+// --- Context tabs cho vung thi truong ---
+const CONTEXT_TABS = [
+  { value:'overview', label:'Tổng quan' },
+  { value:'dist', label:'Phân bố' },
+  { value:'rsi', label:'RSI' },
+  { value:'chart', label:'Biểu đồ lịch sử' },
+];
+let activeContextTab = 'overview';
+
+function buildContextTabs(){
+  const el = document.getElementById('contextTabs');
+  if (!el) return;
+  el.innerHTML = CONTEXT_TABS.map(t =>
+    `<button type="button" data-ctx="${t.value}" class="hub-tab ${activeContextTab === t.value ? 'active' : ''}" onclick="selectContextTab('${t.value}')">${t.label}</button>`
+  ).join('');
+}
+
+function selectContextTab(v){
+  activeContextTab = v;
+  buildContextTabs();
+  CONTEXT_TABS.forEach(t => {
+    const el = document.getElementById('ctx-' + t.value);
+    if (el) el.style.display = t.value === v ? '' : 'none';
+  });
+  if (v === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
+  if (v === 'chart') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
 }
 
 // --- Hub tabs ---
@@ -1546,52 +1505,10 @@ function applyFilters(rows, filter, query){
   });
 }
 
-function filterLabel(value){
-  for (const group of FILTER_GROUPS) {
-    const found = group.items.find(item => item.value === value);
-    if (found) return found.label;
-  }
-  return 'Tất cả tín hiệu';
-}
-
-function buildFilterPopover(){
-  const pop = document.getElementById('filterPopover');
-  const triggerLabel = document.getElementById('filterTriggerLabel');
-  if (!pop || !triggerLabel) return;
-  triggerLabel.textContent = filterLabel(activeFilter);
-  pop.innerHTML = FILTER_GROUPS.map(group => `
-    <div class="filter-group">
-      <div class="filter-group-title">${group.title}</div>
-      ${group.items.map(item => `
-        <button type="button" class="filter-option ${item.value === activeFilter ? 'active' : ''}" onclick="selectFilter('${item.value}')">
-          <span class="filter-option-main"><span class="filter-chip ${item.tone}">${item.chip}</span><span class="filter-label">${item.label}</span></span>
-        </button>`).join('')}
-    </div>`).join('');
-}
-
-function toggleFilterMenu(event){
-  event.stopPropagation();
-  buildFilterPopover();
-  const pop = document.getElementById('filterPopover');
-  const trigger = document.getElementById('filterTrigger');
-  if (!pop || !trigger) return;
-  const open = !pop.classList.contains('open');
-  pop.classList.toggle('open', open);
-  trigger.classList.toggle('open', open);
-}
-
-function closeFilterMenu(){
-  document.getElementById('filterPopover')?.classList.remove('open');
-  document.getElementById('filterTrigger')?.classList.remove('open');
-}
-
 function selectFilter(value){
   activeFilter = value;
-  closeFilterMenu();
   renderSignalTable();
 }
-
-document.addEventListener('click', closeFilterMenu);
 
 function renderSignalTable(){
   buildHubTabs();
@@ -1632,37 +1549,10 @@ function copySymbols(){
   }).catch(() => {});
 }
 
-function renderLmRows(items, emptyText){
-  if (!items || !items.length) return `<div class="empty-note">${emptyText}</div>`;
-  return items.slice(0, 8).map(s => {
-    let meta = [];
-    if (s.buy_score != null) meta.push(`B${s.buy_score}/6`);
-    if (s.sell_score != null && s.sell_score > 0) meta.push(`S${s.sell_score}/6`);
-    if (s.last_volume != null) meta.push(`${Math.round(s.last_volume).toLocaleString('vi-VN')} cp`);
-    return `<div class="lm-row"><span class="lm-sym">${escapeHtml(s.symbol)}</span><span class="lm-meta">${escapeHtml(meta.join(' · '))}</span></div>`;
-  }).join('');
-}
-
-function buildLucMachPanel(){
-  const src = currentSignalSources(activeSignalDate).lm;
-  if (!src) return '';
-  const valid = [...(src.strong || []), ...(src.valid || [])];
-  const watch = src.watch || [];
-  const sell = src.sell_warning || [];
-  return `<div class="panel">
-    <h2>Lục Mạch Core Filter <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">(${src.total_signals || 0} tín hiệu · thiếu OHLCV ${src.skipped_missing_ohlc || 0})</span></h2>
-    <div class="lm-grid">
-      <div class="lm-box"><h3>Buy</h3>${renderLmRows(valid, 'Chưa có mã mua hợp lệ')}</div>
-      <div class="lm-box"><h3>Watchlist</h3>${renderLmRows(watch, 'Chưa có mã theo dõi')}</div>
-      <div class="lm-box"><h3>Sell warning</h3>${renderLmRows(sell, 'Chưa có cảnh báo bán')}</div>
-    </div>
-  </div>`;
-}
-
 // --- Chart ---
 function buildChartSection(){
-  return `<div class="panel">
-    <h2 class="accordion" onclick="toggleAccordion(this)">Biểu đồ lịch sử — % trên MA10 / MA20 / MA50 / MA200</h2>
+  return `<div>
+    <h2 class="accordion collapsed" onclick="toggleAccordion(this)" style="font-size:12px;">Biểu đồ lịch sử — % trên MA10 / MA20 / MA50 / MA200</h2>
     <div class="accordion-body collapsed">
       <div class="chart-wrap" id="chartWrap">
         <canvas id="breadthChart"></canvas>
@@ -1849,19 +1739,6 @@ function renderRsiPulseChart(){
       renderRsiPulseChart();
     };
   });
-}
-
-// --- Commentary ---
-function buildCommentarySection(){
-  if (!COMMENTARY || !COMMENTARY.content) return '';
-  const md = escapeHtml(COMMENTARY.content);
-  const html = md.replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^# (.*$)/gm, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-  return `<div class="panel">
-    <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Nhận định phiên</h2>
-    <div class="accordion-body collapsed">
-      <div class="commentary">${html}</div>
-    </div>
-  </div>`;
 }
 
 // --- History viewer ---
