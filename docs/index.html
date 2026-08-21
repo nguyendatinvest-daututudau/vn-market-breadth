@@ -294,6 +294,7 @@
   .f-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:17px;margin-bottom:12px;}
   .f-icon.red{background:rgba(255,77,46,0.12);}
   .f-icon.blue{background:rgba(91,163,217,0.12);}
+  .f-icon.green{background:rgba(34,197,94,0.12);}
   .f-icon.purple{background:rgba(167,139,250,0.12);}
   .f-icon.cyan{background:rgba(34,211,238,0.12);}
   .feature-card b{display:block;font-size:13px;color:var(--text);margin-bottom:5px;}
@@ -358,6 +359,7 @@
     <div class="nav-links">
       <a href="#home" data-view="home" class="active" onclick="switchView('home')">Trang chủ</a>
       <a href="#market" data-view="market" onclick="switchView('market')">%MA &amp; Thị trường</a>
+      <a href="#chart" data-view="chart" onclick="switchView('chart')">Biểu đồ lịch sử</a>
       <a href="#rsi" data-view="rsi" onclick="switchView('rsi')">RSI</a>
       <a href="#signals" data-view="signals" onclick="switchView('signals')">Mã quan sát</a>
       <a href="#radar" data-view="radar" onclick="switchView('radar')">Radar</a>
@@ -395,8 +397,9 @@
       <div class="market-tabs" id="marketTabs"></div>
     </header>
     <div id="view-home"></div>
-    <div id="view-market" style="display:none;"></div>
-    <div id="view-rsi" style="display:none;"></div>
+<div id="view-market" style="display:none;"></div>
+<div id="view-chart" style="display:none;"></div>
+<div id="view-rsi" style="display:none;"></div>
     <div id="view-signals" style="display:none;"></div>
   </div>
 
@@ -602,6 +605,7 @@ function render(){
   document.getElementById('view-home').innerHTML = `
     <div class="feature-grid">
       <div class="feature-card" onclick="switchView('market')"><div class="f-icon red">📊</div><b>%MA &amp; Thị trường</b><span>Sức khỏe độ rộng: %MA10/20/50/200, phân bố A/D và xu hướng giá.</span></div>
+      <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Biểu đồ lịch sử</b><span>10 năm % mã trên MA10/20/50/200 — bối cảnh dài hạn của thị trường.</span></div>
       <div class="feature-card" onclick="switchView('rsi')"><div class="f-icon blue">📈</div><b>RSI &amp; Sentiment</b><span>Nhiệt RSI toàn thị trường, pulse chart và cảm giác phiên.</span></div>
       <div class="feature-card" onclick="switchView('signals')"><div class="f-icon purple">🔎</div><b>Mã quan sát</b><span>Tín hiệu mua/cảnh báo theo tầng ưu tiên, đã kiểm chứng 10 năm.</span></div>
       <div class="feature-card" onclick="switchView('radar')"><div class="f-icon cyan">🛰</div><b>Accumulation Radar</b><span>Phát hiện mã đang được tích lũy âm thầm bởi dòng tiền lớn.</span></div>
@@ -660,8 +664,15 @@ function render(){
     ${adDistributionHTML}
 
     ${trendDistributionHTML}
+  `;
 
-    ${chartHTML}
+  // ===== VIEW: BIỂU ĐỒ LỊCH SỬ =====
+  document.getElementById('view-chart').innerHTML = `
+    <div class="panel">
+      <h2>Lịch sử % mã trên đường MA <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">10 năm · ${m.date}</span></h2>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Diễn biến độ rộng thị trường từ 04/2016. Chỉ trên MA20 vượt 50% thường trùng vùng thị trường khỏe; rơi dưới 30% là vùng cực yếu. Kéo thanh trượt hoặc bấm 1/3/5 năm để thu hẹp khoảng xem.</div>
+      ${chartHTML}
+    </div>
   `;
 
   // ===== VIEW: RSI =====
@@ -1481,21 +1492,18 @@ function copySymbols(){
 // --- Chart ---
 function buildChartSection(){
   return `<div>
-    <h2 class="accordion collapsed" onclick="toggleAccordion(this)" style="font-size:12px;">Biểu đồ lịch sử — % trên MA10 / MA20 / MA50 / MA200</h2>
-    <div class="accordion-body collapsed">
-      <div class="chart-wrap" id="chartWrap">
-        <canvas id="breadthChart"></canvas>
-        <div class="chart-tooltip" id="chartTooltip"></div>
-        <div class="chart-range-control">
-          <span class="chart-range-label" id="chartRangeLabel">Từ 04/2016 · đến 08/2026</span>
-          <input type="range" id="chartRangeStart" min="0" max="1000" value="0" step="1">
-          <input type="range" id="chartRangeEnd" min="0" max="1000" value="1000" step="1">
-          <div class="chart-range-chips">
-            <button class="chart-range-chip" data-months="12">1 năm</button>
-            <button class="chart-range-chip" data-months="36">3 năm</button>
-            <button class="chart-range-chip" data-months="60">5 năm</button>
-            <button class="chart-range-chip active" data-months="0">Toàn bộ</button>
-          </div>
+    <div class="chart-wrap" id="chartWrap">
+      <canvas id="breadthChart"></canvas>
+      <div class="chart-tooltip" id="chartTooltip"></div>
+      <div class="chart-range-control">
+        <span class="chart-range-label" id="chartRangeLabel">Từ 04/2016 · đến 08/2026</span>
+        <input type="range" id="chartRangeStart" min="0" max="1000" value="0" step="1">
+        <input type="range" id="chartRangeEnd" min="0" max="1000" value="1000" step="1">
+        <div class="chart-range-chips">
+          <button class="chart-range-chip" data-months="12">1 năm</button>
+          <button class="chart-range-chip" data-months="36">3 năm</button>
+          <button class="chart-range-chip" data-months="60">5 năm</button>
+          <button class="chart-range-chip active" data-months="0">Toàn bộ</button>
         </div>
       </div>
     </div>
@@ -1803,15 +1811,16 @@ let radarSortKey = 'score';
 
 function switchView(view){
   document.querySelectorAll('.nav-links a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-  const dashViews = ['home', 'market', 'rsi', 'signals'];
+  const dashViews = ['home', 'market', 'chart', 'rsi', 'signals'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
   if (dashViews.includes(view)) {
-    ['home', 'market', 'rsi', 'signals'].forEach(v => {
+    ['home', 'market', 'chart', 'rsi', 'signals'].forEach(v => {
       const el = document.getElementById('view-' + v);
       if (el) el.style.display = v === view ? '' : 'none';
     });
     if (view === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
+    if (view === 'chart') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
     if (view === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
   }
   if (window.location.hash !== `#${view}`) history.pushState(null, '', `#${view}`);
@@ -1819,7 +1828,7 @@ function switchView(view){
 
 window.addEventListener('hashchange', () => {
   const v = window.location.hash.replace('#', '') || 'home';
-  if (['home', 'market', 'rsi', 'signals', 'radar'].includes(v)) switchView(v);
+  if (['home', 'market', 'chart', 'rsi', 'signals', 'radar'].includes(v)) switchView(v);
 });
 
 const RADAR_FMT = (v, d=1) => v==null||v===undefined?'-':Number(v).toFixed(d);
@@ -2008,7 +2017,7 @@ loadData();
 // Initial hash routing
 (function(){
   const h = window.location.hash.replace('#', '') || 'home';
-  if (['home', 'market', 'rsi', 'signals', 'radar'].includes(h)) switchView(h);
+  if (['home', 'market', 'chart', 'rsi', 'signals', 'radar'].includes(h)) switchView(h);
 })();
 
 // Auto-refresh regime + intraday
