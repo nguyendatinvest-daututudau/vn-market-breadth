@@ -1820,6 +1820,7 @@ function switchView(view){
   const dashViews = ['home', 'market', 'chart', 'rsi', 'signals'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
+  if (view === 'radar' && !radarDataLoaded) loadRadarData();
   if (dashViews.includes(view)) {
     ['home', 'market', 'chart', 'rsi', 'signals'].forEach(v => {
       const el = document.getElementById('view-' + v);
