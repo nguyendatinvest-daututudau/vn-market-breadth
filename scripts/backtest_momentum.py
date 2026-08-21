@@ -188,9 +188,9 @@ def backtest_symbol(symbol: str) -> dict | None:
              + sig_roc * SCORE_ROC + sig_hy * SCORE_HYBRID
              + bonuses["bonus_total"])
 
-    # Categorize
-    is_strong = (strategy_ok & (score >= 60)).astype(int)
-    is_watch = (strategy_ok & (score >= 30) & (score < 60)).astype(int)
+    # Categorize (tier moi theo ket qua evaluate: action 30-59 tot nhat, hot >=60 edge am OOS)
+    is_action = (strategy_ok & (score >= 30) & (score < 60)).astype(int)
+    is_hot = (strategy_ok & (score >= 60)).astype(int)
     has_signal = (strategy_ok & (score >= 30)).astype(int)
 
     # Forward returns
@@ -205,8 +205,8 @@ def backtest_symbol(symbol: str) -> dict | None:
 
         # Stats by bracket
         for bracket_name, bracket_mask in [
-            ("strong", is_strong),
-            ("watch", is_watch),
+            ("action", is_action),
+            ("hot", is_hot),
             ("any_signal", has_signal),
         ]:
             valid = bracket_mask.iloc[valid_start:valid_end]
@@ -231,8 +231,8 @@ def backtest_symbol(symbol: str) -> dict | None:
     results["score_distribution"] = {
         "mean": round(float(valid_scores.mean()), 2) if not valid_scores.empty else None,
         "median": round(float(valid_scores.median()), 2) if not valid_scores.empty else None,
-        "pct_strong": round(float((valid_scores >= 60).mean() * 100), 2) if not valid_scores.empty else None,
-        "pct_watch": round(float(((valid_scores >= 30) & (valid_scores < 60)).mean() * 100), 2) if not valid_scores.empty else None,
+        "pct_hot": round(float((valid_scores >= 60).mean() * 100), 2) if not valid_scores.empty else None,
+        "pct_action": round(float(((valid_scores >= 30) & (valid_scores < 60)).mean() * 100), 2) if not valid_scores.empty else None,
     }
 
     return results
@@ -254,8 +254,8 @@ def aggregate_results(all_results: list[dict]) -> dict:
             combined["score_distribution"] = {
                 "mean_mean": round(np.mean([d["mean"] for d in dists if d["mean"] is not None]), 2) if any(d["mean"] is not None for d in dists) else None,
                 "mean_median": round(np.mean([d["median"] for d in dists if d["median"] is not None]), 2) if any(d["median"] is not None for d in dists) else None,
-                "mean_pct_strong": round(np.mean([d["pct_strong"] for d in dists if d["pct_strong"] is not None]), 2) if any(d["pct_strong"] is not None for d in dists) else None,
-                "mean_pct_watch": round(np.mean([d["pct_watch"] for d in dists if d["pct_watch"] is not None]), 2) if any(d["pct_watch"] is not None for d in dists) else None,
+                "mean_pct_hot": round(np.mean([d["pct_hot"] for d in dists if d["pct_hot"] is not None]), 2) if any(d["pct_hot"] is not None for d in dists) else None,
+                "mean_pct_action": round(np.mean([d["pct_action"] for d in dists if d["pct_action"] is not None]), 2) if any(d["pct_action"] is not None for d in dists) else None,
             }
             continue
 
@@ -288,13 +288,17 @@ def main():
 
     stats = aggregate_results(all_results)
 
+    if not all_results:
+        print("WARN: Khong xu ly duoc symbol nao (ohlc_cache rong?) — KHONG ghi de output cu.")
+        return
+
     print(f"\nSymbols processed: {len(all_results)}")
     print()
 
     # Print summary
     for lf in LOOKFORWARD_OPTIONS:
         print(f"--- T+{lf} (threshold {SUCCESS_THRESHOLD*100:.0f}%) ---")
-        for bracket in ["strong", "watch", "any_signal"]:
+        for bracket in ["action", "hot", "any_signal"]:
             key = f"{bracket}_T+{lf}"
             if key in stats:
                 d = stats[key]
@@ -316,8 +320,8 @@ def main():
         print(f"Score distribution (per symbol avg):")
         print(f"  Mean score: {sd['mean_mean']}")
         print(f"  Median score: {sd['mean_median']}")
-        print(f"  % Strong (>=60): {sd['mean_pct_strong']}%")
-        print(f"  % Watch (35-59): {sd['mean_pct_watch']}%")
+        print(f"  % Hot (>=60): {sd['mean_pct_hot']}%")
+        print(f"  % Action (30-59): {sd['mean_pct_action']}%")
 
     now = vn_now()
     output = {

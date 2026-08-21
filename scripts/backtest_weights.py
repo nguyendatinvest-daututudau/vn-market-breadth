@@ -2,6 +2,9 @@
 Backtest ensemble signal weights — vectorized over full OHLC history.
 For each symbol, slides day by day, records when each signal fires,
 then checks forward return (T+10). Win rate per signal → normalized weight.
+
+Walk-forward: weights chi duoc fit tren cua so trailing (TRAILING_BARS phien
+ket thuc truoc LOOKFORWARD ngay hien tai) — tranh fit in-sample toan bo lich su.
 Output: data/backtest_weights.json
 """
 from __future__ import annotations
@@ -28,6 +31,7 @@ LOOKFORWARD = 10
 SUCCESS_THRESHOLD = 0.02  # 2% return in 10 sessions = win
 MIN_AVG_VOLUME = 300_000
 MIN_OBSERVATIONS = 50
+TRAILING_BARS = 252  # walk-forward: chi fit tren ~12 thang gan nhat
 
 
 def get_filtered_symbols() -> list[str]:
@@ -78,9 +82,12 @@ def backtest_symbol(symbol: str) -> dict | None:
     sig_mo, _ = compute_momentum_signal_series(close, volume)
     liquidity_ok = vol_avg20 >= MIN_AVG_VOLUME
 
-    # Valid range: we need enough leading history AND forward data available
+    # Valid range: enough leading history AND forward data available.
+    # Walk-forward: chi fit tren cua so trailing (252 phien) ket thuc tai
+    # valid_end — nhung ngay co ket qua T+10 chua biet hoac ngoai cua so bi loai.
     valid_start = MIN_SYMBOL_HISTORY - 1
     valid_end = n - LOOKFORWARD
+    fit_start = max(valid_start, n - LOOKFORWARD - TRAILING_BARS)
 
     results = {}
     for name, sig in [
@@ -89,8 +96,8 @@ def backtest_symbol(symbol: str) -> dict | None:
         ("breakout", sig_bo),
         ("momentum", sig_mo),
     ]:
-        triggered = sig.iloc[valid_start:valid_end] & liquidity_ok.iloc[valid_start:valid_end]
-        wins = (triggered & is_win.iloc[valid_start:valid_end]).sum()
+        triggered = sig.iloc[fit_start:valid_end] & liquidity_ok.iloc[fit_start:valid_end]
+        wins = (triggered & is_win.iloc[fit_start:valid_end]).sum()
         total = triggered.sum()
         results[name] = {"wins": int(wins), "total": int(total)}
 
@@ -145,6 +152,9 @@ def main():
 
     # Win rates
     total_obs = sum(d["total"] for d in agg_stats.values())
+    if symbols_tested == 0 or total_obs == 0:
+        print("WARN: Khong du observation (ohlc_cache rong?) — KHONG ghi de weights cu.")
+        return
     print(f"Symbols tested: {symbols_tested}")
     print(f"Total observations: {total_obs}")
     print()
@@ -168,6 +178,8 @@ def main():
     output = {
         "generated_at": now.isoformat(),
         "date": now.strftime("%d/%m/%Y"),
+        "method": "walk_forward_trailing",
+        "trailing_bars": TRAILING_BARS,
         "num_symbols_tested": symbols_tested,
         "total_observations": total_obs,
         "lookforward_days": LOOKFORWARD,

@@ -292,7 +292,13 @@ def analyze_symbol(symbol: str) -> dict | None:
     if bonuses["adx_strong"]: bonus_list.append("adx_strong")
     if bonuses["rsi_gold"]: bonus_list.append("rsi_gold")
 
-    sig_type = "strong" if score >= 60 else "watch"
+    # Phan loai theo backtest 10 nam (2015-2026, T+10 hit2):
+    # - Vung 30-59 co win rate cao nhat va duong ca OOS -> "strong" (hanh dong)
+    # - Score >=60 edge am OOS (b60-70 -2pp, b70-80 -6.6pp) -> "hot" (canh bao qua nong)
+    if score >= 60:
+        sig_type = "hot"
+    else:
+        sig_type = "strong"
 
     return {
         "symbol": symbol,
@@ -347,7 +353,7 @@ def main():
     now = vn_now()
     market_date = format_market_date(signal_market_date()) or now.strftime("%d/%m/%Y")
     strong = [s for s in signals if s["signal_type"] == "strong"]
-    watch = [s for s in signals if s["signal_type"] == "watch"]
+    hot = [s for s in signals if s["signal_type"] == "hot"]
 
     output = {
         "generated_at": now.isoformat(),
@@ -355,9 +361,9 @@ def main():
         "total_symbols_analyzed": len(symbols),
         "total_signals": len(signals),
         "strong_buy": len(strong),
-        "watch_count": len(watch),
+        "hot_count": len(hot),
         "strong": strong,
-        "watch": watch,
+        "hot": hot,
         "all_signals": signals,
     }
 
@@ -368,7 +374,7 @@ def main():
 
     tqdm.write(f"\nDa ghi: {SIGNALS_JSON}")
     tqdm.write(f"Tong phan tich: {output['total_symbols_analyzed']} ma")
-    tqdm.write(f"Tin hieu: {output['total_signals']} (Strong: {output['strong_buy']}, Quan sat: {output['watch_count']})")
+    tqdm.write(f"Tin hieu: {output['total_signals']} (Strong 30-59: {output['strong_buy']}, Hot >=60: {output['hot_count']})")
     if signals:
         tqdm.write(f"\nTop tin hieu:")
         for s in signals[:5]:

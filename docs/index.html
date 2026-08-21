@@ -257,6 +257,7 @@
   .ev-val{font-size:11px;color:var(--muted);white-space:nowrap;}
   .ev-cell.good{border-left:3px solid var(--up);}
   .ev-cell.bad{border-left:3px solid #FF8A8A;}
+  .riskoff-dim .s-badge.str,.riskoff-dim .s-badge.ens{opacity:.4;filter:grayscale(.6);}
 
   .ad-dist-wrap{display:grid;grid-template-columns:1fr;gap:10px;}
   .ad-dist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
@@ -432,7 +433,8 @@ const FILTER_GROUPS = [
     {value:'sell-warning', label:'Cảnh báo bán', chip:'SELL', tone:'sell', desc:'Chưa kiểm chứng dự báo giảm (backtest median T+10 dương)'},
   ]},
   { title:'Cường độ tín hiệu', items:[
-    {value:'strong', label:'Momentum Strong', chip:'STR', tone:'buy', desc:'Score ≥60 — backtest 10 năm thắng THẤP hơn Watch'},
+    {value:'strong', label:'Momentum Strong', chip:'STR', tone:'buy', desc:'Score 30-59 — vùng thắng tốt nhất (backtest 10 năm)'},
+    {value:'hot', label:'Momentum Hot', chip:'HOT', tone:'sell', desc:'Score ≥60 — quá nóng, edge âm OOS, không nên mua đuổi'},
     {value:'ensemble-strong', label:'Ensemble Strong', chip:'ENS', tone:'system', desc:'Điểm ensemble ≥0.65'},
     {value:'ensemble-weak', label:'Ensemble Weak', chip:'ENS', tone:'neutral', desc:'Điểm ensemble 0.35-0.65'},
   ]},
@@ -583,6 +585,16 @@ function fmtBuyPerformance(symbol, currentPrice, buyPrice, buyPriceValue){
   return `<span style="color:${color};font-weight:800;">${sign}${pct.toFixed(1)}%</span>`;
 }
 
+function intradayChipHTML(m){
+  try {
+    if (!INTRADAY || !INTRADAY.markets || !m || !m.date) return '';
+    if (INTRADAY.session_date !== m.date) return '';
+    const hose = INTRADAY.markets.HOSE;
+    if (!hose || !hose.tracked) return '';
+    return `<span class="regime-chip neutral" style="font-size:11px;padding:4px 12px;" title="Breadth trong phiên (streaming SSI), coverage ${((hose.coverage||0)*100).toFixed(0)}%">⏱ Intraday ↑${hose.advances} ↓${hose.declines}</span>`;
+  } catch (e) { return ''; }
+}
+
 function render(){
   const m = LATEST.markets[activeMarket];
   if (!m) { document.getElementById('content').innerHTML = '<div class="loading">Chọn thị trường</div>'; return; }
@@ -616,8 +628,9 @@ function render(){
           <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
           <div class="sub">Buy ${summary.buySignals} · Watch ${summary.watchSignals} · Sell warning ${summary.sellWarnings}${summary.missingOhlc ? ` · Thiếu OHLCV ${summary.missingOhlc} mã` : ''}</div>
         </div>
-        <div class="summary-badges">
+        <div class="summary-badges ${REGIME?.tone === 'risk_off' ? 'riskoff-dim' : ''}">
           ${REGIME?`<span class="regime-chip ${REGIME.tone}" style="font-size:11px;padding:4px 12px;">${{risk_off:'RISK-OFF',neutral:'TRUNG LẬP',risk_on:'RISK-ON',overheated:'QUÁ NÓNG'}[REGIME.tone]||REGIME.tone} ${REGIME.score!=null?REGIME.score.toFixed(0):''}</span>`:''}
+          ${intradayChipHTML(m)}
           ${summary.badges.map(b => `<span class="s-badge ${b.cls}" data-filter="${b.filter}">${b.label}</span>`).join('')}
         </div>
       </div>
@@ -638,6 +651,7 @@ function render(){
       <div class="kpi-card primary"><div class="lab">MA50</div><div class="num">${fmt1(m.pct_above_ma50)}%</div><div class="sub">${m.above_ma50_count} mã</div></div>
       <div class="kpi-card primary"><div class="lab">MA200</div><div class="num">${fmt1(m.pct_above_ma200)}%</div><div class="sub">${m.above_ma200_count} mã</div></div>
     </div>
+    <div style="font-size:10px;color:var(--faint);margin:-4px 0 12px 2px;">Ghi chú: %MA tính trên nhóm mã đủ điều kiện thanh khoản (không phải toàn bộ danh mục sàn). A/D ALL: HOSE toàn sàn, HNX chỉ nhóm mã lọc (SSI không cung cấp A/D HNX toàn sàn).</div>
 
     <div class="breadth-bar">
       <span style="width:${upW}%;background:var(--up);">${upW > 10 ? fmt1(upW)+'%' : ''}</span>
@@ -698,6 +712,7 @@ function render(){
 
   populateSignalDateSelector();
   buildFilterPopover();
+  restoreAccordions();
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.value = searchQuery;
   requestAnimationFrame(() => {
@@ -717,7 +732,7 @@ function adRatioNote(r){
 
 // --- Build summary badges from all strategies ---
 function buildSummary(dateStr){
-  let strongCount = 0, watchCount = 0, ensStrong = 0, ensWeak = 0;
+  let strongCount = 0, hotCount = 0, ensStrong = 0, ensWeak = 0;
   let lmValid = 0, lmWatch = 0, lmSell = 0, mamaBuy = 0, mamaSell = 0, atsBuy = 0, atsSell = 0, k4Buy = 0, k4Sell = 0, k4Watch = 0;
   let symbols = new Set();
 
@@ -733,7 +748,7 @@ function buildSummary(dateStr){
     momSrc.all_signals.forEach(s => {
       symbols.add(s.symbol);
       if (s.signal_type === 'strong') strongCount++;
-      else if (s.signal_type === 'watch') watchCount++;
+      else if (s.signal_type === 'hot') hotCount++;
     });
   }
   if (ensSrc && ensSrc.all_signals) {
@@ -776,7 +791,7 @@ function buildSummary(dateStr){
 
   let badges = [];
   if (strongCount) badges.push({cls:'str', label:`Momentum Strong ${strongCount}`, filter:'strong'});
-  if (watchCount) badges.push({cls:'wat', label:`Momentum Watch ${watchCount}`, filter:'watch'});
+  if (hotCount) badges.push({cls:'ensw', label:`🔥 Hot ${hotCount}`, filter:'hot'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
   if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
   if (lmValid) badges.push({cls:'ensw', label:`LM Buy ${lmValid}`, filter:'luc-mach-valid'});
@@ -790,7 +805,7 @@ function buildSummary(dateStr){
   if (k4Sell) badges.push({cls:'ensw', label:`🔴 K4 Sell ${k4Sell}`, filter:'sell-warning'});
 
   const buySignals = strongCount + ensStrong + ensWeak + lmValid + mamaBuy + atsBuy + k4Buy;
-  const watchSignals = watchCount + lmWatch + k4Watch;
+  const watchSignals = lmWatch + k4Watch;
   const sellWarnings = lmSell + mamaSell + atsSell + k4Sell;
   const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0) + (k4Src?.skipped_missing_ohlc || 0);
   return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
@@ -967,10 +982,10 @@ function rsiSentiment(p){
 
 function buildBacktestSnapshot(){
   const cards = [];
-  const momStrong = MOMENTUM_BT?.stats?.['strong_T+10'];
-  const momWatch = MOMENTUM_BT?.stats?.['watch_T+10'];
-  if (momStrong) cards.push({lab:'Momentum Strong T+10', num:`${(momStrong.win_rate*100).toFixed(1)}%`, sub:`${momStrong.wins}/${momStrong.total} đạt ngưỡng backtest`});
-  if (momWatch) cards.push({lab:'Momentum Watch T+10', num:`${(momWatch.win_rate*100).toFixed(1)}%`, sub:`${momWatch.wins}/${momWatch.total} đạt ngưỡng backtest`});
+  const momAction = MOMENTUM_BT?.stats?.['action_T+10'];
+  const momHot = MOMENTUM_BT?.stats?.['hot_T+10'];
+  if (momAction) cards.push({lab:'Momentum Strong T+10 (30-59)', num:`${(momAction.win_rate*100).toFixed(1)}%`, sub:`${momAction.wins}/${momAction.total} đạt ngưỡng backtest`});
+  if (momHot) cards.push({lab:'Momentum Hot T+10 (≥60)', num:`${(momHot.win_rate*100).toFixed(1)}%`, sub:`${momHot.wins}/${momHot.total} — quá nóng, edge âm OOS`});
   if (MAMA_BT?.stats_all) cards.push({lab:'MAMA T+10 >=7%', num:`${(MAMA_BT.stats_all.win_rate*100).toFixed(1)}%`, sub:`${MAMA_BT.stats_all.wins}/${MAMA_BT.stats_all.total} điểm Buy`});
   if (ATS_BT?.stats_all) cards.push({lab:'ATS T+10 >=7%', num:`${(ATS_BT.stats_all.win_rate*100).toFixed(1)}%`, sub:`${ATS_BT.stats_all.wins}/${ATS_BT.stats_all.total} điểm Buy`});
   if (!cards.length) return '';
@@ -1104,9 +1119,9 @@ function buildSignalHub(dateStr){
     previousDay.mama_positional, previousDay.advanced_trailstop, previousDay.khung4_tplus,
   ).map(s => s.symbol) : []);
 
-  // Load momentum backtest win rates (T+10, 10-nam)
-  let wrStrong = MOMENTUM_BT?.stats?.['strong_T+10']?.win_rate;
-  let wrWatch = MOMENTUM_BT?.stats?.['watch_T+10']?.win_rate;
+  // Load momentum backtest win rates (T+10, 10-nam; tier moi: action 30-59 / hot >=60)
+  let wrStrong = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
+  let wrHot = MOMENTUM_BT?.stats?.['hot_T+10']?.win_rate;
 
   rows = rows.map(r => {
     let repeat = prevSymbols.has(r.symbol) ? '<span class="badge-repeat">🔥 Lặp</span>' : '';
@@ -1124,8 +1139,8 @@ function buildSignalHub(dateStr){
   let tbody = filteredRows.map(r => {
     let typeTag = '', winrateStr = '';
     if (r.source === 'momentum') {
-      if (r.signalType === 'strong') { typeTag = '<span class="tag str" title="Backtest 10 nam: Strong (score>=60) thang THAP hon Watch">Strong</span>'; winrateStr = wrStrong ? `<span class="winrate">~${(wrStrong*100).toFixed(0)}%</span>` : ''; }
-      else { typeTag = '<span class="tag wat" title="Backtest 10 nam: Watch (score 30-59) co ti le thang tot nhat">Watch</span>'; winrateStr = wrWatch ? `<span class="winrate">~${(wrWatch*100).toFixed(0)}%</span>` : ''; }
+      if (r.signalType === 'strong') { typeTag = '<span class="tag str" title="Score 30-59 — vung thang tot nhat theo backtest 10 nam">Strong 30-59</span>'; winrateStr = wrStrong ? `<span class="winrate">~${(wrStrong*100).toFixed(0)}%</span>` : ''; }
+      else { typeTag = '<span class="tag ens-w" title="Backtest 10 nam: score >=60 co edge am OOS — khong nen mua duoi">🔥 Hot ≥60</span>'; winrateStr = wrHot ? `<span class="winrate">~${(wrHot*100).toFixed(0)}%</span>` : ''; }
     } else if (r.source === 'ensemble') {
       typeTag = r.signalType === 'strong' ? '<span class="tag ens">Ens Strong</span>' : '<span class="tag ens-w">Ens Weak</span>';
     } else if (r.source === 'luc-mach') {
@@ -1164,7 +1179,7 @@ function buildSignalHub(dateStr){
   if (!tbody) return '<div class="note" style="margin-bottom:0;">Không có tín hiệu phù hợp.</div>';
 
   const evidenceNote = EVALUATION ? `<div class="note" style="margin:0 0 10px 0;font-size:12px;line-height:1.6;">`
-    + `<b>Kiểm chứng 10 năm (T+10):</b> Momentum Watch (score 30-59) ~${(EVALUATION.filters?.mom_watch?.metrics?.hit2||0).toFixed(3)} · Strong (score ≥60) ~${(EVALUATION.filters?.mom_strong?.metrics?.hit2||0).toFixed(3)} · Ensemble Strong ~${(EVALUATION.filters?.ens_strong?.metrics?.hit2||0).toFixed(3)} · Baseline thanh khoản ~${(EVALUATION.baseline_liquid?.hit2||0).toFixed(3)}.`
+    + `<b>Kiểm chứng 10 năm (T+10):</b> Momentum Strong (score 30-59) ~${(EVALUATION.filters?.mom_watch?.metrics?.hit2||0).toFixed(3)} · Hot ≥60 ~${(EVALUATION.filters?.mom_strong?.metrics?.hit2||0).toFixed(3)} · Ensemble Strong ~${(EVALUATION.filters?.ens_strong?.metrics?.hit2||0).toFixed(3)} · Baseline thanh khoản ~${(EVALUATION.baseline_liquid?.hit2||0).toFixed(3)}.`
     + ` MAMA/ATS/Lục Mạch/K4 chưa có edge dương (chỉ tham khảo).`
     + `</div>` : '';
   return `${evidenceNote}<table>
@@ -1353,6 +1368,7 @@ function applyFilters(rows, filter, query){
     if (filter !== 'all') {
       if (filter === 'buy' && (r.signalType === 'watch' || r.signalType === 'sell_warning')) return false;
       if (filter === 'strong' && !(r.source === 'momentum' && r.signalType === 'strong')) return false;
+      if (filter === 'hot' && !(r.source === 'momentum' && r.signalType === 'hot')) return false;
       if (filter === 'watch' && r.signalType !== 'watch') return false;
       if (filter === 'sell-warning' && r.signalType !== 'sell_warning') return false;
       if (filter === 'ensemble-strong' && !(r.source === 'ensemble' && r.signalType === 'strong')) return false;
@@ -1509,14 +1525,26 @@ function buildChartSection(){
   </div>`;
 }
 
+const accordionState = new Map();
+function accordionKey(el){ return (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80); }
 function toggleAccordion(el){
   el.classList.toggle('collapsed');
   const body = el.nextElementSibling;
   if (body) body.classList.toggle('collapsed');
+  accordionState.set(accordionKey(el), !el.classList.contains('collapsed'));
   // Trigger chart render when expanded
   if (!el.classList.contains('collapsed')) {
     requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
   }
+}
+function restoreAccordions(){
+  document.querySelectorAll('.accordion').forEach(el => {
+    const saved = accordionState.get(accordionKey(el));
+    if (saved === undefined) return;
+    const body = el.nextElementSibling;
+    el.classList.toggle('collapsed', !saved);
+    if (body) body.classList.toggle('collapsed', !saved);
+  });
 }
 
 let chartRange = { s: 0, e: 1 };

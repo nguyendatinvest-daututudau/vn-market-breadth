@@ -48,6 +48,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 OUTPUT_JSON = DATA_DIR / "evaluation_filters.json"
 DOCS_OUTPUT_JSON = DOCS_DATA_DIR / "evaluation_filters.json"
+HISTORY_JSON = DATA_DIR / "evaluation_history.json"
+DOCS_HISTORY_JSON = DOCS_DATA_DIR / "evaluation_history.json"
+HISTORY_MAX_ENTRIES = 260  # ~5 nam neu chay tuan
 HISTORY_JSON = DATA_DIR / "breadth_history.json"
 
 FWD_OPTIONS = (5, 10, 20)
@@ -712,15 +715,58 @@ def main() -> int:
         "regime_series": {"n_dates": len(regime_map),
                           "buckets": {t: sum(1 for v in regime_map.values() if v == t) for t in ("risk_off", "neutral", "risk_on", "overheated")}},
         "walk_forward": wf,
+        "caveats": [
+            "Survivorship bias: OHLC cache chi con ma dang niem yet; ma delist trong qua khu khong co trong mau -> win rate co the lac quan.",
+            "Quan sat T+10 chong cheo (overlapping windows) — so n khong phai cac mau doc lap.",
+            "Universe loc thanh khoan (~660 ma), %MA/AD tren tap eligible nho hon toan san.",
+        ],
     }
+
+    # --- History tracking (edge decay theo thoi gian) ---
+    def _fnum(v):
+        try:
+            return round(float(v), 4)
+        except (TypeError, ValueError):
+            return None
+
+    history_entry = {
+        "generated_at": output["generated_at"],
+        "date": output["date"],
+        "num_symbols_tested": output["num_symbols_tested"],
+        "observations": output["observations"],
+        "baseline_all_hit2": _fnum(baseline_all.get("hit2")),
+        "baseline_liquid_hit2": _fnum(baseline_liq.get("hit2")),
+        "filters": {
+            key: {
+                "hit2": _fnum((r.get("metrics_liq") or r.get("metrics") or {}).get("hit2")),
+                "lift2_liq": _fnum(r.get("lift2_liq")),
+                "lift2_liq_test": _fnum(r.get("lift2_liq_test")),
+            }
+            for key, r in results.items()
+        },
+    }
+    history = []
+    if HISTORY_JSON.exists():
+        try:
+            history = json.loads(HISTORY_JSON.read_text(encoding="utf-8"))
+            if not isinstance(history, list):
+                history = []
+        except (OSError, ValueError):
+            history = []
+    history = [h for h in history if h.get("date") != history_entry["date"]]
+    history.append(history_entry)
+    history = history[-HISTORY_MAX_ENTRIES:]
 
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     DOCS_OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_JSON.write_text(json.dumps(output, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     DOCS_OUTPUT_JSON.write_bytes(OUTPUT_JSON.read_bytes())
+    HISTORY_JSON.write_text(json.dumps(history, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    DOCS_HISTORY_JSON.write_bytes(HISTORY_JSON.read_bytes())
 
     print(f"\nSaved: {OUTPUT_JSON}")
     print(f"Synced: {DOCS_OUTPUT_JSON}")
+    print(f"History: {HISTORY_JSON} ({len(history)} entries)")
 
     # Console summary
     print("\n--- Filter effectiveness (T+10, hit2 = +2%) ---")

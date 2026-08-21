@@ -1,6 +1,9 @@
 name: Evaluate filter logic
 
 on:
+  schedule:
+    # 03:00 UTC Thu Bay = 10:00 VN — ngoai gio san, xa cron update (15:10 VN hang ngay)
+    - cron: "0 3 * * 6"
   workflow_dispatch:
 
 permissions:
