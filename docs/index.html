@@ -1511,7 +1511,7 @@ function renderBreadthChart(m){
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   const P = { t: 30, r: 14, b: 38, l: 44 }, cw = w - P.l - P.r, ch = h - P.t - P.b;
   const xp = i => P.l + (i / (pts.length - 1)) * cw, yp = v => P.t + ch - (v / 100) * ch;
-  const lines = [{ k: 'v10', c: '#9333EA', l: 'MA10' }, { k: 'v20', c: '#4F46E5', l: 'MA20' }, { k: 'v50', c: '#F5A524', l: 'MA50' }, { k: 'v200', c: '#06B6D4', l: 'MA200' }];
+  const lines = [{ k: 'v10', c: '#A78BFA', l: 'MA10' }, { k: 'v20', c: '#818CF8', l: 'MA20' }, { k: 'v50', c: '#FBBF24', l: 'MA50' }, { k: 'v200', c: '#22D3EE', l: 'MA200' }];
   const maxTicks = Math.max(2, Math.floor(cw / 55));
   const months = [];
   let lastKey = null;
@@ -1521,9 +1521,9 @@ function renderBreadthChart(m){
     ctx.clearRect(0, 0, w, h);
     [0, 25, 50, 75, 100].forEach(pct => {
       const y = yp(pct);
-      ctx.save(); ctx.strokeStyle = '#E4E9F7'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
       ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(w - P.r, y); ctx.stroke(); ctx.restore();
-      ctx.fillStyle = '#6B7395'; ctx.font = '9.5px Inter,sans-serif';
+      ctx.fillStyle = '#9CA3AF'; ctx.font = '9.5px Inter,sans-serif';
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(pct + '%', P.l - 6, y);
     });
     lines.forEach(s => {
@@ -1531,25 +1531,25 @@ function renderBreadthChart(m){
       ctx.beginPath(); pts.forEach((p, i) => { const x = xp(i), y = yp(p[s.k]); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
       ctx.stroke();
       const lx = xp(pts.length - 1), ly = yp(pts[pts.length - 1][s.k]);
-      ctx.fillStyle = '#fff'; ctx.strokeStyle = s.c; ctx.lineWidth = 2;
+      ctx.fillStyle = s.c; ctx.strokeStyle = s.c; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     });
-    ctx.fillStyle = '#6B7395'; ctx.font = '9px Inter,sans-serif';
+    ctx.fillStyle = '#9CA3AF'; ctx.font = '9px Inter,sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h - P.b + 8); } });
     const ld = pts[pts.length - 1].date.split('/'); ctx.fillText(ld[0] + '/' + ld[1], xp(pts.length - 1), h - P.b + 8);
-    ctx.strokeStyle = '#E4E9F7'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P.l, h - P.b); ctx.lineTo(w - P.r, h - P.b); ctx.stroke();
     lines.forEach((s, i) => {
       const lx = P.l + i * 100, ly = 14;
       ctx.strokeStyle = s.c; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 18, ly); ctx.stroke();
-      ctx.fillStyle = '#3A4270'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.l, lx + 24, ly);
+      ctx.fillStyle = '#E5E7EB'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.l, lx + 24, ly);
     });
     if (idx >= 0 && idx < pts.length) {
       const p = pts[idx], x = xp(idx);
-      ctx.save(); ctx.strokeStyle = 'rgba(27,33,64,0.15)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
       ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ch); ctx.stroke(); ctx.restore();
-      lines.forEach(s => { const dy = yp(p[s.k]); ctx.fillStyle = '#fff'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
+      lines.forEach(s => { const dy = yp(p[s.k]); ctx.fillStyle = '#141920'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
       tt.style.display = 'block';
       tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA10: <strong>${p.v10.toFixed(1)}%</strong> · MA20: <strong>${p.v20.toFixed(1)}%</strong> · MA50: <strong>${p.v50.toFixed(1)}%</strong> · MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
       const tw = tt.offsetWidth; let tx = Math.round(x - tw / 2);
@@ -1609,10 +1609,10 @@ function renderRsiPulseChart(){
   const mStep = Math.max(1, Math.ceil(months.length / maxTicks));
   function draw(idx){
     ctx.clearRect(0,0,w,h);
-    [0,0.25,0.5,0.75,1].forEach(t => { const v=Math.round(yMax*t), y=yp(v); ctx.save(); ctx.strokeStyle='#E3E8EF'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(w-P.r,y); ctx.stroke(); ctx.restore(); ctx.fillStyle='#8A94A6'; ctx.font='9.5px Inter,sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillText(v, P.l-7, y); });
+    [0,0.25,0.5,0.75,1].forEach(t => { const v=Math.round(yMax*t), y=yp(v); ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(w-P.r,y); ctx.stroke(); ctx.restore(); ctx.fillStyle='#9CA3AF'; ctx.font='9.5px Inter,sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillText(v, P.l-7, y); });
     lines.forEach(s => { ctx.strokeStyle=s.c; ctx.lineWidth=2.4; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=xp(i), y=yp(p[s.k]); i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); }); ctx.stroke(); const lx=xp(pts.length-1), ly=yp(pts[pts.length-1][s.k]); ctx.fillStyle='#fff'; ctx.strokeStyle=s.c; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(lx,ly,4,0,Math.PI*2); ctx.fill(); ctx.stroke(); });
     ctx.fillStyle='#8A94A6'; ctx.font='9px Inter,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='top'; months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h-P.b+8); } }); const ld=pts[pts.length-1].date.split('/'); ctx.fillText(ld[0]+'/'+ld[1], xp(pts.length-1), h-P.b+8);
-    lines.forEach((s,i)=>{ const lx=P.l+i*116, ly=12; ctx.strokeStyle=s.c; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+18,ly); ctx.stroke(); ctx.fillStyle='#0B132B'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(s.l,lx+24,ly); });
+    lines.forEach((s,i)=>{ const lx=P.l+i*116, ly=12; ctx.strokeStyle=s.c; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+18,ly); ctx.stroke(); ctx.fillStyle='#E5E7EB'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(s.l,lx+24,ly); });
     if(idx>=0 && idx<pts.length){ const p=pts[idx], x=xp(idx); ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,P.t+ch); ctx.stroke(); ctx.restore(); lines.forEach(s=>{ const y=yp(p[s.k]); ctx.fillStyle='#141920'; ctx.strokeStyle=s.c; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); }); tt.style.display='block'; tt.innerHTML=`<div style="font-weight:700;margin-bottom:4px;font-size:11px;">${p.date}</div><div>RSI&lt;30: <strong>${p.u30}</strong> · RSI&gt;70: <strong>${p.o70}</strong> · RSI&gt;50: <strong>${p.o50}</strong></div>`; const tw=tt.offsetWidth; let tx=Math.round(x-tw/2); if(tx<4) tx=4; if(tx+tw>w-4) tx=w-tw-4; tt.style.left=tx+'px'; tt.style.top=Math.max(4,P.t-46)+'px'; }
     else tt.style.display='none';
   }
