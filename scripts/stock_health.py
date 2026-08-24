@@ -142,15 +142,20 @@ def _willr(df: pd.DataFrame, period: int = 14):
 def _beta(sym_close: pd.Series, idx_close: pd.Series, lookback: int = 252):
     if sym_close is None or idx_close is None:
         return None
-    s = sym_close.tail(lookback).pct_change().dropna()
-    i = idx_close.tail(lookback).pct_change().dropna()
-    joined = pd.concat([s, i], axis=1, join="inner").dropna()
-    if len(joined) < 60:
+    # Can chinh vi tri tu CUOI (ca hai ket thuc cung phien moi nhat) thay vi join
+    # theo nhãn index goc cua DataFrame - so dong giua ma va VNI khac nhau se lam
+    # inner-join tren RangeIndex tra ve gan nhu rong.
+    s = sym_close.dropna().tail(lookback).reset_index(drop=True)
+    i = idx_close.dropna().tail(lookback).reset_index(drop=True)
+    n = min(len(s), len(i))
+    if n < 61:
         return None
-    var_i = float(joined.iloc[:, 1].var())
+    rs = s.iloc[-n:].pct_change().dropna()
+    ri = i.iloc[-n:].pct_change().dropna()
+    var_i = float(ri.var())
     if var_i <= 0:
         return None
-    cov = float(joined.cov().iloc[0, 1])
+    cov = float(pd.concat([rs, ri], axis=1).cov().iloc[0, 1])
     return cov / var_i
 
 

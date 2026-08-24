@@ -71,12 +71,17 @@ def test_compute_symbol_health_short_history():
 
 
 def test_beta_vs_index():
+    from stock_health import _beta
+
     df = make_df()
-    idx = make_df(seed=11)["Close"]
-    h = compute_symbol_health(df, "TEST", idx)
-    # Beta co the None neu khong du overlap, nhung neu co thi hop le
-    if h["risk"]["beta"] is not None:
-        assert -5 <= h["risk"]["beta"] <= 5
+    # Index dai hon va co nhan index goc lech hẳn so voi ma (mo phong VNI.csv 749 dong vs ma ~2000 dong)
+    idx_long = pd.concat([make_df(seed=11)["Close"]] * 3 + [make_df(seed=11)["Close"].tail(100)], ignore_index=True)
+    beta = _beta(df["Close"], idx_long)
+    assert beta is not None
+    assert -5 <= beta <= 5
+    # Ca hai cung do dai nhung khac nhan index -> van phai tinh duoc
+    b2 = _beta(df["Close"], make_df(seed=13).tail(200)["Close"])
+    assert b2 is not None
 
 
 def test_osc_score_extremes():
