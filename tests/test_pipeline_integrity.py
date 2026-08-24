@@ -48,14 +48,18 @@ def test_signals_history_only_accepts_the_expected_market_date(tmp_path, monkeyp
     monkeypatch.setattr(pipeline, "DATA_DIR", tmp_path)
     monkeypatch.setattr(pipeline, "SIGNALS_HISTORY_JSON", tmp_path / "signals_history.json")
     monkeypatch.setattr(pipeline, "DOCS_SIGNALS_HISTORY_JSON", tmp_path / "docs" / "signals_history.json")
-    (tmp_path / "strategy_signals.json").write_text(json.dumps({"date": "17/07/2026", "name": "new"}), encoding="utf-8")
+    (tmp_path / "strategy_signals.json").write_text(
+        json.dumps({"date": "17/07/2026", "name": "new", "audit": [1, 2], "all_signals": [{"symbol": "AAA"}]}),
+        encoding="utf-8",
+    )
     (tmp_path / "ensemble_signals.json").write_text(json.dumps({"date": "16/07/2026", "name": "stale"}), encoding="utf-8")
 
     pipeline.append_signals_history("17/07/2026")
 
     history = json.loads((tmp_path / "signals_history.json").read_text(encoding="utf-8"))
     assert history[0]["date"] == "17/07/2026"
-    assert history[0]["strategy"]["name"] == "new"
+    # Entry duoc slim: chi giu date + all_signals, bo audit va cac key khac
+    assert history[0]["strategy"] == {"date": "17/07/2026", "all_signals": [{"symbol": "AAA"}]}
     assert history[0]["ensemble"] is None
 
 

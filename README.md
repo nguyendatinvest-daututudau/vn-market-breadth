@@ -39,7 +39,6 @@ scripts/
   market_regime.py        # Regime gauge + phân kỳ + breadth momentum
   backfill_index.py       # Backfill OHLCV VNINDEX/HNXINDEX (cho regime/divergence)
   intraday_breadth.py     # Monitor A/D realtime (SSI v3 Streaming)
-  embed_data.py           # Tạo dashboard.html với embedded data
   requirements.txt
 data/
   breadth_latest.json     # snapshot breadth mới nhất
@@ -56,8 +55,6 @@ data/
   ohlc_cache/             # cache OHLCV theo mã
 docs/
   index.html              # dashboard source (fetch JSON từ data/)
-  accumulation-radar.html # hub riêng Accumulation Radar
-  dashboard.html          # embedded version, dùng được cả Dashboard và Radar qua file://
   data/                   # JSON copies cho GitHub Pages
 .github/workflows/update.yml  # cron: 15:10 VN (T2-T6)
 ```
@@ -93,8 +90,6 @@ Sau khi chạy:
 - `data/market_commentary.json` — nhận định thị trường
 
 Mở `docs/index.html` qua Live Server (VSCode) hoặc `python -m http.server`.
-Mở `docs/accumulation-radar.html` qua Live Server để xem hub Accumulation Radar.
-Mở `docs/dashboard.html` trực tiếp bằng double-click (`file://`) để dùng Dashboard và Accumulation Radar offline. `docs/index.html` và `docs/accumulation-radar.html` vẫn cần được phục vụ qua HTTP để tải JSON.
 
 ## Dashboard tabs
 

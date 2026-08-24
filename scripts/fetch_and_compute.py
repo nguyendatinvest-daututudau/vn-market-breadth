@@ -770,6 +770,28 @@ def append_history(markets_dict: dict) -> None:
     _write_json(HISTORY_JSON, history)
 
 
+HISTORY_SYSTEM_KEEP_KEYS = {"date", "all_signals"}
+
+
+def _slim_history_system(obj):
+    """Giu lai truong nho can thiet cho frontend (date, all_signals).
+
+    Bo cac mang nang khong ai doc lai: audit (300KB+/ngay/he), va cac ban sao
+    buy/sell/strong/hot/valid/watch trung lap voi all_signals.
+    """
+    if not isinstance(obj, dict):
+        return obj
+    return {k: v for k, v in obj.items() if k in HISTORY_SYSTEM_KEEP_KEYS}
+
+
+def _slim_history_entry(entry):
+    for key in ("strategy", "ensemble", "momentum", "luc_mach",
+                "khung4_tplus", "mama_positional", "advanced_trailstop"):
+        if entry.get(key) is not None:
+            entry[key] = _slim_history_system(entry[key])
+    return entry
+
+
 def append_signals_history(expected_date: str) -> None:
     strategy_path = DATA_DIR / "strategy_signals.json"
     ensemble_path = DATA_DIR / "ensemble_signals.json"
@@ -817,8 +839,9 @@ def append_signals_history(expected_date: str) -> None:
         return
 
     history = [h for h in history if h.get("date") != entry["date"]]
-    history.append(entry)
-    history = history[-365:]
+    history.append(_slim_history_entry(entry))
+    # Gioi han 120 phien: du cho xem lich su + so sanh, tranh file phinh vo han
+    history = history[-120:]
 
     _write_json(SIGNALS_HISTORY_JSON, history)
     DOCS_SIGNALS_HISTORY_JSON.parent.mkdir(parents=True, exist_ok=True)
