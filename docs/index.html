@@ -134,6 +134,7 @@
   .tag.ens-w{background:rgba(128,128,128,0.12);color:var(--muted);}
 
   .sig-expl{font-size:10.5px;color:var(--muted);line-height:1.4;max-width:240px;}
+.sig-why{font-size:10px;color:#8B93A0;line-height:1.45;margin-top:3px;max-width:240px;border-left:2px solid rgba(255,77,46,0.35);padding-left:6px;}
   .sig-source{display:flex;gap:3px;flex-wrap:wrap;}
   .src-tag{font-family:var(--font-all);font-size:9px;padding:2px 7px;border-radius:4px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);}
   .src-tag.hy{color:#d946ef;border-color:rgba(217,70,239,0.25);background:rgba(217,70,239,0.06);}
@@ -1084,7 +1085,7 @@ function buildBuyPanel(dateStr){
         <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
         <td>${wrChip}</td>
         <td>${meterHTML(conf)}</td>
-        <td class="sig-expl">${escapeHtml(r.expl || '')}</td>
+        <td>${sigExplainCell(r)}</td>
       </tr>`;
     }).join('');
     body = `<div class="table-scroll"><table class="hub-table">
@@ -1114,12 +1115,12 @@ function buildAlertsPanel(dateStr){
   const sellRows = sells.map(r => `<tr>
       <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}</td>
       <td>${escapeHtml(methodLabel(r.source))}</td>
-      <td class="sig-expl">${escapeHtml(r.expl || '')}</td>
+      <td>${sigExplainCell(r)}</td>
     </tr>`).join('')
     + lmSellWatch.map(r => `<tr>
       <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}</td>
       <td>Lục Mạch <span class="winrate">(sớm · ${escapeHtml(r.expl || '')})</span></td>
-      <td class="sig-expl">Watch nghiêng bán — 2/6 check phe bán, chưa xác nhận</td>
+      <td>${sigExplainCell(r)}</td>
     </tr>`).join('');
   return `<div class="panel">
     <h2>⚠ Cảnh báo <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">đừng mua đuổi · rà vị thế đang giữ</span></h2>
@@ -1278,7 +1279,7 @@ function buildSignalHub(dateStr){
       <td class="num mono">${escapeHtml(r.score)}</td>
       <td>${typeTag}${winrateStr}</td>
       <td>${conf}</td>
-      <td><div class="sig-expl">${escapeHtml(r.expl || '')}</div></td>
+      <td>${sigExplainCell(r)}</td>
       <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
     </tr>`;
   }).join('');
@@ -1318,6 +1319,55 @@ function collectAllSignals(dateStr){
   return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH, MAMA_POSITIONAL, ADVANCED_TRAILSTOP, KHUNG4_TPLUS);
 }
 
+function sigExplainCell(r){
+  const e = escapeHtml(r.expl || '');
+  const w = r.why ? `<div class="sig-why">${escapeHtml(r.why)}</div>` : '';
+  return `<div class="sig-expl">${e}</div>${w}`;
+}
+
+// --- Giai thich tin hieu: tai sao co tin hieu + y nghia giao dich ---
+function whyMomentum(s, strats){
+  if (s.signal_type === 'hot') return 'Quá nóng (score ≥60): thống kê 10 năm cho thấy vùng này hay điều chỉnh — tránh mua đuổi, rà vị thế đang giữ.';
+  const m = strats.map(st => ({
+    ma_crossover: 'MA10 cắt lên MA50 → xu hướng tăng đang hình thành',
+    breakout: 'đóng cửa phá đỉnh 20 phiên → phe mua áp đảo',
+    roc_momentum: 'ROC gia tốc mạnh hơn 20 phiên trước → động lượng tăng',
+    hybrid: 'mô hình hybrid xác nhận',
+  }[st])).filter(Boolean);
+  let base = m.length ? m.join(' + ') : 'nhiều chiến lược cùng xác nhận phe mua';
+  if (s.signal_type === 'strong') return `${base} — vùng score có tỷ lệ thắng T+10 tốt nhất theo backtest 10 năm.`;
+  if (s.signal_type === 'weak') return `${base} — tín hiệu còn yếu, chưa đủ ngưỡng vào nhóm mua chuẩn.`;
+  return `${base} — đang quan sát, chờ thêm xác nhận.`;
+}
+function whyEnsemble(s){
+  const n = ['ma_crossover','pullback','breakout','momentum'].filter(k => s[k]).length;
+  if ((s.total_score ?? 0) >= 0.65) return `${n}/4 chiến lược độc lập cùng chỉ phe mua với điểm tổng hợp cao — độ tin cậy lớn nhất trong các hệ.`;
+  return `Có ${n}/4 chiến lược chỉ phe mua nhưng điểm chưa đạt ngưỡng mạnh — tham khảo, chưa nên vào lệnh.`;
+}
+function whyLucMach(s){
+  const nBuy = (s.strategies || []).filter(x => String(x).endsWith('_buy')).length;
+  const nSell = (s.strategies || []).filter(x => String(x).endsWith('_sell')).length;
+  const vuddTxt = (s.vudd_buy_periods && s.vudd_buy_periods.length) ? `, chu kỳ VUDD ${s.vudd_buy_periods.join('/')} phiên đã xác nhận` : '';
+  if (s.signal_type === 'valid') return `Đạt ${s.buy_score}/6 điều kiện phe mua (giá · volume · xu hướng)${vuddTxt} → nhiều khung thời gian cùng xác nhận phe mua.`;
+  if (s.sell_score > 0 && s.sell_score >= s.buy_score) return `${s.sell_score}/6 check phe bán bật — cảnh báo sớm phân phối, rà soát vị thế.`;
+  if (s.signal_type === 'watch') return `${nBuy}/6 check phe mua — tín hiệu sớm, chờ thêm 1 check để thành MUA chuẩn.`;
+  if (s.signal_type === 'sell_warning') return `${s.sell_score || nSell}/6 check phe bán — cân nhắc giảm vị thế.`;
+  return 'Hệ Lục Mạch theo dõi đa khung thời gian.';
+}
+function whyMama(s){
+  if (s.mama_buy) return 'Giá đóng cửa vượt High setup phiên trước → MAMA xác nhận chuyển sang pha tích lũy-tăng (hệ tham khảo — backtest edge âm nhẹ).';
+  return 'Giá thủng Low setup → MAMA chuyển pha giảm, cân nhắc giảm vị thế.';
+}
+function whyAts(s){
+  if (s.ats_buy) return 'Close cắt lên đường dừng ATS → trend phục hồi; stop-loss tự trượt theo đường bs, giá thủng bs thì thoát.';
+  return 'Close thủng đường dừng ATS → kỷ luật trailing stop: thoát/giảm vị thế.';
+}
+function whyK4(s){
+  if (s.khung4_tplus_buy) return 'State Khung4 chuyển 0→1 → bắt đầu chu kỳ tích lũy-tăng mới (hệ tham khảo — backtest edge âm nhẹ).';
+  if (s.khung4_tplus_sell) return 'State chuyển 1→0 → chu kỳ tăng tạm khép lại, chờ chu kỳ mới.';
+  return 'Đang trong trạng thái chờ của chu kỳ Khung4.';
+}
+
 function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src){
   let result = [];
   // Momentum signals
@@ -1337,7 +1387,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.signal_type, source: 'momentum',
-        strategies: strats, expl: expl,
+        strategies: strats, expl: expl, why: whyMomentum(s, strats),
         rsi: s.rsi14 != null ? s.rsi14.toFixed(1) : null,
         adx: s.adx14 != null ? s.adx14.toFixed(1) : null,
         vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
@@ -1365,7 +1415,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
         symbol: s.symbol, score: pct,
         signalType: s.total_score >= 0.65 ? 'strong' : 'weak',
         source: 'ensemble',
-        strategies: strats, expl: expl,
+        strategies: strats, expl: expl, why: whyEnsemble(s),
         rsi: s.rsi14 != null ? s.rsi14.toFixed(1) : null,
         adx: null, vol: s.vol_ratio != null ? s.vol_ratio.toFixed(1)+'x' : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
@@ -1392,7 +1442,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.signal_type, source: 'luc-mach', watchDir,
-        strategies: s.strategies || [], expl: parts.join(' + '),
+        strategies: s.strategies || [], expl: parts.join(' + '), why: whyLucMach(s),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
@@ -1413,7 +1463,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.mama_buy ? 'valid' : 'sell_warning', source: 'mama',
-        strategies: s.strategies || [], expl: parts.join(' + '),
+        strategies: s.strategies || [], expl: parts.join(' + '), why: whyMama(s),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
@@ -1434,7 +1484,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.ats_buy ? 'valid' : 'sell_warning', source: 'ats',
-        strategies: s.strategies || [], expl: parts.join(' + '),
+        strategies: s.strategies || [], expl: parts.join(' + '), why: whyAts(s),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
@@ -1455,7 +1505,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.khung4_tplus_buy ? 'valid' : (s.khung4_tplus_sell ? 'sell_warning' : 'watch'), source: 'khung4-tplus',
-        strategies: ['khung4_tplus'], expl: parts.join(' + '),
+        strategies: ['khung4_tplus'], expl: parts.join(' + '), why: whyK4(s),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
         price: s.last_price ? s.last_price.toLocaleString('vi-VN') : null,
