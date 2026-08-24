@@ -31,7 +31,7 @@
     background-repeat:no-repeat;
     background-attachment:fixed;
   }
-  .wrap{max-width:1120px; margin:0 auto; padding:0 clamp(12px,3vw,36px);}
+  .wrap{max-width:1460px; margin:0 auto; padding:0 clamp(16px,3vw,44px);}
   .site-nav{position:sticky;top:0;z-index:80;background:rgba(8,10,13,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.06);}
   .nav-inner{max-width:1120px;margin:0 auto;padding:12px clamp(12px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:18px;}
   .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;}
@@ -45,26 +45,31 @@
   .nav-date{font-size:11px;color:var(--faint);white-space:nowrap;}
   .nav-cta{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,77,46,0.3);transition:filter .15s;white-space:nowrap;}
   .nav-cta:hover{filter:brightness(1.12);}
-  .hero{position:relative;overflow:hidden;text-align:center;padding:60px clamp(20px,5vw,56px) 48px;margin:0 calc(clamp(12px,3vw,36px) * -1) 30px;border-bottom:1px solid rgba(255,255,255,0.05);}
+  .hero{position:relative;overflow:hidden;text-align:center;padding:30px clamp(20px,4vw,48px) 24px;margin:0 calc(clamp(16px,3vw,44px) * -1) 18px;border-bottom:1px solid rgba(255,255,255,0.05);}
   .hero:before{content:'';position:absolute;inset:0;background:radial-gradient(720px 400px at 50% -12%, rgba(255,77,46,0.16), transparent 65%);pointer-events:none;}
-  .hero-badge{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.18em;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:999px;padding:7px 14px;margin-bottom:22px;}
-  .hero-title{position:relative;z-index:1;max-width:760px;margin:0 auto 16px;font-size:clamp(32px,5.5vw,56px);line-height:1.15;letter-spacing:-0.03em;font-weight:800;color:#fff;}
-  .hero-desc{position:relative;z-index:1;max-width:640px;margin:0 auto;font-size:clamp(14px,1.7vw,16px);line-height:1.75;color:var(--muted);}
-  .hero-ctas{position:relative;z-index:1;display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
-  .btn-primary{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,77,46,0.35);transition:filter .15s,transform .15s;}
+  .hero-badge{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:999px;padding:5px 12px;margin-bottom:12px;}
+  .hero-title{position:relative;z-index:1;max-width:760px;margin:0 auto 10px;font-size:clamp(24px,3vw,36px);line-height:1.15;letter-spacing:-0.03em;font-weight:800;color:#fff;}
+  .hero-desc{position:relative;z-index:1;max-width:680px;margin:0 auto;font-size:clamp(13px,1.2vw,14.5px);line-height:1.6;color:var(--muted);}
+  .hero-ctas{position:relative;z-index:1;display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .btn-primary{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,77,46,0.35);transition:filter .15s,transform .15s;}
   .btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);}
-  .btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent-border);border-radius:9px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;}
+  .btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent-border);border-radius:8px;padding:9px 20px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s;}
   .btn-outline:hover{background:var(--accent-soft);}
-  .hero-stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:18px;max-width:760px;margin:44px auto 0;}
-  .hstat-num{font-size:clamp(24px,3.4vw,34px);font-weight:800;color:var(--accent);letter-spacing:-0.02em;}
-  .hstat-lab{font-size:11px;color:var(--faint);margin-top:6px;}
+  .hero-stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:0;max-width:none;margin:20px auto 0;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .hero-stats > div{padding:12px 10px;border-right:1px solid var(--border);}
+  .hero-stats > div:last-child{border-right:none;}
+  .hstat-num{font-size:clamp(20px,2.3vw,27px);font-weight:800;color:var(--accent);letter-spacing:-0.02em;}
+  .hstat-lab{font-size:11px;color:var(--faint);margin-top:3px;}
+  .home-grid{display:grid;gap:14px;}
+  .home-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  @media (min-width:1080px){.home-grid{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);align-items:start;}}
   .hero-logo{position:absolute;top:22px;right:26px;z-index:1;width:84px;height:84px;border-radius:12px;background:#F7F4ED;border:1px solid rgba(255,255,255,0.12);box-shadow:0 12px 30px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;padding:8px;}
   .hero-logo img{width:100%;height:100%;object-fit:contain;display:block;}
-  @media (max-width:900px){.hero-stats{grid-template-columns:repeat(2,1fr);}}
-  @media (max-width:760px){.hero-logo{position:static;margin:0 auto 20px;width:76px;height:76px;}}
-  @media (max-width:640px){.hero{padding:40px 20px 36px;}}
+  @media (max-width:900px){.hero-stats{grid-template-columns:repeat(2,1fr);}.hero-stats > div:nth-child(2n){border-right:none;}.hero-stats > div:nth-child(-n+2){border-bottom:1px solid var(--border);}}
+  @media (max-width:760px){.hero-logo{position:static;margin:0 auto 16px;width:64px;height:64px;}}
+  @media (max-width:640px){.hero{padding:22px 16px 18px;}.hero-stats{margin-top:14px;}}
   @media (max-width:700px){.nav-inner{align-items:flex-start;}.nav-links{gap:12px;flex-wrap:wrap;justify-content:flex-end;font-size:12px;}}
-  @media (max-width:640px){.hero{padding:26px 20px;margin-left:-12px;margin-right:-12px;}.hero-title{font-size:36px;}}
+  @media (max-width:640px){.hero-title{font-size:24px;}.hero-desc{font-size:13px;}}
   header{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
   h1{font-weight:700; font-size:clamp(17px,2.2vw,23px); letter-spacing:-0.01em; color:var(--text); display:inline-flex; align-items:center; gap:8px;}
   h1 small{font-size:11px; font-weight:500; color:var(--faint); letter-spacing:0; display:inline-block; margin-left:4px;}
@@ -82,8 +87,8 @@
   .panel{background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:22px; margin-bottom:16px; box-shadow:var(--shadow-sm);overflow-x:auto;}
   .panel h2{font-family:var(--font-all); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:#C9D1DB; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
 
-  .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
-  @media (max-width:700px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+ .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+ @media (max-width:700px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
   .kpi-card{border:1px solid var(--border);border-radius:4px;padding:14px;text-align:left;background:var(--panel);box-shadow:var(--shadow-sm);}
   .kpi-card .lab{font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:var(--faint);font-weight:600;}
   .kpi-card .num{font-family:var(--font-all);font-size:20px;font-weight:700;margin-top:2px;}
@@ -629,9 +634,8 @@ function render(){
   const downW = total ? m.declines_pct : 0;
 
   let summary = buildSummary(activeSignalDate);
-  let buyHTML = buildBuyPanel(activeSignalDate);
-  let newOppHTML = buildNewOpportunities(activeSignalDate);
-  let alertsHTML = buildAlertsPanel(activeSignalDate);
+let buyHTML = buildBuyPanel(activeSignalDate);
+let alertsHTML = buildAlertsPanel(activeSignalDate);
   let adDistributionHTML = buildAdDistributionPanel(m);
   let trendDistributionHTML = buildTrendDistributionPanel(m);
   let rsiSentimentHTML = buildRsiSentimentPanel(m);
@@ -656,7 +660,7 @@ function render(){
   // ===== VIEW: TRANG CHỦ — tín hiệu thị trường + tín hiệu chung =====
   document.getElementById('view-home').innerHTML = `
     <div class="feature-grid">
-      <div class="feature-card" onclick="switchView('market')"><div class="f-icon red">📊</div><b>%MA &amp; Thị trường</b><span>Sức khỏe độ rộng: %MA10/20/50/200, phân bố A/D và xu hướng giá.</span></div>
+      <div class="feature-card" onclick="switchView('market')"><div class="f-icon red">📊</div><b>Độ rộng thị trường</b><span>Sức khỏe độ rộng: %MA10/20/50/200, phân bố A/D và xu hướng giá.</span></div>
       <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Biểu đồ lịch sử MA</b><span>10 năm % mã trên MA10/20/50/200 — bối cảnh dài hạn của thị trường.</span></div>
       <div class="feature-card" onclick="switchView('rsi')"><div class="f-icon blue">📈</div><b>Biểu đồ lịch sử RSI</b><span>Nhiệt RSI toàn thị trường, pulse chart và cảm giác phiên.</span></div>
       <div class="feature-card" onclick="switchView('signals')"><div class="f-icon purple">🔎</div><b>Tín hiệu</b><span>Tín hiệu mua/cảnh báo theo tầng ưu tiên, đã kiểm chứng 10 năm.</span></div>
@@ -679,15 +683,16 @@ function render(){
 
     ${REGIME && REGIME.tone === 'risk_off' ? `<div style="border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>⚠️ RISK-OFF:</b> theo kiểm chứng 10 năm, các tín hiệu mua trong giai đoạn risk-off có tỉ lệ thắng <b>âm -7 đến -11pp</b> so với baseline. Hạn chế mua mới, ưu tiên bảo toàn vốn.</div>` : ''}
 
-    ${buyHTML}
-
-    ${newOppHTML}
-
-    ${alertsHTML}
-
-    ${regimeHTML}
-
-    ${breadthMomentumHTML}
+    <div class="home-grid">
+      <div class="home-col">
+        ${buyHTML}
+        ${alertsHTML}
+      </div>
+      <div class="home-col">
+        ${regimeHTML}
+        ${breadthMomentumHTML}
+      </div>
+    </div>
   `;
 
   // ===== VIEW: %MA & THỊ TRƯỜNG =====
@@ -1066,12 +1071,21 @@ function meterHTML(conf){
   return `<span class="meter">${[0,1,2].map(i => `<i class="${i < conf ? 'on' : ''}"></i>`).join('')}</span><span class="conf-num">${conf}/3</span>`;
 }
 
-// --- Star panel: mua chuẩn (da kiem chung) ---
+// --- Star panel: mua chuẩn (da kiem chung) + badge NEW cho ma lan dau xuat hien ---
 function buildBuyPanel(dateStr){
   const rows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
   const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
   const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
   const riskOff = REGIME && REGIME.tone === 'risk_off';
+  // Tap ma strong cua phien truoc de danh dau NEW
+  let prevSyms = null;
+  const prev = previousSignalHistory(dateStr);
+  if (prev) {
+    prevSyms = new Set(_collectSignals(
+      prev.momentum, prev.strategy, prev.ensemble, prev.luc_mach,
+      prev.mama_positional, prev.advanced_trailstop, prev.khung4_tplus,
+    ).filter(r => r.source === 'momentum' && r.signalType === 'strong').map(r => r.symbol));
+  }
   let body;
   if (!rows.length) {
     body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
@@ -1079,8 +1093,9 @@ function buildBuyPanel(dateStr){
     rows.sort((a, b) => confirmCount(b) - confirmCount(a) || (Number(b.score) || 0) - (Number(a.score) || 0));
     const tr = rows.map(r => {
       const conf = confirmCount(r);
+      const isNew = prevSyms !== null && !prevSyms.has(r.symbol);
       return `<tr class="tier-good">
-        <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}</td>
+        <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${isNew ? ' <span class="tag str" title="Lần đầu vào Mua chuẩn so với phiên trước">NEW</span>' : ''}</td>
         <td class="num mono">${escapeHtml(String(r.score))}</td>
         <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
         <td>${wrChip}</td>
@@ -1128,25 +1143,6 @@ function buildAlertsPanel(dateStr){
     <div class="table-scroll"><table class="hub-table"><thead><tr><th>Mã</th><th class="num">Score</th><th class="num">Giá</th><th>Ghi chú</th></tr></thead><tbody>${hotRows}</tbody></table></div>` : ''}
     ${(sells.length || lmSellWatch.length) ? `<div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin:${hot.length ? '12px' : '0'} 0 6px;">Sell warning — rà lại vị thế</div>
     <div class="table-scroll"><table class="hub-table"><thead><tr><th>Mã</th><th>Hệ</th><th>Ghi chú</th></tr></thead><tbody>${sellRows}</tbody></table></div>` : ''}
-  </div>`;
-}
-
-// --- Co hoi moi: manh mua chuan xuat hien lan dau so voi hom qua ---
-function buildNewOpportunities(dateStr){
-  const todayRows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
-  if (!todayRows.length) return '';
-  const prev = previousSignalHistory(dateStr);
-  if (!prev) return '';
-  const prevSyms = new Set(_collectSignals(
-    prev.momentum, prev.strategy, prev.ensemble, prev.luc_mach,
-    prev.mama_positional, prev.advanced_trailstop, prev.khung4_tplus,
-  ).filter(r => r.source === 'momentum' && r.signalType === 'strong').map(r => r.symbol));
-  const fresh = todayRows.filter(r => !prevSyms.has(r.symbol));
-  if (!fresh.length) return '';
-  const chips = fresh.map(r => `<span class="mini-symbol buy" title="Score ${escapeHtml(String(r.score))} · ${escapeHtml(r.price ?? '')}">${escapeHtml(r.symbol)}</span>`).join('');
-  return `<div class="panel" style="border-color:rgba(22,163,74,0.4);">
-    <h2>🆕 Cơ hội mới hôm nay <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">mã lần đầu vào Mua chuẩn so với phiên trước</span></h2>
-    <div class="action-list">${chips}</div>
   </div>`;
 }
 
