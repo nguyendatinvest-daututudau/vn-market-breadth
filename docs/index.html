@@ -1975,6 +1975,18 @@ function shGaugeBar(v, min, max){
   const p = max > min ? ((v - min) / (max - min)) * 100 : 50;
   return `<div class="sh-bar"><span style="left:${Math.max(2, Math.min(98, p))}%"></span></div>`;
 }
+function whyForSignal(source, o){
+  try {
+    if (source === 'Momentum') return whyMomentum(o, o.strategies || []);
+    if (source === 'Lục Mạch') return whyLucMach(o);
+    const c = Object.assign({}, o);
+    if (source === 'Khung 4'){ if (c.khung4_tplus_buy == null) c.khung4_tplus_buy = c.buy; if (c.khung4_tplus_sell == null) c.khung4_tplus_sell = c.sell; return whyK4(c); }
+    if (source === 'MAMA Positional'){ if (c.mama_buy == null) c.mama_buy = c.buy != null ? c.buy : (c.signal_type === 'valid'); return whyMama(c); }
+    if (source === 'TrailStop'){ if (c.ats_buy == null) c.ats_buy = c.buy != null ? c.buy : (c.signal_type === 'valid'); return whyAts(c); }
+    if (source === 'Ensemble') return whyEnsemble(o);
+  } catch (e) {}
+  return '';
+}
 function shCollectSignals(sym){
   const out = [];
   const scan = (data, source, paths) => {
@@ -1994,6 +2006,27 @@ function shCollectSignals(sym){
   scan(ADVANCED_TRAILSTOP, 'TrailStop', ['buy', 'valid', 'signals']);
   scan(ENSEMBLE, 'Ensemble', ['strong', 'weak']);
   return out;
+}
+function shQuickTake(h, ma, o, w){
+  const bits = [];
+  const above = [10,20,50,100,200].filter(n => ma.above && ma.above['sma' + n]);
+  if (above.length >= 4) bits.push(`Giá đứng trên ${above.length}/5 đường MA (${above.map(n => 'SMA'+n).join(', ')}) → xu hướng tăng rõ ràng, ưu tiên mua thả theo vùng hỗ trợ.`);
+  else if (above.length >= 2) bits.push(`Giá trên ${above.length}/5 đường MA (${above.map(n => 'SMA'+n).join(', ')}) → xu hướng trung tính nghiêng tích cực, chờ điểm vào tốt hơn.`);
+  else bits.push('Giá dưới phần lớn các MA → xu hướng chưa tốt, nên quan sát hoặc chỉ giao dịch ngắn hạn có kỷ luật.');
+  const rsi = o.rsi14;
+  if (rsi != null) {
+    if (rsi >= 70) bits.push(`RSI ${rsi} — quá mua: dễ điều chỉnh ngắn hạn, tránh mua đuổi.`);
+    else if (rsi <= 30) bits.push(`RSI ${rsi} — quá bán: có thể xuất hiện nhịp hồi kỹ thuật.`);
+    else bits.push(`RSI ${rsi} — vùng trung tính, động lượng chưa quá nóng.`);
+  }
+  if (o.adx14 != null && o.adx14 >= 25) bits.push(`ADX ${o.adx14} — xu hướng mạnh, tín hiệu theo trend đáng tin hơn.`);
+  else if (o.adx14 != null && o.adx14 < 18) bits.push(`ADX ${o.adx14} — thị trường sideway/chao đảo: breakout hay thất bại.`);
+  if (w.pos != null) {
+    if (w.pos >= 90) bits.push('Đang ở gần đỉnh 52 tuần — momentum tốt nhưng cẩn thận resistance tâm lý.');
+    else if (w.pos <= 15) bits.push('Gần đáy 52 tuần — rủi ro cao, cần xác nhận đảo chiều trước khi bắt đáy.');
+  }
+  if (h.w52 && h.w52.new_high) bits.unshift('Vừa lập đỉnh 52 tuần mới — tín hiệu strength rất tích cực.');
+  return bits.join(' ');
 }
 function buildStockCardHTML(sym){
   const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
@@ -2030,7 +2063,8 @@ function buildStockCardHTML(sym){
   const sigHTML = sigs.length ? sigs.map(s => {
     const so = s.o;
     const st = so.status || so.signal_type || so.signalType || (so.total_score != null ? `điểm ${(so.total_score * 100).toFixed(0)}` : (so.score != null ? `score ${so.score}` : 'bắt được'));
-    return `<div class="sh-sig"><b>${s.source}</b><span style="color:var(--up);font-weight:700;">${escapeHtml(String(st))}</span></div>`;
+    const why = whyForSignal(s.source, so);
+    return `<div class="sh-sig" style="flex-wrap:wrap;"><b>${s.source}</b><span style="color:var(--up);font-weight:700;">${escapeHtml(String(st))}</span>${why ? `<div class="sig-why" style="flex-basis:100%;max-width:none;margin-top:4px;">${escapeHtml(why)}</div>` : ''}</div>`;
   }).join('') : '<div class="sh-none">Không hệ nào đang bắt mã này ở phiên gần nhất.</div>';
   let radarTag = '';
   try {
@@ -2053,6 +2087,7 @@ function buildStockCardHTML(sym){
       <span class="sh-verdict" style="color:${ov.c};background:${ov.bg};">${ov.t}</span>
       <span class="sh-score-lab">Tổng hợp ${(h.overall * 100).toFixed(0)} · MA ${(h.ma_score * 100).toFixed(0)} · Dao động ${(h.osc_score * 100).toFixed(0)} (thang -100…+100)</span>
     </div>
+    <div class="sh-sec"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;font-size:11px;line-height:1.6;">${shQuickTake(h, ma, o, w)}</div></div>
     <div class="sh-sec"><h4>Xu hướng — MA stack</h4><div class="sh-chips">${maChips}</div></div>
     <div class="sh-sec"><h4>Dao động</h4>${oscRows}</div>
     <div class="sh-sec"><h4>Vị trí 52 tuần ${w.pct_from_high != null ? '· cách đỉnh ' + w.pct_from_high + '%' : ''}</h4>
