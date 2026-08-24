@@ -402,17 +402,17 @@
     </a>
     <div class="nav-links">
       <a href="#home" data-view="home" class="active" onclick="switchView('home')">Trang chủ</a>
-      <a href="#market" data-view="market" onclick="switchView('market')">%MA &amp; Thị trường</a>
-      <a href="#chart" data-view="chart" onclick="switchView('chart')">Biểu đồ lịch sử</a>
-      <a href="#rsi" data-view="rsi" onclick="switchView('rsi')">RSI</a>
-      <a href="#signals" data-view="signals" onclick="switchView('signals')">Mã quan sát</a>
+      <a href="#market" data-view="market" onclick="switchView('market')">Độ rộng thị trường</a>
+      <a href="#chart" data-view="chart" onclick="switchView('chart')">Biểu đồ lịch sử MA</a>
+      <a href="#rsi" data-view="rsi" onclick="switchView('rsi')">Biểu đồ lịch sử RSI</a>
+      <a href="#signals" data-view="signals" onclick="switchView('signals')">Tín hiệu</a>
       <a href="#radar" data-view="radar" onclick="switchView('radar')">Radar</a>
     </div>
     <div class="nav-right">
       <div class="nav-search"><input id="stockSearch" list="stockList" placeholder="Tra cứu mã..." autocomplete="off" onkeydown="if(event.key==='Enter'){const v=this.value.trim().toUpperCase(); if(v){openStockModal(v); this.blur();}}"></div>
       <datalist id="stockList"></datalist>
       <span class="nav-date" id="navDate"></span>
-      <button class="nav-cta" onclick="switchView('signals')">Mã quan sát</button>
+      <button class="nav-cta" onclick="switchView('signals')">Tín hiệu</button>
     </div>
   </div>
 </nav>
@@ -422,8 +422,8 @@
     <h2 class="hero-title">Dữ liệu rõ ràng,<br>quyết định vững vàng</h2>
     <p class="hero-desc">Theo dõi độ rộng thị trường, dòng tiền và tín hiệu giao dịch trong một dashboard trực quan để ra quyết định nhanh, có kỷ luật và dựa trên dữ liệu.</p>
     <div class="hero-ctas">
-      <button class="btn-primary" onclick="switchView('signals')">Xem mã quan sát</button>
-      <button class="btn-outline" onclick="switchView('market')">%MA &amp; Thị trường</button>
+      <button class="btn-primary" onclick="switchView('signals')">Xem tín hiệu</button>
+      <button class="btn-outline" onclick="switchView('market')">Độ rộng thị trường</button>
     </div>
     <div class="hero-stats">
       <div><div class="hstat-num" id="statMA10">—</div><div class="hstat-lab">% mã trên MA10</div></div>
@@ -656,9 +656,9 @@ function render(){
   document.getElementById('view-home').innerHTML = `
     <div class="feature-grid">
       <div class="feature-card" onclick="switchView('market')"><div class="f-icon red">📊</div><b>%MA &amp; Thị trường</b><span>Sức khỏe độ rộng: %MA10/20/50/200, phân bố A/D và xu hướng giá.</span></div>
-      <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Biểu đồ lịch sử</b><span>10 năm % mã trên MA10/20/50/200 — bối cảnh dài hạn của thị trường.</span></div>
-      <div class="feature-card" onclick="switchView('rsi')"><div class="f-icon blue">📈</div><b>RSI &amp; Sentiment</b><span>Nhiệt RSI toàn thị trường, pulse chart và cảm giác phiên.</span></div>
-      <div class="feature-card" onclick="switchView('signals')"><div class="f-icon purple">🔎</div><b>Mã quan sát</b><span>Tín hiệu mua/cảnh báo theo tầng ưu tiên, đã kiểm chứng 10 năm.</span></div>
+      <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Biểu đồ lịch sử MA</b><span>10 năm % mã trên MA10/20/50/200 — bối cảnh dài hạn của thị trường.</span></div>
+      <div class="feature-card" onclick="switchView('rsi')"><div class="f-icon blue">📈</div><b>Biểu đồ lịch sử RSI</b><span>Nhiệt RSI toàn thị trường, pulse chart và cảm giác phiên.</span></div>
+      <div class="feature-card" onclick="switchView('signals')"><div class="f-icon purple">🔎</div><b>Tín hiệu</b><span>Tín hiệu mua/cảnh báo theo tầng ưu tiên, đã kiểm chứng 10 năm.</span></div>
       <div class="feature-card" onclick="switchView('radar')"><div class="f-icon cyan">🛰</div><b>Accumulation Radar</b><span>Phát hiện mã đang được tích lũy âm thầm bởi dòng tiền lớn.</span></div>
     </div>
 
@@ -1871,6 +1871,8 @@ function switchView(view){
   const dashViews = ['home', 'market', 'chart', 'rsi', 'signals'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
+  const pgTitle = document.querySelector('#dashboardView header h1');
+  if (pgTitle) pgTitle.style.display = view === 'signals' ? 'none' : '';
   if (view === 'radar' && !radarDataLoaded) loadRadarData();
   if (dashViews.includes(view)) {
     ['home', 'market', 'chart', 'rsi', 'signals'].forEach(v => {
@@ -1899,7 +1901,18 @@ window.addEventListener('resize', () => {
 });
 
 // ===== Stock Health Card =====
-const STOCK_HEALTH = typeof EMBEDDED_STOCK_HEALTH !== 'undefined' ? EMBEDDED_STOCK_HEALTH : null;
+let STOCK_HEALTH = typeof EMBEDDED_STOCK_HEALTH !== 'undefined' ? EMBEDDED_STOCK_HEALTH : null;
+let shFetchPromise = null;
+function ensureStockHealth(){
+  if (STOCK_HEALTH) return Promise.resolve(STOCK_HEALTH);
+  if (!shFetchPromise) {
+    shFetchPromise = fetch('data/stock_health.json', {cache: 'no-cache'})
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.symbols) { STOCK_HEALTH = d; populateStockSearch(); } return d; })
+      .catch(() => null);
+  }
+  return shFetchPromise;
+}
 function shVerdict(v){
   if (v == null) return { t: '—', c: 'var(--muted)', bg: 'var(--panel-tint)' };
   if (v >= 0.5) return { t: 'MUA MẠNH', c: 'var(--up)', bg: 'rgba(34,197,94,0.14)' };
@@ -2005,10 +2018,11 @@ function buildStockCardHTML(sym){
 function openStockModal(sym){
   sym = String(sym || '').trim().toUpperCase();
   if (!sym) return;
-  const bd = document.getElementById('stockModal');
-  document.getElementById('stockModalBody').innerHTML = buildStockCardHTML(sym);
-  bd.classList.add('open');
-  requestAnimationFrame(() => {
+  ensureStockHealth().then(() => {
+    const bd = document.getElementById('stockModal');
+    document.getElementById('stockModalBody').innerHTML = buildStockCardHTML(sym);
+    bd.classList.add('open');
+    requestAnimationFrame(() => {
     const cv = document.getElementById('shSpark');
     const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
     if (cv && h && h.spark && h.spark.length > 1) {
@@ -2028,6 +2042,7 @@ function openStockModal(sym){
       ctx.fillStyle = up ? 'rgba(34,197,94,0.08)' : 'rgba(248,113,113,0.08)';
       ctx.fill();
     }
+    });
   });
 }
 function closeStockModal(){
@@ -2035,7 +2050,8 @@ function closeStockModal(){
 }
 function populateStockSearch(){
   const dl = document.getElementById('stockList');
-  if (!dl || !STOCK_HEALTH || !STOCK_HEALTH.symbols) return;
+  if (!dl) return;
+  if (!STOCK_HEALTH || !STOCK_HEALTH.symbols) { ensureStockHealth(); return; }
   dl.innerHTML = Object.keys(STOCK_HEALTH.symbols).sort().map(s => `<option value="${s}">`).join('');
 }
 document.addEventListener('click', e => {
