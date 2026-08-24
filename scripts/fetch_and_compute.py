@@ -43,6 +43,7 @@ from backtest_mama_positional import main as run_backtest_mama_positional
 from backtest_advanced_trailstop import main as run_backtest_advanced_trailstop
 from accumulation_radar import main as run_accumulation_radar
 from market_regime import main as run_market_regime
+from stock_health import main as run_stock_health
 from backfill_index import main as run_backfill_index
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
@@ -723,7 +724,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data(include_signal_outputs: bool = True):
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "latest_prices.json"]
+    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "latest_prices.json", "stock_health.json"]
     if include_signal_outputs:
         files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json"])
     for f in files:
@@ -920,6 +921,13 @@ def main():
         print(f"Da ghi backtest Advanced Trailstop.\n")
     except Exception as e:
         print(f"Loi backtest Advanced Trailstop: {e}")
+
+    # The suc khieu co phieu (thuan ky thuat, doc tu cache OHLC)
+    try:
+        run_stock_health()
+        print(f"Da ghi stock health.\n")
+    except Exception as e:
+        print(f"Loi sinh stock health: {e}")
 
     # A partial breadth snapshot can contain an unknown/stale subset. Do not let
     # any generator label those cached quotes as a current market signal.

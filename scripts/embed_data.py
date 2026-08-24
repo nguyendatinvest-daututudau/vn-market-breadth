@@ -23,6 +23,7 @@ ACCUMULATION_RADAR_JSON = ROOT / "data" / "accumulation_radar.json"
 REGIME_JSON = ROOT / "data" / "market_regime.json"
 INTRADAY_JSON = ROOT / "data" / "intraday_breadth.json"
 EVALUATION_JSON = ROOT / "data" / "evaluation_filters.json"
+STOCK_HEALTH_JSON = ROOT / "data" / "stock_health.json"
 SRC_HTML = ROOT / "docs" / "index.html"
 OUT_HTML = ROOT / "docs" / "dashboard.html"
 
@@ -46,6 +47,7 @@ accumulation_radar = json.loads(ACCUMULATION_RADAR_JSON.read_text(encoding="utf-
 regime = json.loads(REGIME_JSON.read_text(encoding="utf-8")) if REGIME_JSON.exists() else None
 intraday = json.loads(INTRADAY_JSON.read_text(encoding="utf-8")) if INTRADAY_JSON.exists() else None
 evaluation = json.loads(EVALUATION_JSON.read_text(encoding="utf-8")) if EVALUATION_JSON.exists() else None
+stock_health = json.loads(STOCK_HEALTH_JSON.read_text(encoding="utf-8")) if STOCK_HEALTH_JSON.exists() else None
 
 html = SRC_HTML.read_text(encoding="utf-8")
 
@@ -84,6 +86,7 @@ const EMBEDDED_ACCUMULATION_RADAR = {inline_json(accumulation_radar)};
 const EMBEDDED_REGIME = {inline_json(regime)};
 const EMBEDDED_INTRADAY = {inline_json(intraday)};
 const EMBEDDED_EVALUATION = {inline_json(evaluation)};
+const EMBEDDED_STOCK_HEALTH = {inline_json(stock_health)};
 </script>
 """
 
