@@ -66,11 +66,11 @@
   .home-grid{display:grid;gap:14px;}
   .home-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
   @media (min-width:1080px){.home-grid{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);align-items:start;}}
-  .hero-logo{position:absolute;top:22px;right:26px;z-index:1;width:84px;height:84px;border-radius:12px;background:#F7F4ED;border:1px solid rgba(255,255,255,0.12);box-shadow:0 12px 30px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;padding:8px;}
+  .hero-side{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:14px;}
+  .hero-logo{z-index:1;width:60px;height:60px;border-radius:10px;background:#F7F4ED;border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 22px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;padding:6px;}
   .hero-logo img{width:100%;height:100%;object-fit:contain;display:block;}
-  @media (max-width:1080px){.hero-main{flex-direction:column;align-items:center;text-align:center;gap:20px;}.hero-desc{margin:0 auto;}.hero-ctas{justify-content:center;}.hero-stats{max-width:560px;}}
-  @media (max-width:760px){.hero-logo{position:static;margin:0 auto 16px;width:64px;height:64px;}}
-  @media (max-width:640px){.hero{padding:22px 16px 18px;}.hero-stats > div{padding:11px 12px;}}
+  @media (max-width:1080px){.hero-main{flex-direction:column;align-items:center;text-align:center;gap:20px;}.hero-desc{margin:0 auto;}.hero-ctas{justify-content:center;}.hero-side{align-items:center;}.hero-stats{max-width:560px;width:100%;}}
+  @media (max-width:640px){.hero{padding:22px 16px 18px;}.hero-stats > div{padding:11px 12px;}.hero-logo{width:52px;height:52px;}}
   @media (max-width:700px){.nav-inner{align-items:flex-start;}.nav-links{gap:12px;flex-wrap:wrap;justify-content:flex-end;font-size:13px;}}
   @media (max-width:640px){.hero-title{font-size:26px;}.hero-desc{font-size:14px;}}
   header{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
@@ -437,14 +437,16 @@
           <button class="btn-outline" onclick="switchView('market')">Độ rộng thị trường</button>
         </div>
       </div>
-      <div class="hero-stats">
-        <div><div class="hstat-num" id="statMA10">—</div><div class="hstat-lab">% mã trên MA10</div></div>
-        <div><div class="hstat-num" id="statMA20">—</div><div class="hstat-lab">% mã trên MA20</div></div>
-        <div><div class="hstat-num" id="statAD">—</div><div class="hstat-lab">A/D ratio (HOSE)</div></div>
-        <div><div class="hstat-num" id="statSig">—</div><div class="hstat-lab">Tín hiệu mua hôm nay</div></div>
+      <div class="hero-side">
+        <div class="hero-logo"><img src="./assets/logo.png" alt="NGUYENDAT INVEST logo"></div>
+        <div class="hero-stats">
+          <div><div class="hstat-num" id="statMA10">-</div><div class="hstat-lab">% mã trên MA10</div></div>
+          <div><div class="hstat-num" id="statMA20">-</div><div class="hstat-lab">% mã trên MA20</div></div>
+          <div><div class="hstat-num" id="statAD">-</div><div class="hstat-lab">A/D ratio (HOSE)</div></div>
+          <div><div class="hstat-num" id="statSig">-</div><div class="hstat-lab">Tín hiệu mua hôm nay</div></div>
+        </div>
       </div>
     </div>
-    <div class="hero-logo"><img src="./assets/logo.png" alt="NGUYENDAT INVEST logo"></div>
   </section>
 
   <div id="dashboardView">
