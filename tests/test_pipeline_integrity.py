@@ -116,7 +116,12 @@ def test_cache_respects_manual_as_of_date(tmp_path, monkeypatch):
     assert loaded["TradingDate"].max() == pd.Timestamp("2026-07-17")
 
 
-def test_commentary_keeps_zero_ad_ratio_as_valid_data():
+def test_commentary_keeps_zero_ad_ratio_as_valid_data(monkeypatch):
+    import market_commentary as mc
+
+    # Neo hermetic: khong doc market_regime.json trong repo (du lieu that thay doi theo tung commit CI)
+    monkeypatch.setattr(mc, "load_market_regime", lambda: {})
+    monkeypatch.setattr(mc, "vnindex_technical", lambda: {})
     markets = {
         market: {
             "date": "17/07/2026",
