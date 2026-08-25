@@ -55,7 +55,7 @@ ADX_BONUS_LEVEL = 28.0
 ADX_BONUS_POINTS = 10
 EXT_DIST_MA20_MAX = 4.5
 EXT_PENALTY_POINTS = 0   # da loai bo theo calibration: dist>4.5% actually +1.3pp lift
-TIER_A_MIN = 55           # calibration: A>=55 -> n=95, hit2=42.1%; A>=60 -> 0 signal
+TIER_A_MIN = 50           # calibration: A>=55 -> n=95, hit2=42.1%; user request A>=50 for more signals
 TIER_B_MIN = 40           # calibration: B>=40 -> hit2=42.8%, best tier B threshold
 CAP_A = 12
 

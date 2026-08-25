@@ -66,8 +66,8 @@ def test_missing_health_fields_do_not_crash():
 # --- Bien hang A/B/C ---
 
 def test_tier_boundaries():
-    assert bc.classify_tier(54, True) == "B"
-    assert bc.classify_tier(55, True) == "A"
+    assert bc.classify_tier(49, True) == "B"
+    assert bc.classify_tier(50, True) == "A"
     assert bc.classify_tier(59, True) == "A"
     assert bc.classify_tier(39, True) == "C"
     assert bc.classify_tier(40, True) == "B"
