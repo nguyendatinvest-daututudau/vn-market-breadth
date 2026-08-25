@@ -24,6 +24,7 @@ Cap: chi cap_a ma hang A dau tien duoc dua vao panel Mua chuan (in_panel=true).
 from __future__ import annotations
 
 import json
+import math
 import os
 import warnings
 
@@ -97,6 +98,7 @@ def compute_streaks(history_entries: list[dict], exclude_date: str | None = None
     xuat hien trong lich su conviction. Neu exclude_date khac None thi bo qua
     ngay do (dung khi ngay hom nay da duoc append truoc khi goi ham nay)."""
     streaks: dict[str, int] = {}
+    active: set[str] | None = None
     for entry in reversed(history_entries or []):
         date = entry.get("date")
         if exclude_date and date == exclude_date:
@@ -107,9 +109,22 @@ def compute_streaks(history_entries: list[dict], exclude_date: str | None = None
         syms = {s.get("symbol") for s in sigs}
         if not syms:
             break
-        for sym in syms:
-            streaks[sym] = streaks.get(sym, 0) + 1
-        # Chi dem chuoi lien tiep: dung o phien dau tien bi gian doan.
+        if active is None:
+            active = set(syms)
+            for sym in syms:
+                streaks[sym] = 1
+        else:
+            # Chi giu streak cho ma van xuat hien lien tuc
+            new_active: set[str] = set()
+            for sym in list(active):
+                if sym in syms:
+                    streaks[sym] = streaks.get(sym, 0) + 1
+                    new_active.add(sym)
+                else:
+                    streaks.pop(sym, None)
+            active = new_active
+            if not active:
+                break
     return streaks
 
 
@@ -168,7 +183,7 @@ def score_conviction(
     )
     total += shadow_points
 
-    conviction = int(round(total * regime_factor))
+    conviction = int(math.floor(total * regime_factor + 0.5))
     return {"conviction": conviction, "components": components, "shadow": shadow}
 
 
@@ -253,9 +268,14 @@ def build_records(
         })
 
     records.sort(key=lambda r: (-r["conviction"], r["symbol"]))
+    a_rank = 0
     for i, rec in enumerate(records, start=1):
         rec["rank_in_day"] = i
-        rec["in_panel"] = rec["tier"] == "A" and i <= CAP_A
+        if rec["tier"] == "A":
+            a_rank += 1
+            rec["in_panel"] = a_rank <= CAP_A
+        else:
+            rec["in_panel"] = False
         srcs = confirm_sets.get(rec["symbol"]) or set()
         rec["confirm_sources"] = sorted(srcs)
     return records

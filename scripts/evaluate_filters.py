@@ -51,7 +51,7 @@ DOCS_OUTPUT_JSON = DOCS_DATA_DIR / "evaluation_filters.json"
 HISTORY_JSON = DATA_DIR / "evaluation_history.json"
 DOCS_HISTORY_JSON = DOCS_DATA_DIR / "evaluation_history.json"
 HISTORY_MAX_ENTRIES = 260  # ~5 nam neu chay tuan
-HISTORY_JSON = DATA_DIR / "breadth_history.json"
+BREADTH_HISTORY_JSON = DATA_DIR / "breadth_history.json"
 
 FWD_OPTIONS = (5, 10, 20)
 MIN_AVG_VOLUME = 300_000
@@ -337,9 +337,9 @@ def backtest_symbol(symbol: str, skip_heavy: bool) -> pd.DataFrame | None:
 def build_regime_map(frames: list[pd.DataFrame]) -> dict[pd.Timestamp, str]:
     """Per-date regime tone from breadth_history + per-date A/D accumulated on the fly."""
     hist = []
-    if HISTORY_JSON.exists():
+    if BREADTH_HISTORY_JSON.exists():
         try:
-            hist = json.loads(HISTORY_JSON.read_text(encoding="utf-8"))
+            hist = json.loads(BREADTH_HISTORY_JSON.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             hist = []
     breadth = {}

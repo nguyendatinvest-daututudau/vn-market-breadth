@@ -112,10 +112,13 @@ def build_frame(symbol: str) -> pd.DataFrame | None:
     lo52 = close.rolling(252, min_periods=120).min()
     w52_pos = (close - lo52) / (hi52 - lo52) * 100.0
 
+    rsi_gold = (rsi >= 50) & (rsi <= 68)
     has_signal = strategy_ok & (score >= 30)
+    # raw: base + bonuses (single-count) + rsi_gold. Live double-counts vol/adx via buy_conviction, so keep single here for calibration clarity
     raw = (score
            + np.where(vol_ratio >= VOL_BONUS_RATIO, VOL_BONUS_POINTS, 0.0)
            + np.where(adx > ADX_BONUS_LEVEL, ADX_BONUS_POINTS, 0.0)
+           + np.where(rsi_gold, 10.0, 0.0)
            + np.where(dist_ma20 > EXT_DIST_MA20_MAX, EXT_PENALTY_POINTS, 0.0))
 
     out = pd.DataFrame({
@@ -143,7 +146,7 @@ def build_frame(symbol: str) -> pd.DataFrame | None:
     end = n - max(FWD_OPTIONS)
     if end <= start:
         return None
-    out.loc[start:end - 1, "_valid"] = True
+    out.iloc[start:end, out.columns.get_loc("_valid")] = True
     return out
 
 

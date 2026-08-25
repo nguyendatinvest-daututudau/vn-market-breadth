@@ -143,8 +143,20 @@ def test_compute_streaks_consecutive_days():
     ]
     streaks = bc.compute_streaks(history)
     assert streaks["AAA"] == 3
-    assert streaks["BBB"] == 1  # mat chuoi ngay phien thu 2
+    assert streaks.get("BBB", 0) == 0  # BBB not in most recent 2 days -> streak broken
     assert streaks["CCC"] == 1
+
+
+def test_compute_streaks_gap_breaks():
+    # AAA appears on 01 and 03 but missing 02 -> streak should be 1 (only most recent)
+    history = [
+        {"date": "01/01/2026", "signals": [{"symbol": "AAA"}]},
+        {"date": "02/01/2026", "signals": [{"symbol": "BBB"}]},
+        {"date": "03/01/2026", "signals": [{"symbol": "AAA"}]},
+    ]
+    streaks = bc.compute_streaks(history)
+    assert streaks["AAA"] == 1
+    assert streaks.get("BBB", 0) == 0
 
 
 def test_compute_streaks_excludes_today():

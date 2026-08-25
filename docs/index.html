@@ -477,7 +477,7 @@
   <footer>Dữ liệu: SSI FastConnect · Cập nhật tự động qua GitHub Actions<br><span style="color:var(--faint);font-weight:600;">nguyendat.invest2026</span></footer>
 </div>
 
-<div class="modal-backdrop" id="stockModal" onclick="if(event.target===this)closeStockModal()">
+<div class="modal-backdrop" id="stockModal" role="dialog" aria-modal="true" aria-label="Chi tiết mã" onclick="if(event.target===this)closeStockModal()">
   <div class="stock-modal" id="stockModalBody"></div>
 </div>
 
@@ -638,6 +638,7 @@ function intradayChipHTML(m){
 }
 
 function render(){
+  if (!LATEST || !LATEST.markets) { document.getElementById('view-home').innerHTML = '<div class="loading">Đang tải dữ liệu...</div>'; return; }
   const m = LATEST.markets[activeMarket];
   if (!m) { document.getElementById('view-home').innerHTML = '<div class="loading">Chọn thị trường</div>'; return; }
   const total = m.total_symbols || 0;
@@ -706,6 +707,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
       </div>
     </div>
   `;
+  requestAnimationFrame(drawRegimeGauge);
 
   // ===== VIEW: %MA & THỊ TRƯỜNG =====
   document.getElementById('view-market').innerHTML = `
@@ -869,7 +871,7 @@ function buildSummary(dateStr){
   }
 
   let badges = [];
-  const hasConv = !!BUY_CONVICTION?.signals;
+  const hasConv = !!(BUY_CONVICTION?.signals?.length && BUY_CONVICTION.signals.some(s=>s.in_panel) && (!dateStr || BUY_CONVICTION.date === dateStr));
   if (strongCount && !hasConv) badges.push({cls:'str', label:`Momentum Strong ${strongCount}`, filter:'strong'});
   if (hotCount) badges.push({cls:'ensw', label:`🔥 Hot ${hotCount}`, filter:'hot'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
@@ -896,7 +898,8 @@ function buildSummary(dateStr){
   const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0) + (k4Src?.skipped_missing_ohlc || 0);
   let finalBuySignals = buySignals;
   let refSignals = lmValid + mamaBuy + atsBuy + k4Buy;
-  if (BUY_CONVICTION?.signals) {
+  const useConvSummary = BUY_CONVICTION?.signals?.length && BUY_CONVICTION.signals.some(s=>s.in_panel) && (!dateStr || BUY_CONVICTION.date === dateStr);
+  if (useConvSummary) {
     finalBuySignals = BUY_CONVICTION.signals.filter(s => s.in_panel).length;
   }
   return { totalSignals: finalBuySignals + watchSignals + sellWarnings, uniqueSymbols: symbols.size, badges, buySignals: finalBuySignals, refSignals, watchSignals, sellWarnings, missingOhlc };
@@ -1128,7 +1131,7 @@ function meterHTML(conf){
 function buildBuyPanel(dateStr){
   const useConv = BUY_CONVICTION?.signals && BUY_CONVICTION.date && (!dateStr || BUY_CONVICTION.date === dateStr);
   const riskOff = REGIME && REGIME.tone === 'risk_off';
-  const factor = BUY_CONVICTION?.regime_factor;
+  const factor = BUY_CONVICTION?.regime?.factor;
   const factorNote = factor != null && factor < 1 ? `<span style="font-size:10px;color:#C2413B;margin-left:6px;">×${factor}</span>` : '';
   const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
   const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
@@ -2106,7 +2109,7 @@ function shQuickTake(h, ma, o, w){
 }
 function buildStockCardHTML(sym){
   const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
-  if (!h) return `<button class="sh-close" onclick="closeStockModal()">✕</button><div class="sh-none" style="padding:30px 0;text-align:center;">Không có dữ liệu kỹ thuật cho mã <b>${escapeHtml(sym)}</b>.</div>`;
+  if (!h) return `<button class="sh-close" onclick="closeStockModal()" aria-label="Đóng">✕</button><div class="sh-none" style="padding:30px 0;text-align:center;">Không có dữ liệu kỹ thuật cho mã <b>${escapeHtml(sym)}</b>.</div>`;
   const chgC = h.chg_pct > 0 ? 'var(--up)' : h.chg_pct < 0 ? 'var(--down)' : 'var(--muted)';
   const ov = shVerdict(h.overall);
   const ma = h.ma, o = h.osc, w = h.w52, rk = h.risk, pf = h.perf;
@@ -2151,7 +2154,7 @@ function buildStockCardHTML(sym){
   } catch (e) {}
   const wBadge = w.new_high ? ' <span class="tag str">ĐỈNH 52T MỚI</span>' : w.new_low ? ' <span class="tag" style="background:rgba(248,113,113,0.12);color:var(--down);">ĐÁY 52T MỚI</span>' : '';
   return `
-    <button class="sh-close" onclick="closeStockModal()">✕</button>
+    <button class="sh-close" onclick="closeStockModal()" aria-label="Đóng">✕</button>
     <div class="sh-head">
       <span class="sh-sym">${escapeHtml(sym)}</span>
       <span class="sh-price">${h.close != null ? h.close : '—'}</span>
@@ -2387,24 +2390,20 @@ function buildRegimePanel(){
     </div>
     ${alertHtml}
     ${r.momentum?`<div class="regime-momentum">Breadth momentum (osc): <b style="color:var(--text)">${Number(r.momentum.osc).toFixed(2)}</b> · ${r.momentum.trend||'—'}</div>`:''}
-  </div>
-  <script>
-  (function(){
-    var c=document.getElementById('regimeCanvas');
-    if(!c)return;
-    var ctx=c.getContext('2d');
-    var score=${r.score||0};
-    var cx=90,cy=100,radius=70;
-    // Background arc
-    ctx.lineWidth=14;ctx.lineCap='round';
-    ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI,0);ctx.strokeStyle='#e5e7eb';ctx.stroke();
-    // Score arc
-    var colors=['#ef4444','#f59e0b','#10b981','#06b6d4'];
-    var idx2=score<30?0:score<55?1:score<80?2:3;
-    ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI,-Math.PI+Math.PI*(score/100));
-    ctx.strokeStyle=colors[idx2];ctx.stroke();
-  })();
-  <\/script>`;
+  </div>`;
+}
+function drawRegimeGauge(){
+  const c=document.getElementById('regimeCanvas');
+  if(!c||!REGIME) return;
+  const ctx=c.getContext('2d');
+  const score=REGIME.score||0;
+  const cx=90,cy=100,radius=70;
+  ctx.lineWidth=14;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI,0);ctx.strokeStyle='#e5e7eb';ctx.stroke();
+  const colors=['#ef4444','#f59e0b','#10b981','#06b6d4'];
+  const idx2=score<30?0:score<55?1:score<80?2:3;
+  ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI,-Math.PI+Math.PI*(score/100));
+  ctx.strokeStyle=colors[idx2];ctx.stroke();
 }
 
 loadData();
