@@ -114,14 +114,12 @@ def compute_streaks(history_entries: list[dict], exclude_date: str | None = None
             for sym in syms:
                 streaks[sym] = 1
         else:
-            # Chi giu streak cho ma van xuat hien lien tuc
+            # Chi giu streak cho ma van xuat hien lien tuc; gap thi giu nguyen streak hien tai
             new_active: set[str] = set()
             for sym in list(active):
                 if sym in syms:
                     streaks[sym] = streaks.get(sym, 0) + 1
                     new_active.add(sym)
-                else:
-                    streaks.pop(sym, None)
             active = new_active
             if not active:
                 break
