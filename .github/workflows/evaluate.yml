@@ -5,6 +5,15 @@ on:
     # 03:00 UTC Thu Bay = 10:00 VN — ngoai gio san, xa cron update (15:10 VN hang ngay)
     - cron: "0 3 * * 6"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "full = backtest + calibration; calibration_only = bo qua filter evaluation (~5-8 phut)"
+        required: true
+        default: full
+        type: choice
+        options:
+          - full
+          - calibration_only
 
 permissions:
   contents: write
@@ -73,6 +82,7 @@ jobs:
           SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
 
       - name: Run filter evaluation
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'full' }}
         run: python scripts/evaluate_filters.py
 
       - name: Calibrate buy conviction thresholds

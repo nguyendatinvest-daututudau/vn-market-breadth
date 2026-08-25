@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - 'data/**'
       - 'docs/**'
+      - 'tests/**'
+      - '.github/**'
   schedule:
     # 08:10 UTC = 15:10 gio VN (sau gio dong cua)
     - cron: "10 8 * * 1-5"
@@ -98,5 +100,14 @@ jobs:
             echo "No data changes to commit."
           else
             git commit -m "chore: update market breadth data $(date -u +'%Y-%m-%d')"
-            git push
+            for attempt in 1 2 3 4 5; do
+              if git push; then
+                echo "Pushed on attempt $attempt."
+                exit 0
+              fi
+              echo "Push attempt $attempt rejected; rebasing..."
+              git pull --rebase
+            done
+            echo "Push failed after 5 attempts."
+            exit 1
           fi
