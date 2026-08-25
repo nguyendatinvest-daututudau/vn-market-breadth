@@ -2249,10 +2249,10 @@ function buildStockCardHTML(sym){
     <div class="sh-sec"><h4>Vị trí 52 tuần ${w.pct_from_high != null ? '· cách đỉnh ' + w.pct_from_high + '%' : ''}</h4>
       <div class="sh-52w"><span class="lo">${w.low != null ? w.low : '—'}</span>${shGaugeBar(w.pos != null ? w.pos : 50, 0, 100)}<span class="hi">${w.high != null ? w.high : '—'}</span></div>
     </div>
+    ${((tp)=>{ const ctp = tp || computeModalTradePlan(sym); return ctp ? `<div class="sh-sec"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(ctp)}</div>` : '';})((getConviction(sym)||{}).trade_plan)}
     <div class="sh-sec"><h4>Hiệu suất</h4><div class="sh-grid">${perfCells}</div></div>
     <div class="sh-sec"><h4>Rủi ro & thanh khoản</h4><div class="sh-grid">${riskCells}</div></div>
     ${pivCells ? `<div class="sh-sec"><h4>Pivot phiên trước</h4><div class="sh-grid">${pivCells}</div></div>` : ''}
-    ${((tp)=>{ const ctp = tp || computeModalTradePlan(sym); return ctp ? `<div class="sh-sec"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(ctp)}</div>` : '';})((getConviction(sym)||{}).trade_plan)}
     <div class="sh-sec"><h4>Giá 90 phiên</h4><canvas class="sh-spark" id="shSpark"></canvas></div>
     <div class="sh-sec"><h4>Tín hiệu hệ thống đang bắt mã này</h4>${sigHTML}${radarTag}</div>
   `;
