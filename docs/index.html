@@ -489,7 +489,7 @@ let searchQuery = '';
 let LATEST = null, HISTORY = null, COMMENTARY = null;
 let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, MAMA_BT = null, ATS_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null, MAMA_POSITIONAL = null, ADVANCED_TRAILSTOP = null;
 let ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null, LATEST_PRICES = null;
-let REGIME = null, INTRADAY = null, EVALUATION = null;
+let REGIME = null, INTRADAY = null, EVALUATION = null, BUY_CONVICTION = null;
 
 async function loadData(){
   try {
@@ -513,12 +513,13 @@ async function loadData(){
       REGIME = typeof EMBEDDED_REGIME !== 'undefined' ? EMBEDDED_REGIME : null;
       INTRADAY = typeof EMBEDDED_INTRADAY !== 'undefined' ? EMBEDDED_INTRADAY : null;
       EVALUATION = typeof EMBEDDED_EVALUATION !== 'undefined' ? EMBEDDED_EVALUATION : null;
+      BUY_CONVICTION = typeof EMBEDDED_BUY_CONVICTION !== 'undefined' ? EMBEDDED_BUY_CONVICTION : null;
     } else {
       const ts = Date.now();
       const res = await fetch(`./data/breadth_latest.json?t=${ts}`);
       if (!res.ok) throw new Error('No data');
       LATEST = await res.json();
-      const [h, c, s1, s2, s3, lm, k4, mama, ats, w, bt, mbt, abt, sh, lp, reg, intr, ev] = await Promise.all([
+      const [h, c, s1, s2, s3, lm, k4, mama, ats, w, bt, mbt, abt, sh, lp, reg, intr, ev, cv] = await Promise.all([
         fetch(`./data/breadth_history.json?t=${ts}`), fetch(`./data/market_commentary.json?t=${ts}`),
         fetch(`./data/strategy_signals.json?t=${ts}`), fetch(`./data/ensemble_signals.json?t=${ts}`),
         fetch(`./data/momentum_signals.json?t=${ts}`), fetch(`./data/luc_mach_signals.json?t=${ts}`),
@@ -530,6 +531,7 @@ async function loadData(){
         fetch(`./data/market_regime.json?t=${ts}`).catch(()=>null),
         fetch(`./data/intraday_breadth.json?t=${ts}`).catch(()=>null),
         fetch(`./data/evaluation_filters.json?t=${ts}`).catch(()=>null),
+        fetch(`./data/buy_conviction.json?t=${ts}`).catch(()=>null),
       ]);
       HISTORY = h.ok ? await h.json() : [];
       COMMENTARY = c.ok ? await c.json() : null;
@@ -549,6 +551,7 @@ async function loadData(){
       REGIME = reg?.ok ? await reg.json() : null;
       INTRADAY = intr?.ok ? await intr.json() : null;
       EVALUATION = ev?.ok ? await ev.json() : null;
+      BUY_CONVICTION = cv?.ok ? await cv.json() : null;
     }
 
     document.getElementById('metaLine').innerHTML =
@@ -680,7 +683,7 @@ let alertsHTML = buildAlertsPanel(activeSignalDate);
       <div class="summary-top">
         <div>
           <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
-          <div class="sub">Buy ${summary.buySignals} · Watch ${summary.watchSignals} · Sell warning ${summary.sellWarnings}${summary.missingOhlc ? ` · Thiếu OHLCV ${summary.missingOhlc} mã` : ''}</div>
+          <div class="sub">Mua chuẩn ${summary.buySignals}${summary.refSignals ? ` · Tham khảo ${summary.refSignals}` : ''} · Watch ${summary.watchSignals} · Sell warning ${summary.sellWarnings}${summary.missingOhlc ? ` · Thiếu OHLCV ${summary.missingOhlc} mã` : ''}</div>
         </div>
         <div class="summary-badges ${REGIME?.tone === 'risk_off' ? 'riskoff-dim' : ''}">
           ${REGIME?`<span class="regime-chip ${REGIME.tone}" style="font-size:11px;padding:4px 12px;">${{risk_off:'RISK-OFF',neutral:'TRUNG LẬP',risk_on:'RISK-ON',overheated:'QUÁ NÓNG'}[REGIME.tone]||REGIME.tone} ${REGIME.score!=null?REGIME.score.toFixed(0):''}</span>`:''}
@@ -870,21 +873,33 @@ function buildSummary(dateStr){
   if (hotCount) badges.push({cls:'ensw', label:`🔥 Hot ${hotCount}`, filter:'hot'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
   if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
-  if (lmValid) badges.push({cls:'ensw', label:`LM Buy ${lmValid}`, filter:'luc-mach-valid'});
+  const hasConv = !!BUY_CONVICTION?.signals;
+  if (lmValid) badges.push({cls: hasConv ? 'wat' : 'ensw', label:`LM Buy ${lmValid}${hasConv ? ' ℹ' : ''}`, filter:'luc-mach-valid'});
   if (lmWatch) badges.push({cls:'wat', label:`👀 LM Watch ${lmWatch}`, filter:'luc-mach-watch'});
   if (lmSell) badges.push({cls:'ensw', label:`🔴 LM Sell ${lmSell}`, filter:'sell-warning'});
-  if (mamaBuy) badges.push({cls:'ensw', label:`MAMA Buy ${mamaBuy}`, filter:'mama-buy'});
+  if (mamaBuy) badges.push({cls: hasConv ? 'wat' : 'ensw', label:`MAMA Buy ${mamaBuy}${hasConv ? ' ℹ' : ''}`, filter:'mama-buy'});
   if (mamaSell) badges.push({cls:'ensw', label:`🔴 MAMA Sell ${mamaSell}`, filter:'sell-warning'});
-  if (atsBuy) badges.push({cls:'ensw', label:`ATS Buy ${atsBuy}`, filter:'ats-buy'});
+  if (atsBuy) badges.push({cls: hasConv ? 'wat' : 'ensw', label:`ATS Buy ${atsBuy}${hasConv ? ' ℹ' : ''}`, filter:'ats-buy'});
   if (atsSell) badges.push({cls:'ensw', label:`🔴 ATS Sell ${atsSell}`, filter:'sell-warning'});
-  if (k4Buy) badges.push({cls:'ensw', label:`K4 Buy ${k4Buy}`, filter:'k4-buy'});
+  if (k4Buy) badges.push({cls: hasConv ? 'wat' : 'ensw', label:`K4 Buy ${k4Buy}${hasConv ? ' ℹ' : ''}`, filter:'k4-buy'});
   if (k4Sell) badges.push({cls:'ensw', label:`🔴 K4 Sell ${k4Sell}`, filter:'sell-warning'});
+  if (hasConv) {
+    const tierA = BUY_CONVICTION.signals.filter(s => s.in_panel).length;
+    const tierB = BUY_CONVICTION.signals.filter(s => s.tier === 'B' && !s.in_panel).length;
+    if (tierA) badges.unshift({cls:'str', label:`⭐ Hạng A ${tierA}`, filter:'strong'});
+    if (tierB) badges.push({cls:'ensw', label:`Hạng B ${tierB}`, filter:'strong'});
+  }
 
   const buySignals = strongCount + ensStrong + lmValid + mamaBuy + atsBuy + k4Buy;
   const watchSignals = lmWatch + k4Watch + ensWeak;
   const sellWarnings = lmSell + lmWatchSell + mamaSell + atsSell + k4Sell;
   const missingOhlc = (lmSrc?.skipped_missing_ohlc || 0) + (mamaSrc?.skipped_missing_ohlc || 0) + (atsSrc?.skipped_missing_ohlc || 0) + (k4Src?.skipped_missing_ohlc || 0);
-  return { totalSignals: buySignals+watchSignals+sellWarnings, uniqueSymbols: symbols.size, badges, buySignals, watchSignals, sellWarnings, missingOhlc };
+  let finalBuySignals = buySignals;
+  let refSignals = lmValid + mamaBuy + atsBuy + k4Buy;
+  if (BUY_CONVICTION?.signals) {
+    finalBuySignals = BUY_CONVICTION.signals.filter(s => s.in_panel).length;
+  }
+  return { totalSignals: finalBuySignals + watchSignals + sellWarnings, uniqueSymbols: symbols.size, badges, buySignals: finalBuySignals, refSignals, watchSignals, sellWarnings, missingOhlc };
 }
 
 function buildAdDistributionPanel(m){
@@ -1076,16 +1091,45 @@ function confirmCount(r){
   return c;
 }
 
+function getConviction(sym){
+  if (!BUY_CONVICTION?.signals) return null;
+  return BUY_CONVICTION.signals.find(s => s.symbol === sym) || null;
+}
+
+function tierChip(tier, score){
+  if (tier === 'A') return `<span class="tag str" style="font-size:11px;font-weight:700;">Hạng A · ${score}đ</span>`;
+  if (tier === 'B') return `<span class="tag ensw" style="font-size:11px;font-weight:700;">Hạng B · ${score}đ</span>`;
+  return `<span class="tag" style="font-size:11px;color:var(--faint);">Hạng C · ${score}đ</span>`;
+}
+
+function convictionCondChips(components){
+  if (!components) return '';
+  const chips = [];
+  if (components.vol_bonus) chips.push('<span class="src-tag ma">Vol×2+</span>');
+  if (components.adx_bonus) chips.push('<span class="src-tag bo">ADX 28+</span>');
+  if (components.extension_penalty) chips.push('<span class="tag wat" style="font-size:10px;">Duỗi MA20</span>');
+  return chips.join('');
+}
+
+function convictionSources(badges){
+  if (!badges || !badges.length) return '';
+  return badges.map(b => {
+    const cls = b.endsWith('_buy') ? 'src-tag ma' : b === 'ensemble_strong' ? 'src-tag bo' : 'src-tag';
+    return `<span class="${cls}">${methodLabel(b.replace(/_buy$/, '').replace(/_sell$/, ''))}</span>`;
+  }).join('');
+}
+
 function meterHTML(conf){
   return `<span class="meter">${[0,1,2].map(i => `<i class="${i < conf ? 'on' : ''}"></i>`).join('')}</span><span class="conf-num">${conf}/3</span>`;
 }
 
 // --- Star panel: mua chuẩn (da kiem chung) + badge NEW cho ma lan dau xuat hien ---
 function buildBuyPanel(dateStr){
-  const rows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
-  const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
-  const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
+  const useConv = BUY_CONVICTION?.signals && BUY_CONVICTION.date && (!dateStr || BUY_CONVICTION.date === dateStr);
   const riskOff = REGIME && REGIME.tone === 'risk_off';
+  const factor = BUY_CONVICTION?.regime_factor;
+  const factorNote = factor != null && factor < 1 ? `<span style="font-size:10px;color:#C2413B;margin-left:6px;">×${factor}</span>` : '';
+
   // Tap ma strong cua phien truoc de danh dau NEW
   let prevSyms = null;
   const prev = previousSignalHistory(dateStr);
@@ -1095,29 +1139,58 @@ function buildBuyPanel(dateStr){
       prev.mama_positional, prev.advanced_trailstop, prev.khung4_tplus,
     ).filter(r => r.source === 'momentum' && r.signalType === 'strong').map(r => r.symbol));
   }
-  let body;
-  if (!rows.length) {
-    body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
+
+  let body, headerExtra;
+  if (useConv) {
+    const rows = BUY_CONVICTION.signals.filter(s => s.in_panel).sort((a, b) => a.rank_in_day - b.rank_in_day);
+    if (!rows.length) {
+      body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
+    } else {
+      const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
+      const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
+      const tr = rows.map(r => {
+        const isNew = prevSyms !== null && !prevSyms.has(r.symbol);
+        const symbol = `<td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${isNew ? ' <span class="tag str" title="Lần đầu vào Mua chuẩn so với phiên trước">NEW</span>' : ''}</td>`;
+        const score = `<td class="num mono" style="color:#22C55E;font-weight:800;">${r.conviction}</td>`;
+        const price = `<td class="num mono">${escapeHtml(String(r.last_price ?? '\u2014'))}</td>`;
+        const conditions = `<td>${convictionCondChips(r.components)}${r.shadow?.extension_pct != null ? `<span class="tag wat" style="font-size:10px;">${r.shadow.extension_pct.toFixed(1)}%</span>` : ''}</td>`;
+        const sources = `<td>${convictionSources(r.confirm_sources)}</td>`;
+        const why = `<td class="sig-expl">${escapeHtml(r.why || '')}</td>`;
+        return `<tr class="tier-good">${symbol}${score}${price}${conditions}${sources}${why}</tr>`;
+      }).join('');
+      body = `<div class="table-scroll"><table class="hub-table">
+        <thead><tr><th>Mã</th><th class="num">Điểm</th><th class="num">Giá</th><th>Điều kiện</th><th>Đồng thuận</th><th>Ghi chú</th></tr></thead>
+        <tbody>${tr}</tbody></table></div>`;
+    }
+    headerExtra = ` · φiltre theo điều kiện xác nhận · ${wrChip}${factorNote}`;
   } else {
-    rows.sort((a, b) => confirmCount(b) - confirmCount(a) || (Number(b.score) || 0) - (Number(a.score) || 0));
-    const tr = rows.map(r => {
-      const conf = confirmCount(r);
-      const isNew = prevSyms !== null && !prevSyms.has(r.symbol);
-      return `<tr class="tier-good">
-        <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${isNew ? ' <span class="tag str" title="Lần đầu vào Mua chuẩn so với phiên trước">NEW</span>' : ''}</td>
-        <td class="num mono">${escapeHtml(String(r.score))}</td>
-        <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
-        <td>${wrChip}</td>
-        <td>${meterHTML(conf)}</td>
-        <td>${sigExplainCell(r)}</td>
-      </tr>`;
-    }).join('');
-    body = `<div class="table-scroll"><table class="hub-table">
-      <thead><tr><th>Mã</th><th class="num">Score</th><th class="num">Giá</th><th>Win rate T+10</th><th>Xác nhận</th><th>Ghi chú</th></tr></thead>
-      <tbody>${tr}</tbody></table></div>`;
+    const rows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
+    const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
+    const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
+    if (!rows.length) {
+      body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
+    } else {
+      rows.sort((a, b) => confirmCount(b) - confirmCount(a) || (Number(b.score) || 0) - (Number(a.score) || 0));
+      const tr = rows.map(r => {
+        const conf = confirmCount(r);
+        const isNew = prevSyms !== null && !prevSyms.has(r.symbol);
+        return `<tr class="tier-good">
+          <td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${isNew ? ' <span class="tag str" title="Lần đầu vào Mua chuẩn so với phiên trước">NEW</span>' : ''}</td>
+          <td class="num mono">${escapeHtml(String(r.score))}</td>
+          <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
+          <td>${wrChip}</td>
+          <td>${meterHTML(conf)}</td>
+          <td>${sigExplainCell(r)}</td>
+        </tr>`;
+      }).join('');
+      body = `<div class="table-scroll"><table class="hub-table">
+        <thead><tr><th>Mã</th><th class="num">Score</th><th class="num">Giá</th><th>Win rate T+10</th><th>Xác nhận</th><th>Ghi chú</th></tr></thead>
+        <tbody>${tr}</tbody></table></div>`;
+    }
+    headerExtra = ` · vùng thắng tốt nhất backtest 10 năm · sắp theo số xác nhận`;
   }
   return `<div class="panel" ${riskOff ? 'style="border-color:rgba(194,65,59,0.45);"' : ''}>
-    <h2>⭐ Mua chuẩn — Momentum Strong 30-59 <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">vùng thắng tốt nhất backtest 10 năm · sắp theo số xác nhận</span></h2>
+    <h2>⭐ Mua chuẩn — Hạng A (conviction) <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${useConv ? 'điểm tin cậy = momentum score + bonus − penalty · hệ số regime' : headerExtra}</span></h2>
     ${riskOff ? '<div class="note" style="margin-bottom:10px;font-size:12px;color:#C2413B;"><b>RISK-OFF:</b> backtest cho thấy mọi tín hiệu mua đều thắng âm trong giai đoạn này — cân nhắc dừng mua mới.</div>' : ''}
     ${body}
   </div>`;
@@ -2090,6 +2163,7 @@ function buildStockCardHTML(sym){
     </div>
     <div class="sh-verdict-row">
       <span class="sh-verdict" style="color:${ov.c};background:${ov.bg};">${ov.t}</span>
+      ${(conv => conv ? `<span class="tag" style="background:${conv.tier==='A'?'rgba(34,197,94,0.14)':conv.tier==='B'?'rgba(245,165,36,0.12)':'rgba(128,128,128,0.12)'};color:${conv.tier==='A'?'#22C55E':conv.tier==='B'?'#E8A33D':'#9CA3AF'};padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">${conv.tier==='A'?'★ ':''}Hạng ${conv.tier} · ${conv.conviction}đ</span>` : '')(getConviction(sym))}
       <span class="sh-score-lab">Tổng hợp ${(h.overall * 100).toFixed(0)} · MA ${(h.ma_score * 100).toFixed(0)} · Dao động ${(h.osc_score * 100).toFixed(0)} (thang -100…+100)</span>
     </div>
     <div class="sh-sec"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;font-size:11px;line-height:1.6;">${shQuickTake(h, ma, o, w)}</div></div>
@@ -2142,7 +2216,11 @@ function populateStockSearch(){
   const dl = document.getElementById('stockList');
   if (!dl) return;
   if (!STOCK_HEALTH || !STOCK_HEALTH.symbols) { ensureStockHealth(); return; }
-  dl.innerHTML = Object.keys(STOCK_HEALTH.symbols).sort().map(s => `<option value="${s}">`).join('');
+  dl.innerHTML = Object.keys(STOCK_HEALTH.symbols).sort().map(s => {
+    const cv = getConviction(s);
+    const tag = cv ? ` [${cv.tier}${cv.conviction != null ? '·'+cv.conviction : ''}]` : '';
+    return `<option value="${s}">${tag ? escapeHtml(tag) : ''}</option>`;
+  }).join('');
 }
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-sym]');
