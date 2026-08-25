@@ -185,6 +185,110 @@ def score_conviction(
     return {"conviction": conviction, "components": components, "shadow": shadow}
 
 
+def compute_trade_plan(
+    *,
+    close: float | None,
+    sma10: float | None,
+    sma20: float | None,
+    sma50: float | None,
+    sma200: float | None,
+    atr14: float | None,
+    dist_ma20: float | None,
+    pivots: dict | None,
+    w52_high: float | None,
+    w52_low: float | None,
+) -> dict | None:
+    """Ke hoach vao lenh cho tung diem mua hang A/B. Tra ve None neu thieu du lieu cot loi."""
+    if close is None or not math.isfinite(close) or close <= 0:
+        return None
+    # Tim khang cu / ho tro gan nhat
+    resistance = None
+    support = None
+    try:
+        cands_res = [x for x in (sma20, sma50, sma200, (pivots or {}).get("r1"), (pivots or {}).get("r2"), w52_high) if x is not None and math.isfinite(x) and x > close]
+        if cands_res:
+            resistance = min(cands_res)
+        cands_sup = [x for x in (sma20, sma50, sma200, (pivots or {}).get("s1"), (pivots or {}).get("s2"), w52_low) if x is not None and math.isfinite(x) and x < close]
+        if cands_sup:
+            support = max(cands_sup)
+    except Exception:
+        pass
+
+    # Vung mua
+    entry_type = "base"
+    entry_low = entry_high = None
+    entry_note = ""
+    if dist_ma20 is not None and math.isfinite(dist_ma20) and dist_ma20 > 4.0 and sma10 is not None and sma20 is not None and math.isfinite(sma10) and math.isfinite(sma20):
+        entry_type = "pullback"
+        lo = min(sma10, sma20)
+        hi = max(sma10, sma20)
+        entry_low = round(lo * 0.99, 2)
+        entry_high = round(hi * 1.01, 2)
+        entry_note = "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)"
+    elif resistance is not None and (resistance - close) / close < 0.03:
+        entry_type = "breakout"
+        entry_low = round(resistance * 0.98, 2)
+        entry_high = round(resistance * 1.02, 2)
+        entry_note = f"Gần kháng cự {resistance:.1f} (<3%) — vùng phá vỡ, cần Vol×2 xác nhận"
+    else:
+        entry_low = round(close * 0.99, 2)
+        entry_high = round(close * 1.01, 2)
+        entry_note = "Vùng mua quanh giá hiện tại ±1%"
+
+    if entry_low is None or entry_high is None or entry_low <= 0 or entry_high <= 0:
+        return None
+    entry_mid = (entry_low + entry_high) / 2.0
+
+    # Cat lo: max(2×ATR, SMA20, S1) duoi entry_low
+    stop = None
+    cands_stop: list[float] = []
+    if atr14 is not None and math.isfinite(atr14) and atr14 > 0:
+        cands_stop.append(entry_low - 2 * atr14)
+    if sma20 is not None and math.isfinite(sma20):
+        cands_stop.append(float(sma20))
+    s1 = (pivots or {}).get("s1")
+    if s1 is not None and math.isfinite(s1):
+        cands_stop.append(float(s1))
+    if cands_stop:
+        stop = round(min(cands_stop), 2)
+        # Dam bao stop duoi entry_low
+        if stop >= entry_low:
+            # Neu cac moc deu tren entry_low (hiem), lay entry_low - 2*ATR hoac -3%
+            stop = round(entry_low - (2 * atr14 if atr14 and math.isfinite(atr14) else entry_low * 0.03), 2)
+
+    # Muc tieu R1/R2
+    r1 = (pivots or {}).get("r1")
+    r2 = (pivots or {}).get("r2")
+    r1 = float(r1) if r1 is not None and math.isfinite(r1) else None
+    r2 = float(r2) if r2 is not None and math.isfinite(r2) else None
+
+    def _pct(v: float | None) -> float | None:
+        if v is None or not math.isfinite(v) or entry_mid == 0:
+            return None
+        return round((v - entry_mid) / entry_mid * 100.0, 2)
+
+    rr1 = rr2 = None
+    if stop is not None and entry_mid is not None and stop < entry_mid:
+        risk = entry_mid - stop
+        if risk > 0:
+            if r1 is not None and r1 > entry_mid:
+                rr1 = round((r1 - entry_mid) / risk, 2)
+            if r2 is not None and r2 > entry_mid:
+                rr2 = round((r2 - entry_mid) / risk, 2)
+
+    return {
+        "entry_type": entry_type,
+        "entry_zone": {"low": entry_low, "high": entry_high, "mid": round(entry_mid, 2)},
+        "entry_note": entry_note,
+        "resistance": round(resistance, 2) if resistance is not None else None,
+        "support": round(support, 2) if support is not None else None,
+        "stop": stop,
+        "stop_pct": _pct(stop),
+        "targets": {"r1": r1, "r2": r2, "r1_pct": _pct(r1), "r2_pct": _pct(r2)},
+        "rr": {"rr1": rr1, "rr2": rr2},
+    }
+
+
 def _load_json(path) -> dict | None:
     if not path.exists():
         return None
@@ -249,6 +353,25 @@ def build_records(
         )
         eligible_a = base_score < BASE_HOT_MIN
         tier = classify_tier(scored["conviction"], eligible_a)
+        # Trade plan chi cho A/B (co du lieu health)
+        trade_plan = None
+        if tier in ("A", "B"):
+            ma = h.get("ma") or {}
+            piv = h.get("pivots")
+            w52 = h.get("w52") or {}
+            risk = h.get("risk") or {}
+            trade_plan = compute_trade_plan(
+                close=h.get("close"),
+                sma10=ma.get("sma10"),
+                sma20=ma.get("sma20"),
+                sma50=ma.get("sma50"),
+                sma200=ma.get("sma200"),
+                atr14=risk.get("atr14"),
+                dist_ma20=dist_ma20,
+                pivots=piv if isinstance(piv, dict) else None,
+                w52_high=w52.get("high"),
+                w52_low=w52.get("low"),
+            )
         records.append({
             "symbol": sym,
             "base_score": base_score,
@@ -263,6 +386,7 @@ def build_records(
             "adx14": adx14_h,
             "last_price": row.get("last_price"),
             "confirm_sources": [],
+            "trade_plan": trade_plan,
         })
 
     records.sort(key=lambda r: (-r["conviction"], r["symbol"]))
