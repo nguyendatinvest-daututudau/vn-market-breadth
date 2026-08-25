@@ -379,8 +379,9 @@
   .sh-sec.hero{margin-top:24px;padding:16px;background:var(--panel-tint);border:1px solid var(--border);border-radius:12px;}
   .sh-sec.hero h4{font-size:12px;color:var(--text);margin-bottom:10px;}
   .sh-sec.hero .sig-why{font-size:13px !important;line-height:1.6 !important;}
-  .sh-hero-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  @media(max-width:900px){.sh-hero-grid{grid-template-columns:1fr;}}
+  .sh-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .sh-hero-grid .hero-full{grid-column:1 / -1;}
+  @media(max-width:700px){.sh-hero-grid{grid-template-columns:1fr;}}
   .sh-verdict-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;}
   .sh-verdict{font-size:12px;font-weight:800;padding:5px 14px;border-radius:999px;}
   .sh-score-lab{font-size:11px;color:var(--muted);}
@@ -1124,7 +1125,7 @@ function tradePlanDetailHTML(tp){
   const z=tp.entry_zone;
   const rrBadge=(v)=> v==null?'':`<span style="display:inline-block;background:${v>=1?'rgba(16,185,129,0.15)':'rgba(245,158,11,0.15)'};color:${v>=1?'#10b981':'#f59e0b'};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;margin-left:4px;">R:R ${v}</span>`;
   const entryIcon=tp.entry_type==='pullback'?'↙':tp.entry_type==='breakout'?'↗':'◆';
-  return `<div style="display:flex;flex-direction:column;gap:10px;">
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
     <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px;">
       <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#3b82f6;text-transform:uppercase;margin-bottom:6px;">${entryIcon} Vùng mua <span style="font-weight:400;text-transform:none;color:var(--faint)">${escapeHtml(tp.entry_type)}</span></div>
       <div style="font-size:15px;font-weight:900;color:var(--text);letter-spacing:-0.02em;">${f(z.low)} – ${f(z.high)}</div>
@@ -2249,7 +2250,7 @@ function buildStockCardHTML(sym){
       <span class="sh-score-lab">Tổng hợp ${(h.overall * 100).toFixed(0)} · MA ${(h.ma_score * 100).toFixed(0)} · Dao động ${(h.osc_score * 100).toFixed(0)} (thang -100…+100)</span>
     </div>
     <div class="sh-hero-grid">
-      <div class="sh-sec hero"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;">${shQuickTake(h, ma, o, w)}</div></div>
+      <div class="sh-sec hero hero-full"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;">${shQuickTake(h, ma, o, w)}</div></div>
       <div class="sh-sec hero"><h4>Xu hướng — MA stack</h4><div class="sh-chips">${maChips}</div></div>
       ${((tp)=>{ const ctp = tp || computeModalTradePlan(sym); return ctp ? `<div class="sh-sec hero"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(ctp)}</div>` : '<div class="sh-sec hero"><h4>Kế hoạch lệnh</h4><span style="color:var(--muted);font-size:11px;">Không đủ dữ liệu</span></div>';})((getConviction(sym)||{}).trade_plan)}
     </div>
