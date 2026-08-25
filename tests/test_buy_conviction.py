@@ -23,9 +23,9 @@ def _score(**kw):
 # --- Cong thuc tung thanh phan ---
 
 def test_base_only_below_b_is_c():
-    r = _score(base_score=40)
-    assert r["conviction"] == 40
-    assert bc.classify_tier(40, True) == "C"
+    r = _score(base_score=39)
+    assert r["conviction"] == 39
+    assert bc.classify_tier(39, True) == "C"
     assert r["components"]["vol_bonus"] is False
     assert r["components"]["adx_bonus"] is False
     assert r["components"]["extension_penalty"] is False
@@ -38,12 +38,12 @@ def test_full_bonus_reaches_a():
     assert bc.classify_tier(r["conviction"], True) == "A"
 
 
-def test_extension_penalty_applied():
-    # 55 + 15 = 70; dui MA20 >4.5% -> -15 => 55 (B)
+def test_extension_no_longer_penalized():
+    # 55 + 15 = 70; dist_ma20 >4.5% khong con phat -> 70 (A)
     r = _score(base_score=55, vol_ratio=2.5, dist_ma20=6.1)
-    assert r["conviction"] == 55
-    assert r["components"]["extension_penalty"] is True
-    assert bc.classify_tier(55, True) == "B"
+    assert r["conviction"] == 70
+    assert r["components"]["extension_penalty"] is True  # flag van ghi
+    assert bc.classify_tier(70, True) == "A"
 
 
 def test_boundary_dist_ma20_not_penalized_at_exact_threshold():
@@ -66,11 +66,11 @@ def test_missing_health_fields_do_not_crash():
 # --- Bien hang A/B/C ---
 
 def test_tier_boundaries():
-    assert bc.classify_tier(59, True) == "B" if bc.classify_tier(59, True) == "B" else True
-    assert bc.classify_tier(60, True) == "A"
-    assert bc.classify_tier(61, True) == "A"
-    assert bc.classify_tier(44, True) == "C"
-    assert bc.classify_tier(45, True) == "B"
+    assert bc.classify_tier(54, True) == "B"
+    assert bc.classify_tier(55, True) == "A"
+    assert bc.classify_tier(59, True) == "A"
+    assert bc.classify_tier(39, True) == "C"
+    assert bc.classify_tier(40, True) == "B"
 
 
 def test_hot_symbol_never_tier_a():
@@ -93,10 +93,10 @@ def test_regime_factor_mapping():
 
 
 def test_regime_multiplier_changes_tier():
-    # 70 diem: Risk-On -> A, Risk-Off x0.8 -> 56 -> B
+    # 35 + 15 + 10 = 60: Risk-On -> 60 -> A, Risk-Off x0.8 -> 48 -> B
     full = dict(vol_ratio=2.5, adx14=30.0)
-    on = _score(base_score=45, regime_factor=bc.regime_factor_for("Risk-On"), **full)
-    off = _score(base_score=45, regime_factor=bc.regime_factor_for("Risk-Off"), **full)
+    on = _score(base_score=35, regime_factor=bc.regime_factor_for("Risk-On"), **full)
+    off = _score(base_score=35, regime_factor=bc.regime_factor_for("Risk-Off"), **full)
     assert bc.classify_tier(on["conviction"], True) == "A"
     assert bc.classify_tier(off["conviction"], True) == "B"
 
@@ -204,10 +204,10 @@ def test_build_records_health_fields_flow_through():
     r = recs[0]
     assert r["dist_ma20"] == 7.8
     assert r["adx14"] == 31.0
-    assert r["components"]["extension_penalty"] is True
+    assert r["components"]["extension_penalty"] is True   # flag van ghi nhung 0 diem
     assert r["components"]["adx_bonus"] is True
     assert r["shadow"]["w52_healthy"] is False  # dui qua nguong dist
-    # 55 + 15 + 10 - 15 = 65 -> A
+    # 55 + 15 + 10 + 0 (ext penalty removed) = 80 -> A
     assert r["tier"] == "A"
 
 

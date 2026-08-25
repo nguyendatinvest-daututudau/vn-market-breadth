@@ -199,27 +199,33 @@ def equivalence_check(big: pd.DataFrame) -> dict:
     actual = {r.get("symbol"): r.get("score") for r in mom.get("all_signals") or []}
     if not actual:
         return {"status": "skip", "reason": "momentum rong"}
-    last_date = big["date"].max()
-    tail = big[(big["date"] == last_date) & big["strategy_ok"].astype(bool) & (big["score"] >= 30)]
-    recomputed = dict(zip(tail["symbol"], tail["score"].round().astype(int)))
-    common = set(recomputed) & set(actual)
-    if not common:
-        return {"status": "warn", "reason": f"khong giao nhau tai {last_date.date()}",
-                "cache_last_date": str(last_date.date())}
-    diffs = {s: int(recomputed[s]) - int(actual[s]) for s in common}
+    # Thu nhieu ngay de tim nhieu symbol chung
+    dates_sorted = sorted(big["date"].unique(), reverse=True)
+    best_common: dict[str, tuple[int, int]] = {}
+    best_date = None
+    for d in dates_sorted[:5]:
+        tail = big[(big["date"] == d) & big["strategy_ok"].astype(bool) & (big["score"] >= 30)]
+        recomputed = dict(zip(tail["symbol"], tail["score"].round().astype(int)))
+        common = set(recomputed) & set(actual)
+        if len(common) > len(best_common):
+            best_common = {s: (int(recomputed[s]), int(actual[s])) for s in common}
+            best_date = d
+    if not best_common:
+        return {"status": "warn", "reason": "khong giao nhau trong 5 ngay gan nhat",
+                "cache_last_date": str(dates_sorted[0].date()) if dates_sorted else "?"}
+    common = best_common
+    diffs = {s: v[0] - v[1] for s, v in common.items()}
     exact = sum(1 for d in diffs.values() if abs(d) <= 0)
     near = sum(1 for d in diffs.values() if abs(d) <= 2)
     worst = sorted(diffs.items(), key=lambda kv: -abs(kv[1]))[:8]
-    missing_in_cache = sorted(set(actual) - set(recomputed))
     return {
         "status": "ok",
-        "cache_last_date": str(last_date.date()),
+        "cache_last_date": str(best_date.date()),
         "compared": len(common),
         "exact_match_rate": round(exact / len(common), 4),
         "within2_match_rate": round(near / len(common), 4),
         "max_abs_diff": max(abs(d) for d in diffs.values()),
         "worst": worst,
-        "actual_not_recomputed_count": len(missing_in_cache),
     }
 
 

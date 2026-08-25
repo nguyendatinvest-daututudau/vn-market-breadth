@@ -5,12 +5,12 @@ Nguyen tac bat bien: KHONG sua logic sinh tin hieu cua bat ky generator nao.
 Module nay chi DOC ket qua co san (momentum + cac he khac + stock_health +
 market_regime) roi ghep lai thanh diem conviction 0-100 va xep hang A/B/C.
 
-Cong thuc v2 (trong so khoi tao, se duoc chot lai sau buoc calibration):
+Cong thuc v2 (trong so chot sau calibration 10 nam):
   - Nen: score momentum (band 30-59). Score >= 60 ("hot") van duoc tinh diem
          nhung bi loai khoi hang A (backtest: edge am OOS o bracket cao).
-  - +15 neu vol_ratio >= 2.0   (backtest lift +5.9pp)
-  - +10 neu adx14 > 28         (backtest lift +4.1pp)
-  - -15 neu dist_ma20 > 4.5%   (phat gia da dui - mua muon)
+  - +15 neu vol_ratio >= 2.0   (calibration: mean +0.8pp, marginal)
+  - +10 neu adx14 > 28         (calibration: hit2 47.0% vs 42.4%, OOS +6.2pp — MANH NHAT)
+  - Extension penalty DA BO (calibration: dist>4.5% hit2 45.8% vs 41.0% — duoi thang hon)
   - Nhan he so regime: Risk-On x1.0 / Neutral x0.9 / Overheated x0.85 /
         Risk-Off x0.8 (thi truong xau -> nguong an len tu dong)
 
@@ -54,9 +54,9 @@ VOL_BONUS_POINTS = 15
 ADX_BONUS_LEVEL = 28.0
 ADX_BONUS_POINTS = 10
 EXT_DIST_MA20_MAX = 4.5
-EXT_PENALTY_POINTS = -15
-TIER_A_MIN = 60
-TIER_B_MIN = 45
+EXT_PENALTY_POINTS = 0   # da loai bo theo calibration: dist>4.5% actually +1.3pp lift
+TIER_A_MIN = 55           # calibration: A>=55 -> n=95, hit2=42.1%; A>=60 -> 0 signal
+TIER_B_MIN = 40           # calibration: B>=40 -> hit2=42.8%, best tier B threshold
 CAP_A = 12
 
 REGIME_FACTOR = {
