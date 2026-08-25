@@ -2189,7 +2189,7 @@ function shQuickTake(h, ma, o, w){
     else if (w.pos <= 15) bits.push('Gần đáy 52 tuần — rủi ro cao, cần xác nhận đảo chiều trước khi bắt đáy.');
   }
   if (h.w52 && h.w52.new_high) bits.unshift('Vừa lập đỉnh 52 tuần mới — tín hiệu strength rất tích cực.');
-  return bits.join(' ');
+  return bits.map(b => `• ${b}`).join('<br>');
 }
 function buildStockCardHTML(sym){
   const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
