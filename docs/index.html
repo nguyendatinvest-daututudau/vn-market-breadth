@@ -1098,7 +1098,7 @@ function getConviction(sym){
 
 function tierChip(tier, score){
   if (tier === 'A') return `<span class="tag str" style="font-size:11px;font-weight:700;">Hạng A · ${score}đ</span>`;
-  if (tier === 'B') return `<span class="tag ensw" style="font-size:11px;font-weight:700;">Hạng B · ${score}đ</span>`;
+  if (tier === 'B') return `<span class="tag wat" style="font-size:11px;font-weight:700;">Hạng B · ${score}đ</span>`;
   return `<span class="tag" style="font-size:11px;color:var(--faint);">Hạng C · ${score}đ</span>`;
 }
 
@@ -1114,8 +1114,10 @@ function convictionCondChips(components){
 function convictionSources(badges){
   if (!badges || !badges.length) return '';
   return badges.map(b => {
-    const cls = b.endsWith('_buy') ? 'src-tag ma' : b === 'ensemble_strong' ? 'src-tag bo' : 'src-tag';
-    return `<span class="${cls}">${methodLabel(b.replace(/_buy$/, '').replace(/_sell$/, ''))}</span>`;
+    const clean = b.replace(/_buy$/, '').replace(/_sell$/, '').replace(/_/g, '-');
+    const label = methodLabel(clean);
+    const cls = b.endsWith('_buy') ? 'src-tag ma' : b === 'ensemble' ? 'src-tag bo' : 'src-tag';
+    return `<span class="${cls}">${escapeHtml(label)}</span>`;
   }).join('');
 }
 
