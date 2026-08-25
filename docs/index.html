@@ -1130,6 +1130,8 @@ function buildBuyPanel(dateStr){
   const riskOff = REGIME && REGIME.tone === 'risk_off';
   const factor = BUY_CONVICTION?.regime_factor;
   const factorNote = factor != null && factor < 1 ? `<span style="font-size:10px;color:#C2413B;margin-left:6px;">×${factor}</span>` : '';
+  const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
+  const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
 
   // Tap ma strong cua phien truoc de danh dau NEW
   let prevSyms = null;
@@ -1147,8 +1149,6 @@ function buildBuyPanel(dateStr){
     if (!rows.length) {
       body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
     } else {
-      const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
-      const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
       const tr = rows.map(r => {
         const isNew = prevSyms !== null && !prevSyms.has(r.symbol);
         const symbol = `<td class="mono" style="font-weight:900;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${isNew ? ' <span class="tag str" title="Lần đầu vào Mua chuẩn so với phiên trước">NEW</span>' : ''}</td>`;
@@ -1163,11 +1163,8 @@ function buildBuyPanel(dateStr){
         <thead><tr><th>Mã</th><th class="num">Điểm</th><th class="num">Giá</th><th>Điều kiện</th><th>Đồng thuận</th><th>Ghi chú</th></tr></thead>
         <tbody>${tr}</tbody></table></div>`;
     }
-    headerExtra = ` · φiltre theo điều kiện xác nhận · ${wrChip}${factorNote}`;
   } else {
     const rows = collectAllSignals(dateStr).filter(r => r.source === 'momentum' && r.signalType === 'strong');
-    const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
-    const wrChip = wr ? `<span class="wr-chip">~${(wr*100).toFixed(0)}%</span>` : '';
     if (!rows.length) {
       body = `<div class="buy-empty">Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.</div>`;
     } else {
@@ -1191,7 +1188,7 @@ function buildBuyPanel(dateStr){
     headerExtra = ` · vùng thắng tốt nhất backtest 10 năm · sắp theo số xác nhận`;
   }
   return `<div class="panel" ${riskOff ? 'style="border-color:rgba(194,65,59,0.45);"' : ''}>
-    <h2>⭐ Mua chuẩn — Hạng A (conviction) <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${useConv ? 'điểm tin cậy = momentum score + bonus − penalty · hệ số regime' : headerExtra}</span></h2>
+    <h2>⭐ Mua chuẩn — Hạng A (conviction) ${useConv ? factorNote : ''}<span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${useConv ? 'điểm tin cậy = momentum score + bonus · hệ số regime · win rate T+10 ' + (wrChip || '') : headerExtra}</span></h2>
     ${riskOff ? '<div class="note" style="margin-bottom:10px;font-size:12px;color:#C2413B;"><b>RISK-OFF:</b> backtest cho thấy mọi tín hiệu mua đều thắng âm trong giai đoạn này — cân nhắc dừng mua mới.</div>' : ''}
     ${body}
   </div>`;
