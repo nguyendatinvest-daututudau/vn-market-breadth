@@ -1123,6 +1123,45 @@ function tradePlanDetailHTML(tp){
     <div><b style="color:var(--text)">Mục tiêu</b><br>R1 ${f(tp.targets.r1)}${pct(tp.targets.r1_pct)}${tp.rr.rr1!=null?` · R:R ${tp.rr.rr1}`:''}<br>R2 ${f(tp.targets.r2)}${pct(tp.targets.r2_pct)}${tp.rr.rr2!=null?` · R:R ${tp.rr.rr2}`:''}</div>
   </div>`;
 }
+function computeModalTradePlan(sym){
+  const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
+  if(!h) return null;
+  const close = h.close, sma10=h.ma?.sma10, sma20=h.ma?.sma20, sma50=h.ma?.sma50, sma200=h.ma?.sma200;
+  const atr=h.risk?.atr14, dist=h.ma?.dist?.sma20, piv=h.pivots, wHigh=h.w52?.high, wLow=h.w52?.low;
+  if(close==null) return null;
+  // resistance/support
+  const candsRes=[sma20,sma50,sma200,piv?.r1,piv?.r2,wHigh].filter(v=>v!=null&&isFinite(v)&&v>close);
+  const resistance=candsRes.length?Math.min(...candsRes):null;
+  const candsSup=[sma20,sma50,sma200,piv?.s1,piv?.s2,wLow].filter(v=>v!=null&&isFinite(v)&&v<close);
+  const support=candsSup.length?Math.max(...candsSup):null;
+  let entry_type='base', low, high, note='';
+  if(dist!=null&&isFinite(dist)&&dist>4&&sma10!=null&&sma20!=null){
+    entry_type='pullback'; low=Math.round(Math.min(sma10,sma20)*0.99*100)/100; high=Math.round(Math.max(sma10,sma20)*1.01*100)/100;
+    note='Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)';
+  } else if(resistance!=null&&(resistance-close)/close<0.03){
+    entry_type='breakout'; low=Math.round(resistance*0.98*100)/100; high=Math.round(resistance*1.02*100)/100;
+    note=`Gần kháng cự ${resistance.toFixed(1)} (<3%) — vùng phá vỡ, cần Vol×2 xác nhận`;
+  } else {
+    low=Math.round(close*0.99*100)/100; high=Math.round(close*1.01*100)/100; note='Vùng mua quanh giá hiện tại ±1%';
+  }
+  const mid=(low+high)/2;
+  const candsStop=[];
+  if(atr!=null&&isFinite(atr)) candsStop.push(low-2*atr);
+  if(sma20!=null) candsStop.push(sma20);
+  if(piv?.s1!=null) candsStop.push(piv.s1);
+  let stop=candsStop.length?Math.min(...candsStop):null;
+  if(stop!=null&&stop>=low) stop=Math.round((low-(atr||low*0.03))*100)/100;
+  else if(stop!=null) stop=Math.round(stop*100)/100;
+  const r1=piv?.r1, r2=piv?.r2;
+  const pct=(v)=> v==null||!isFinite(v)||mid==0?null:Math.round((v-mid)/mid*10000)/100;
+  let rr1=null, rr2=null;
+  if(stop!=null&&stop<mid){
+    const risk=mid-stop;
+    if(r1!=null&&r1>mid) rr1=Math.round((r1-mid)/risk*100)/100;
+    if(r2!=null&&r2>mid) rr2=Math.round((r2-mid)/risk*100)/100;
+  }
+  return {entry_type, entry_zone:{low,high,mid:Math.round(mid*100)/100}, entry_note:note, resistance:resistance!=null?Math.round(resistance*100)/100:null, support:support!=null?Math.round(support*100)/100:null, stop, stop_pct:pct(stop), targets:{r1:r1??null,r2:r2??null,r1_pct:pct(r1),r2_pct:pct(r2)}, rr:{rr1,rr2}};
+}
 function toggleTradeDetail(sym){
   const el=document.getElementById('detail-'+sym);
   if(!el) return;
@@ -2197,7 +2236,7 @@ function buildStockCardHTML(sym){
     <div class="sh-sec"><h4>Hiệu suất</h4><div class="sh-grid">${perfCells}</div></div>
     <div class="sh-sec"><h4>Rủi ro & thanh khoản</h4><div class="sh-grid">${riskCells}</div></div>
     ${pivCells ? `<div class="sh-sec"><h4>Pivot phiên trước</h4><div class="sh-grid">${pivCells}</div></div>` : ''}
-    ${((tp)=> tp ? `<div class="sh-sec"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(tp)}</div>` : '')((getConviction(sym)||{}).trade_plan)}
+    ${((tp)=>{ const ctp = tp || computeModalTradePlan(sym); return ctp ? `<div class="sh-sec"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(ctp)}</div>` : '';})((getConviction(sym)||{}).trade_plan)}
     <div class="sh-sec"><h4>Giá 90 phiên</h4><canvas class="sh-spark" id="shSpark"></canvas></div>
     <div class="sh-sec"><h4>Tín hiệu hệ thống đang bắt mã này</h4>${sigHTML}${radarTag}</div>
   `;
