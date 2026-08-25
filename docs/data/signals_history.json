@@ -56038,6 +56038,39 @@
           "last_volume": 2103100.0
         },
         {
+          "symbol": "NNC",
+          "status": "VALID_BUY",
+          "signal_type": "valid",
+          "score": 83,
+          "buy_score": 5,
+          "sell_score": 0,
+          "luc_mach_buy": true,
+          "luc_mach_sell": false,
+          "diep_filter": true,
+          "min_volume": 20000,
+          "threshold": 3,
+          "tplus_buy": true,
+          "tplus_sell": false,
+          "tplus_state": 1,
+          "vudd_buy_periods": [
+            13,
+            20,
+            55,
+            65
+          ],
+          "vudd_sell_periods": [],
+          "strategies": [
+            "luc_mach_buy",
+            "tplus_buy",
+            "vudd13_buy",
+            "vudd20_buy",
+            "vudd55_buy",
+            "vudd65_buy"
+          ],
+          "last_price": 40499.85,
+          "last_volume": 20100.0
+        },
+        {
           "symbol": "PVG",
           "status": "VALID_BUY",
           "signal_type": "valid",
@@ -58218,6 +58251,38 @@
           "last_volume": 25800.0
         },
         {
+          "symbol": "VAB",
+          "status": "SELL_WARNING",
+          "signal_type": "sell_warning",
+          "score": 67,
+          "buy_score": 0,
+          "sell_score": 4,
+          "luc_mach_buy": false,
+          "luc_mach_sell": true,
+          "diep_filter": true,
+          "min_volume": 20000,
+          "threshold": 3,
+          "tplus_buy": false,
+          "tplus_sell": false,
+          "tplus_state": 1,
+          "vudd_buy_periods": [],
+          "vudd_sell_periods": [
+            13,
+            20,
+            55,
+            65
+          ],
+          "strategies": [
+            "luc_mach_sell",
+            "vudd13_sell",
+            "vudd20_sell",
+            "vudd55_sell",
+            "vudd65_sell"
+          ],
+          "last_price": 9140.5,
+          "last_volume": 854800.0
+        },
+        {
           "symbol": "KOS",
           "status": "SELL_WARNING",
           "signal_type": "sell_warning",
@@ -58662,6 +58727,22 @@
           "buy_price": 13800.0,
           "last_price": 13800.0,
           "last_volume": 24300.0,
+          "strategies": [
+            "khung4_tplus_buy"
+          ]
+        },
+        {
+          "symbol": "NNC",
+          "status": "BUY",
+          "signal_type": "khung4_tplus_buy",
+          "score": 100,
+          "khung4_tplus_buy": true,
+          "khung4_tplus_sell": false,
+          "khung4_tplus_state": 1,
+          "khung4_tplus_d": 39600.0,
+          "buy_price": 40499.85,
+          "last_price": 40499.85,
+          "last_volume": 20100.0,
           "strategies": [
             "khung4_tplus_buy"
           ]
