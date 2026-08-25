@@ -1114,13 +1114,29 @@ function convictionCondChips(components){
 }
 function tradePlanDetailHTML(tp){
   if(!tp) return '<span style="color:var(--muted);font-size:11px;">Không đủ dữ liệu pivots/ATR để tính kế hoạch</span>';
-  const f=(v)=> v==null?'—':v;
-  const pct=(v)=> v==null?'':` <span style="color:var(--muted)">(${v>0?'+':''}${v}%)</span>`;
+  const f=(v)=> v==null?'—':Number(v).toLocaleString('vi-VN');
+  const pct=(v)=> v==null?'':` <span style="font-size:11px;color:var(--muted)">(${v>0?'+':''}${v}%)</span>`;
   const z=tp.entry_zone;
-  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:11px;line-height:1.5;">
-    <div><b style="color:var(--text)">Vùng mua</b> <span style="font-size:10px;color:var(--faint)">${escapeHtml(tp.entry_type)}</span><br><span style="font-weight:700">${f(z.low)} – ${f(z.high)}</span> · mid ${f(z.mid)}<br><span style="color:var(--muted)">${escapeHtml(tp.entry_note)}</span><br><span style="color:var(--muted)">Kháng cự gần nhất ${f(tp.resistance)} · Hỗ trợ ${f(tp.support)}</span></div>
-    <div><b style="color:var(--text)">Cắt lỗ</b><br><span style="font-weight:700;color:var(--down)">${f(tp.stop)}</span>${pct(tp.stop_pct)}<br><span style="color:var(--muted)">max(2×ATR, MA20, S1) dưới đáy vùng mua</span></div>
-    <div><b style="color:var(--text)">Mục tiêu</b><br>R1 ${f(tp.targets.r1)}${pct(tp.targets.r1_pct)}${tp.rr.rr1!=null?` · R:R ${tp.rr.rr1}`:''}<br>R2 ${f(tp.targets.r2)}${pct(tp.targets.r2_pct)}${tp.rr.rr2!=null?` · R:R ${tp.rr.rr2}`:''}</div>
+  const rrBadge=(v)=> v==null?'':`<span style="display:inline-block;background:${v>=1?'rgba(16,185,129,0.15)':'rgba(245,158,11,0.15)'};color:${v>=1?'#10b981':'#f59e0b'};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;margin-left:4px;">R:R ${v}</span>`;
+  const entryIcon=tp.entry_type==='pullback'?'↙':tp.entry_type==='breakout'?'↗':'◆';
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+    <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#3b82f6;text-transform:uppercase;margin-bottom:6px;">${entryIcon} Vùng mua <span style="font-weight:400;text-transform:none;color:var(--faint)">${escapeHtml(tp.entry_type)}</span></div>
+      <div style="font-size:15px;font-weight:900;color:var(--text);letter-spacing:-0.02em;">${f(z.low)} – ${f(z.high)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">mid ${f(z.mid)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">${escapeHtml(tp.entry_note)}</div>
+      <div style="font-size:10px;color:var(--faint);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);">KC ${f(tp.resistance)} · HT ${f(tp.support)}</div>
+    </div>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#ef4444;text-transform:uppercase;margin-bottom:6px;">🛑 Cắt lỗ</div>
+      <div style="font-size:18px;font-weight:900;color:#ef4444;letter-spacing:-0.02em;">${f(tp.stop)}${pct(tp.stop_pct)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">max(2×ATR, MA20, S1) dưới đáy vùng mua</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#10b981;text-transform:uppercase;margin-bottom:6px;">🎯 Mục tiêu</div>
+      <div style="font-size:13px;font-weight:800;color:var(--text);">R1 ${f(tp.targets.r1)}${pct(tp.targets.r1_pct)}${rrBadge(tp.rr.rr1)}</div>
+      <div style="font-size:13px;font-weight:800;color:var(--text);margin-top:4px;">R2 ${f(tp.targets.r2)}${pct(tp.targets.r2_pct)}${rrBadge(tp.rr.rr2)}</div>
+    </div>
   </div>`;
 }
 function computeModalTradePlan(sym){
