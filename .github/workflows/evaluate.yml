@@ -75,6 +75,9 @@ jobs:
       - name: Run filter evaluation
         run: python scripts/evaluate_filters.py
 
+      - name: Calibrate buy conviction thresholds
+        run: python scripts/calibrate_conviction.py
+
       - name: Commit evaluation results
         run: |
           git config user.name "github-actions[bot]"
