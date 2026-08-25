@@ -869,11 +869,11 @@ function buildSummary(dateStr){
   }
 
   let badges = [];
-  if (strongCount) badges.push({cls:'str', label:`Momentum Strong ${strongCount}`, filter:'strong'});
+  const hasConv = !!BUY_CONVICTION?.signals;
+  if (strongCount && !hasConv) badges.push({cls:'str', label:`Momentum Strong ${strongCount}`, filter:'strong'});
   if (hotCount) badges.push({cls:'ensw', label:`🔥 Hot ${hotCount}`, filter:'hot'});
   if (ensStrong) badges.push({cls:'ens', label:`🟣 Ensemble ${ensStrong}`, filter:'ensemble-strong'});
   if (ensWeak) badges.push({cls:'ensw', label:`⚪ Ensemble ${ensWeak}`, filter:'ensemble-weak'});
-  const hasConv = !!BUY_CONVICTION?.signals;
   if (lmValid) badges.push({cls: hasConv ? 'wat' : 'ensw', label:`LM Buy ${lmValid}${hasConv ? ' ℹ' : ''}`, filter:'luc-mach-valid'});
   if (lmWatch) badges.push({cls:'wat', label:`👀 LM Watch ${lmWatch}`, filter:'luc-mach-watch'});
   if (lmSell) badges.push({cls:'ensw', label:`🔴 LM Sell ${lmSell}`, filter:'sell-warning'});
