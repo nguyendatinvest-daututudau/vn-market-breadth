@@ -645,9 +645,9 @@ function render(){
   const flatW = total ? m.unchanged_pct : 0;
   const downW = total ? m.declines_pct : 0;
 
-  let summary = buildSummary(activeSignalDate);
-let buyHTML = buildBuyPanel(activeSignalDate);
-let alertsHTML = buildAlertsPanel(activeSignalDate);
+  let summary; try { summary = buildSummary(activeSignalDate); } catch(e){ console.error('buildSummary',e); summary = {totalSignals:0, uniqueSymbols:0, badges:[], buySignals:0, refSignals:0, watchSignals:0, sellWarnings:0, missingOhlc:0}; }
+let buyHTML; try { buyHTML = buildBuyPanel(activeSignalDate); } catch(e){ console.error('buildBuyPanel',e); buyHTML = `<div class="panel" style="border-color:rgba(194,65,59,0.45);"><h2>⭐ Mua chuẩn</h2><div class="note" style="color:#C2413B;">Lỗi render panel mua chuẩn: ${escapeHtml(e.message)} — vui lòng báo lỗi.</div></div>`; }
+let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e){ console.error('buildAlertsPanel',e); alertsHTML = ''; }
   let adDistributionHTML = buildAdDistributionPanel(m);
   let trendDistributionHTML = buildTrendDistributionPanel(m);
   let rsiSentimentHTML = buildRsiSentimentPanel(m);
