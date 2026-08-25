@@ -138,6 +138,7 @@ def build_frame(symbol: str) -> pd.DataFrame | None:
         "liq300": (vol_avg20 >= LIQ_MIN_AVG_VOLUME).astype(np.int8),
     })
     out["_valid"] = False
+    out["_close"] = close
     start = MIN_SYMBOL_HISTORY
     end = n - max(FWD_OPTIONS)
     if end <= start:
