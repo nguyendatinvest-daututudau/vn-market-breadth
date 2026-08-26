@@ -2091,7 +2091,7 @@ function buildAppendixSection(m){
     return list.map(s => {
       const isDual = dualSet && dualSet.has(s);
       const cls = isDual ? 'chip dual' : (kind === 'up' ? 'chip up' : kind === 'down' ? 'chip down' : 'chip');
-      return `<span class="${cls}">${s}</span>`;
+      return `<span class="${cls}" data-sym="${s}" title="Xem thẻ sức khỏe">${s}</span>`;
     }).join('');
   };
   const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
