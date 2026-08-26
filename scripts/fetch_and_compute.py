@@ -62,6 +62,7 @@ MARKET_INDEX_ID = {
     "HNX": "HNXIndex",
 }
 MA_WINDOWS = [10, 20, 50, 200]
+INDEX_HISTORY_SYMBOLS = ("VNI", "HNXINDEX")
 HISTORY_DAYS_LOOKBACK = 4200  # du tu ~giua 2015 (MA200 co the tinh tu 01/01/2016) cho chart lich su 10 nam
 INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tranh thieu sau ky nghi dai)
 REQUEST_SLEEP_SEC = 0.5       # cho giua cac lan goi API de tranh rate limit                                                         
@@ -742,7 +743,7 @@ def _write_json(path: Path, data) -> None:
 def _sync_docs_data(include_signal_outputs: bool = True):
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "latest_prices.json", "stock_health.json", "buy_conviction.json"]
+    files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "backtest_zweig.json", "latest_prices.json", "stock_health.json", "buy_conviction.json"]
     if include_signal_outputs:
         files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json"])
     for f in files:
@@ -761,6 +762,11 @@ def _compact_history_markets(markets_dict: dict) -> dict:
             "pct_above_ma20":  round(float(snap.get("pct_above_ma20", 0.0) or 0.0), 1),
             "pct_above_ma50":  round(float(snap.get("pct_above_ma50", 0.0) or 0.0), 1),
             "pct_above_ma200": round(float(snap.get("pct_above_ma200", 0.0) or 0.0), 1),
+            "above_ma10_count": snap.get("above_ma10_count"),
+            "above_ma20_count": snap.get("above_ma20_count"),
+            "above_ma50_count": snap.get("above_ma50_count"),
+            "above_ma200_count": snap.get("above_ma200_count"),
+            "ma_eligible_symbols": snap.get("ma_eligible_symbols", {}),
             "rsi_pulse": snap.get("rsi_pulse"),
             "advances": snap.get("advances"),
             "declines": snap.get("declines"),
@@ -775,7 +781,30 @@ def _compact_history_markets(markets_dict: dict) -> dict:
     return compact
 
 
-def append_history(markets_dict: dict) -> None:
+def load_index_closes_by_date(cache_dir=CACHE_DIR) -> dict[str, dict[str, float]]:
+    """Doc gia dong cua index tu cache, chi map dung ngay giao dich."""
+    closes: dict[str, dict[str, float]] = {}
+    for symbol in INDEX_HISTORY_SYMBOLS:
+        frame = _load_cache(symbol, cache_dir)
+        if frame.empty or not {"TradingDate", "Close"}.issubset(frame.columns):
+            continue
+        frame = frame.dropna(subset=["TradingDate", "Close"]).sort_values("TradingDate")
+        frame = frame.drop_duplicates(subset=["TradingDate"], keep="last")
+        for _, row in frame.iterrows():
+            date = format_market_date(row["TradingDate"])
+            if not date:
+                continue
+            try:
+                closes.setdefault(date, {})[symbol] = round(float(row["Close"]), 2)
+            except (TypeError, ValueError):
+                continue
+    return closes
+
+
+def append_history(
+    markets_dict: dict,
+    index_closes_by_date: dict[str, dict[str, float]] | None = None,
+) -> None:
     history = []
     if HISTORY_JSON.exists():
         try:
@@ -786,8 +815,17 @@ def append_history(markets_dict: dict) -> None:
     history = _backfill_ud_volume(history)
 
     today_date = markets_dict["ALL"]["date"]
+    index_map = index_closes_by_date or {}
+    if index_closes_by_date is not None:
+        for entry in history:
+            entry["index_closes"] = index_map.get(entry.get("date", ""), {})
     history = [h for h in history if h.get("date") != today_date]
-    history.append({"date": today_date, "markets": _compact_history_markets(markets_dict)})
+    history.append({
+        "date": today_date,
+        "markets": _compact_history_markets(markets_dict),
+        "index_closes": index_map.get(today_date, {}),
+    })
+    history.sort(key=lambda h: parse_market_date(h.get("date")) or datetime.min)
     history = history[-2900:]  # gioi han ~10 nam phien giao dich
 
     _write_json(HISTORY_JSON, history)
@@ -999,15 +1037,15 @@ def main():
     generate_latest_prices()
     print(f"\nDa ghi: {LATEST_JSON}")
 
-    append_history(markets_dict)
-    print(f"Da cap nhat history.")
-
     # Backfill chi so (VNI/HNXINDEX) de regime gauge + phan ky co du lieu.
     try:
         run_backfill_index()
         print(f"Da cap nhat cache chi so.")
     except Exception as e:
         print(f"Loi backfill chi so: {e}")
+
+    append_history(markets_dict, load_index_closes_by_date())
+    print(f"Da cap nhat history.")
 
     # Market regime (gauge + phan ky + breadth momentum)
     try:

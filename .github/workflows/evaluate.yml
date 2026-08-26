@@ -82,18 +82,25 @@ jobs:
           SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
           SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
 
+      - name: Backfill HOSE A/D for Zweig EMA10
+        run: python scripts/backfill_zweig.py --refresh
+        env:
+          SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
+          SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
+          SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
+
+      - name: Refresh market regime with Zweig EMA10
+        run: python scripts/market_regime.py
+
+      - name: Backtest Zweig EMA10
+        run: python scripts/backtest_zweig.py
+
       - name: Run filter evaluation
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'full' }}
         run: python scripts/evaluate_filters.py
 
       - name: Calibrate buy conviction thresholds
         run: python scripts/calibrate_conviction.py
-
-      - name: Backfill Zweig A/D history
-        run: python scripts/backfill_zweig.py
-
-      - name: Backtest Zweig thresholds
-        run: python scripts/backtest_zweig.py
 
       - name: Commit evaluation results
         run: |

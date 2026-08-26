@@ -142,3 +142,36 @@ def test_commentary_keeps_zero_ad_ratio_as_valid_data(monkeypatch):
     commentary = generate_commentary({"session": "close", "markets": markets})
     assert "A/D Ratio = **0.00**" in commentary
     assert "Giảm vị thế" in commentary
+
+
+def test_history_publishes_only_exact_date_index_closes(tmp_path, monkeypatch):
+    monkeypatch.delenv("PIPELINE_AS_OF_DATE", raising=False)
+    pd.DataFrame({
+        "TradingDate": ["16/07/2026", "18/07/2026"],
+        "Close": [1200.0, 1220.0],
+    }).to_csv(tmp_path / "VNI.csv", index=False)
+    pd.DataFrame({
+        "TradingDate": ["17/07/2026"],
+        "Close": [245.5],
+    }).to_csv(tmp_path / "HNXINDEX.csv", index=False)
+
+    closes = pipeline.load_index_closes_by_date(tmp_path)
+    assert closes["17/07/2026"] == {"HNXINDEX": 245.5}
+
+    monkeypatch.setattr(pipeline, "HISTORY_JSON", tmp_path / "breadth_history.json")
+    markets = {"ALL": {"date": "17/07/2026"}}
+    pipeline.append_history(markets, closes)
+    entry = json.loads((tmp_path / "breadth_history.json").read_text(encoding="utf-8"))[0]
+    assert entry["index_closes"] == {"HNXINDEX": 245.5}
+
+
+def test_compact_history_keeps_ma_denominators():
+    compact = pipeline._compact_history_markets({
+        "HOSE": {
+            "pct_above_ma20": 60.0,
+            "above_ma20_count": 84,
+            "ma_eligible_symbols": {"20": 140},
+        }
+    })
+    assert compact["HOSE"]["above_ma20_count"] == 84
+    assert compact["HOSE"]["ma_eligible_symbols"]["20"] == 140

@@ -41,9 +41,6 @@
   .nav-links a{color:var(--muted);text-decoration:none;padding:6px 2px;border-bottom:2px solid transparent;transition:color .15s;}
   .nav-links a:hover{color:#fff;}
   .nav-links a.active{color:#fff;border-bottom-color:var(--accent);}
-  .nav-links a[data-view="signals"]{background:var(--accent);color:#fff !important;border-radius:8px;padding:6px 14px;border-bottom:none;}
-  .nav-links a[data-view="signals"]:hover{filter:brightness(1.12);}
-  .nav-links a[data-view="signals"].active{background:var(--accent);color:#fff !important;border-bottom:none;}
   .nav-right{display:flex;align-items:center;gap:14px;}
   .nav-date{font-size:12.5px;color:var(--muted);white-space:nowrap;}
   .nav-cta{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,77,46,0.3);transition:filter .15s;white-space:nowrap;}
@@ -186,7 +183,16 @@
   .breadth-bar span{display:flex;align-items:center;justify-content:center;font-family:var(--font-all);font-size:10px;font-weight:700;color:#fff;}
   .chart-wrap{position:relative;width:100%;}
   .chart-wrap canvas{width:100%;display:block;border-radius:10px;}
-  .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(20,25,32,0.97);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10.5px;box-shadow:var(--shadow-md);font-family:var(--font-all);display:none;white-space:nowrap;line-height:1.5;}
+  .linked-chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px;font-family:var(--font-all);}
+  .linked-chart-title{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;}
+  .linked-chart-sub{font-size:10px;color:var(--faint);margin-left:6px;text-transform:none;letter-spacing:0;font-weight:500;}
+  .linked-chart-divider{height:1px;background:var(--border);margin:2px 48px 4px;}
+  .zweig-badge{font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid var(--border);background:var(--panel-tint);color:var(--muted);}
+  .zweig-badge.armed,.zweig-badge.forming{color:#b45309;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);}
+  .zweig-badge.confirmed{color:#047857;border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.09);}
+  .zweig-badge.expired{color:var(--faint);}
+  .zweig-detail{font-family:var(--font-all);font-size:10.5px;color:var(--muted);line-height:1.5;padding:7px 10px;margin:4px 0 8px;border-left:3px solid #C084FC;background:rgba(192,132,252,.06);border-radius:6px;}
+  .chart-tooltip{position:absolute;pointer-events:none;z-index:50;background:rgba(20,25,32,0.97);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10.5px;box-shadow:var(--shadow-md);font-family:var(--font-all);display:none;white-space:normal;max-width:min(430px,calc(100% - 8px));line-height:1.5;}
   .chart-range-control{margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel-tint);}
   .chart-range-label{display:block;font-family:var(--font-all);font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:6px;}
   .chart-range-control input[type=range]{width:100%;height:18px;margin:2px 0;accent-color:#4F46E5;cursor:pointer;}
@@ -195,6 +201,7 @@
   .chart-range-chip{border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-family:var(--font-all);font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:999px;cursor:pointer;transition:all .15s;}
   .chart-range-chip:hover{border-color:var(--accent-1);color:var(--accent-1);}
   .chart-range-chip.active{background:var(--accent-1);border-color:var(--accent-1);color:var(--bg-a);}
+  @media(max-width:600px){.linked-chart-divider{margin-left:40px;margin-right:12px}.chart-tooltip{font-size:10px}.linked-chart-sub{display:block;margin-left:0;margin-top:2px}}
 
   .loading,.err{font-family:var(--font-all);font-size:12px;color:var(--muted);padding:30px;text-align:center;}
   footer{font-family:var(--font-all);font-size:10.5px;color:var(--faint);text-align:center;margin-top:20px;}
@@ -369,7 +376,7 @@
   [data-sym]:hover{text-decoration:underline;color:var(--accent) !important;}
   .modal-backdrop{position:fixed;inset:0;background:rgba(4,5,8,0.78);backdrop-filter:blur(6px);z-index:200;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px;}
   .modal-backdrop.open{display:flex;}
-  .stock-modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;max-width:920px;width:100%;padding:32px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.6);margin-bottom:40px;}
+  .stock-modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;max-width:680px;width:100%;padding:24px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.6);margin-bottom:40px;}
   .sh-close{position:absolute;top:14px;right:14px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;}
   .sh-close:hover{color:#fff;border-color:var(--accent-border);}
   .sh-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;padding-right:36px;}
@@ -377,34 +384,28 @@
   .sh-price{font-size:22px;font-weight:800;}
   .sh-chg{font-size:13px;font-weight:700;}
   .sh-date{font-size:11px;color:var(--faint);margin-left:auto;}
-  .sh-sec{margin-top:22px;}
-  .sh-sec h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:800;margin-bottom:8px;}
-  .sh-sec.hero{margin-top:24px;padding:20px;background:var(--panel-tint);border:1px solid var(--border);border-radius:12px;}
-  .sh-sec.hero h4{font-size:13px;color:var(--text);margin-bottom:10px;}
-  .sh-sec.hero .sig-why{font-size:14px !important;line-height:1.65 !important;}
-  .sh-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .sh-hero-grid .hero-full{grid-column:1 / -1;}
-  @media(max-width:700px){.sh-hero-grid{grid-template-columns:1fr;}}
+  .sh-sec{margin-top:18px;}
+  .sh-sec h4{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:800;margin-bottom:8px;}
   .sh-verdict-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;}
   .sh-verdict{font-size:12px;font-weight:800;padding:5px 14px;border-radius:999px;}
   .sh-score-lab{font-size:11px;color:var(--muted);}
   .sh-chips{display:flex;gap:6px;flex-wrap:wrap;}
-  .sh-chip{border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--faint);background:var(--panel-tint);min-width:90px;}
-  .sh-chip b{display:block;font-size:13px;margin-top:2px;color:var(--muted);}
+  .sh-chip{border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--faint);background:var(--panel-tint);min-width:86px;}
+  .sh-chip b{display:block;font-size:12px;margin-top:2px;color:var(--muted);}
   .sh-chip.on{border-color:rgba(34,197,94,0.4);}
   .sh-chip.on b{color:var(--up);}
-  .sh-gauge-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .sh-gauge-row{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);margin-bottom:6px;}
   .sh-gauge-row .lab{width:64px;flex-shrink:0;}
   .sh-bar{flex:1;height:8px;border-radius:999px;background:var(--panel-tint);position:relative;}
   .sh-bar span{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--accent);transform:translateX(-50%);}
   .sh-gauge-row .val{width:46px;text-align:right;font-weight:700;color:var(--text);}
-  .sh-52w{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted);}
-  .sh-52w .lo,.sh-52w .hi{font-weight:700;color:var(--text);font-size:13px;}
-  .sh-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+  .sh-52w{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--muted);}
+  .sh-52w .lo,.sh-52w .hi{font-weight:700;color:var(--text);}
+  .sh-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
   @media(max-width:600px){.sh-grid{grid-template-columns:repeat(3,1fr);}}
-  .sh-cell{background:var(--panel-tint);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
-  .sh-cell b{display:block;font-size:14px;}
-  .sh-cell span{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;}
+  .sh-cell{background:var(--panel-tint);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+  .sh-cell b{display:block;font-size:13px;}
+  .sh-cell span{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;}
   .sh-sig{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--panel-tint);margin-bottom:5px;font-size:12px;}
   .sh-sig b{color:var(--text);}
   .sh-spark{width:100%;height:70px;display:block;}
@@ -430,6 +431,7 @@
       <div class="nav-search"><input id="stockSearch" list="stockList" placeholder="Tra cứu mã..." autocomplete="off" onkeydown="if(event.key==='Enter'){const v=this.value.trim().toUpperCase(); if(v){openStockModal(v); this.blur();}}"></div>
       <datalist id="stockList"></datalist>
       <span class="nav-date" id="navDate"></span>
+      <button class="nav-cta" onclick="switchView('signals')">Tín hiệu</button>
     </div>
   </div>
 </nav>
@@ -598,6 +600,22 @@ function parseViDate(s){
   const m = String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   return m ? new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
 }
+function regimeCore(){ return REGIME?.regime || REGIME || {}; }
+function regimeIndexKey(){ return activeMarket === 'HNX' ? 'HNXINDEX' : 'VNI'; }
+function regimeIndex(){ return REGIME?.index?.[regimeIndexKey()] || {}; }
+function zweigData(){
+  const current = REGIME?.zweig_breadth_thrust;
+  const legacy = REGIME?.zweig;
+  if (current?.available || !legacy?.available) return current || null;
+  return {
+    available:true,
+    state:legacy.active?'confirmed':'inactive',
+    ema10:legacy.score,
+    confirmed_date:legacy.date,
+    sessions_since_armed:null,
+    events:legacy.active && legacy.date ? [{date:legacy.date,kind:'confirmed',ema10:legacy.score}] : [],
+  };
+}
 function staleDataBadge(dateStr){
   const m = String(dateStr || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!m) return '';
@@ -653,6 +671,8 @@ function render(){
   const upW = total ? m.advances_pct : 0;
   const flatW = total ? m.unchanged_pct : 0;
   const downW = total ? m.declines_pct : 0;
+  const regime = regimeCore();
+  const hasRegime = regime.score != null;
 
   let summary; try { summary = buildSummary(activeSignalDate); } catch(e){ console.error('buildSummary',e); summary = {totalSignals:0, uniqueSymbols:0, badges:[], buySignals:0, refSignals:0, watchSignals:0, sellWarnings:0, missingOhlc:0}; }
 let buyHTML; try { buyHTML = buildBuyPanel(activeSignalDate); } catch(e){ console.error('buildBuyPanel',e); buyHTML = `<div class="panel" style="border-color:rgba(194,65,59,0.45);"><h2>⭐ Mua chuẩn</h2><div class="note" style="color:#C2413B;">Lỗi render panel mua chuẩn: ${escapeHtml(e.message)} — vui lòng báo lỗi.</div></div>`; }
@@ -682,7 +702,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
   document.getElementById('view-home').innerHTML = `
     <div class="feature-grid">
       <div class="feature-card" onclick="switchView('market')"><div class="f-icon red">📊</div><b>Độ rộng thị trường</b><span>Sức khỏe độ rộng: %MA10/20/50/200, phân bố A/D và xu hướng giá.</span></div>
-      <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Biểu đồ lịch sử MA</b><span>10 năm % mã trên MA10/20/50/200 — bối cảnh dài hạn của thị trường.</span></div>
+      <div class="feature-card" onclick="switchView('chart')"><div class="f-icon green">🕘</div><b>Chỉ số & độ rộng</b><span>So sánh index với % mã trên MA10/20/50/200 và theo dõi Zweig EMA10.</span></div>
       <div class="feature-card" onclick="switchView('rsi')"><div class="f-icon blue">📈</div><b>Biểu đồ lịch sử RSI</b><span>Nhiệt RSI toàn thị trường, pulse chart và cảm giác phiên.</span></div>
       <div class="feature-card" onclick="switchView('signals')"><div class="f-icon purple">🔎</div><b>Tín hiệu</b><span>Tín hiệu mua/cảnh báo theo tầng ưu tiên, đã kiểm chứng 10 năm.</span></div>
       <div class="feature-card" onclick="switchView('radar')"><div class="f-icon cyan">🛰</div><b>Accumulation Radar</b><span>Phát hiện mã đang được tích lũy âm thầm bởi dòng tiền lớn.</span></div>
@@ -694,16 +714,15 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
           <span class="summary-count">${summary.totalSignals} tín hiệu · ${summary.uniqueSymbols} mã duy nhất</span>
           <div class="sub">Mua chuẩn ${summary.buySignals}${summary.refSignals ? ` · Tham khảo ${summary.refSignals}` : ''} · Watch ${summary.watchSignals} · Sell warning ${summary.sellWarnings}${summary.missingOhlc ? ` · Thiếu OHLCV ${summary.missingOhlc} mã` : ''}</div>
         </div>
-        <div class="summary-badges ${REGIME?.tone === 'risk_off' ? 'riskoff-dim' : ''}">
-          ${REGIME?`<span class="regime-chip ${REGIME.tone}" style="font-size:11px;padding:4px 12px;">${{risk_off:'RISK-OFF',neutral:'TRUNG LẬP',risk_on:'RISK-ON',overheated:'QUÁ NÓNG'}[REGIME.tone]||REGIME.tone} ${REGIME.score!=null?REGIME.score.toFixed(0):''}</span>`:''}
+        <div class="summary-badges ${regime.tone === 'risk_off' ? 'riskoff-dim' : ''}">
+          ${hasRegime?`<span class="regime-chip ${regime.tone}" style="font-size:11px;padding:4px 12px;">${{risk_off:'RISK-OFF',neutral:'TRUNG LẬP',risk_on:'RISK-ON',overheated:'QUÁ NÓNG'}[regime.tone]||regime.tone} ${regime.score.toFixed(0)}</span>`:''}
           ${intradayChipHTML(m)}
           ${summary.badges.map(b => `<span class="s-badge ${b.cls}" data-filter="${b.filter}">${b.label}</span>`).join('')}
         </div>
       </div>
     </div>
 
-    ${REGIME && REGIME.tone === 'risk_off' ? `<div style="border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>⚠️ RISK-OFF:</b> theo kiểm chứng 10 năm, các tín hiệu mua trong giai đoạn risk-off có tỉ lệ thắng <b>âm -7 đến -11pp</b> so với baseline. Hạn chế mua mới, ưu tiên bảo toàn vốn.</div>` : ''}
-    ${REGIME?.zweig?.active ? `<div style="border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#6EE7B7;"><b>🚀 ZWEIG THRUST:</b> Breadth thrust HOSE ${REGIME.zweig.prior_low!=null?REGIME.zweig.prior_low.toFixed(3):''} → ${REGIME.zweig.score!=null?REGIME.zweig.score.toFixed(3):''} ngày ${REGIME.zweig.date||''} — xác nhận đảo chiều breadth, thường +6-12 tháng tích cực <a href="#market" onclick="switchView('market')" style="color:#6EE7B7;text-decoration:underline;">→ Độ rộng thị trường</a></div>` : ''}
+    ${regime.tone === 'risk_off' ? `<div style="border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>⚠️ RISK-OFF:</b> theo kiểm chứng 10 năm, các tín hiệu mua trong giai đoạn risk-off có tỉ lệ thắng <b>âm -7 đến -11pp</b> so với baseline. Hạn chế mua mới, ưu tiên bảo toàn vốn.</div>` : ''}
 
     <div class="home-grid">
       <div class="home-col">
@@ -743,17 +762,14 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
 
     ${adDistributionHTML}
 
-    ${buildUdVolumePanel(m)}
-
     ${trendDistributionHTML}
   `;
-  requestAnimationFrame(renderUdVolumeChart);
 
   // ===== VIEW: BIỂU ĐỒ LỊCH SỬ =====
   document.getElementById('view-chart').innerHTML = `
     <div class="panel">
-      <h2>Lịch sử % mã trên đường MA <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">10 năm · ${m.date}</span></h2>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Diễn biến độ rộng thị trường từ 04/2016. Chỉ trên MA20 vượt 50% thường trùng vùng thị trường khỏe; rơi dưới 30% là vùng cực yếu. Kéo thanh trượt hoặc bấm 1/3/5 năm để thu hẹp khoảng xem.</div>
+      <h2>Chỉ số & độ rộng thị trường <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${m.date}</span></h2>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">So sánh chỉ số với tỷ lệ mã trên MA10/20/50/200 theo cùng ngày giao dịch. MA20 vượt 50% thường xác nhận thị trường khỏe; index tăng trong khi MA20/MA50 giảm là dấu hiệu tăng hẹp.</div>
       ${chartHTML}
     </div>
   `;
@@ -994,64 +1010,6 @@ function buildTrendDistributionPanel(m){
   return `<div><div class="ctx-title">Phân bổ xu hướng theo MA stack · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div></div>`;
 }
 
-function buildUdVolumePanel(m){
-  const ratio = m?.up_down_volume_ratio;
-  const up = m?.up_volume, down = m?.down_volume;
-  const hasData = ratio!=null || up!=null;
-  if (!hasData) {
-    return `<div class="panel" style="padding:16px;">
-      <div class="ctx-title">UD VOLUME — dòng tiền nhóm tăng vs nhóm giảm</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">Đang chờ dữ liệu phiên đầu tiên sau khi deploy (15:10 hôm nay). Panel sẽ hiện ratio + Up/Down volume + chart lịch sử sau khi CI chạy xong.</div>
-    </div>`;
-  }
-  const fmtVol = v => v==null?'—':(v>=1e9?(v/1e9).toFixed(1)+'B':(v/1e6).toFixed(1)+'M');
-  const color = ratio==null?'var(--muted)':ratio>=1?'var(--up)':'var(--down)';
-  const note = ratio==null?'Chưa có dữ liệu':ratio>=1?'Tiền tập trung nhóm mã tăng':'Tiền tập trung nhóm mã giảm';
-  const barUp = ratio!=null? Math.min(100, Math.max(0, (ratio/(ratio+1))*100)) : 50;
-  return `<div class="panel" style="padding:16px;">
-    <div class="ctx-title">UD VOLUME — dòng tiền nhóm tăng vs nhóm giảm</div>
-    <div style="display:flex;gap:16px;align-items:center;margin-top:10px;">
-      <div style="min-width:90px;text-align:center;"><div style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;">Ratio</div><div style="font-size:28px;font-weight:900;color:${color};">${ratio!=null?ratio.toFixed(2):'—'}</div><div style="font-size:11px;color:var(--muted);">${note}</div></div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;"><span>Tăng ${fmtVol(up)}</span><span>Giảm ${fmtVol(down)}</span></div>
-        <div style="height:12px;border-radius:6px;overflow:hidden;display:flex;background:var(--panel-tint);border:1px solid var(--border);"><div style="width:${barUp}%;background:var(--up);"></div><div style="width:${100-barUp}%;background:var(--down);"></div></div>
-        <div style="font-size:10px;color:var(--faint);margin-top:4px;">≥1: tiền ở nhóm tăng · &lt;1: tiền ở nhóm giảm · Backfill từ universe hiện tại</div>
-      </div>
-    </div>
-    <div style="margin-top:12px;"><canvas id="udVolumeChart" height="80"></canvas></div>
-  </div>`;
-}
-
-function renderUdVolumeChart(){
-  const cv = document.getElementById('udVolumeChart');
-  if(!cv || !HISTORY) return;
-  const pts = HISTORY.map(h => {
-    const v = h.markets?.ALL?.up_down_volume_ratio;
-    return v==null?null:Number(v);
-  }).filter(v=>v!=null);
-  // Use last 250 points for chart
-  const allPts = HISTORY.map(h => h.markets?.ALL?.up_down_volume_ratio).map(v=>v==null?null:Number(v));
-  const validPts = allPts.filter(v=>v!=null);
-  if(validPts.length < 5) return;
-  const dpr = window.devicePixelRatio||1, w=cv.clientWidth||600, h=80;
-  cv.width=w*dpr; cv.height=h*dpr; cv.style.height=h+'px';
-  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  const maxV = Math.max(2.5, ...validPts), minV=0;
-  const rng=maxV-minV||1;
-  // Ref line at 1.0
-  const yRef = h-6-((1.0-minV)/rng)*(h-12);
-  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(2,yRef); ctx.lineTo(w-2,yRef); ctx.stroke(); ctx.setLineDash([]);
-  ctx.strokeStyle='#22C55E'; ctx.lineWidth=1.6; ctx.beginPath();
-  let started=false;
-  validPts.slice(-250).forEach((v,i,arr)=>{
-    const x=2+(i/(arr.length-1))*(w-4), y=h-6-((v-minV)/rng)*(h-12);
-    if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-  ctx.fillStyle='rgba(34,197,94,0.08)';
-  ctx.lineTo(w-2,h); ctx.lineTo(2,h); ctx.closePath(); ctx.fill();
-}
-
 function buildRsiPulseChartPanel(m){
   if (!m?.rsi_pulse) return '';
   return `<div>
@@ -1060,13 +1018,13 @@ function buildRsiPulseChartPanel(m){
       <canvas id="rsiPulseChart"></canvas>
       <div class="chart-tooltip" id="rsiPulseTooltip"></div>
       <div class="chart-range-control">
-        <span class="chart-range-label" id="rsiRangeLabel">Từ 04/2016 · đến 08/2026</span>
+        <span class="chart-range-label" id="rsiRangeLabel">Đang tải khoảng dữ liệu...</span>
         <input type="range" id="rsiRangeStart" min="0" max="1000" value="0" step="1">
         <input type="range" id="rsiRangeEnd" min="0" max="1000" value="1000" step="1">
         <div class="chart-range-chips">
+          <button class="chart-range-chip" data-months="3">3 tháng</button>
+          <button class="chart-range-chip" data-months="6">6 tháng</button>
           <button class="chart-range-chip" data-months="12">1 năm</button>
-          <button class="chart-range-chip" data-months="36">3 năm</button>
-          <button class="chart-range-chip" data-months="60">5 năm</button>
           <button class="chart-range-chip active" data-months="0">Toàn bộ</button>
         </div>
       </div>
@@ -1184,69 +1142,14 @@ function convictionCondChips(components){
 }
 function tradePlanDetailHTML(tp){
   if(!tp) return '<span style="color:var(--muted);font-size:11px;">Không đủ dữ liệu pivots/ATR để tính kế hoạch</span>';
-  const f=(v)=> v==null?'—':Number(v).toLocaleString('vi-VN');
-  const pct=(v)=> v==null?'':` <span style="font-size:11px;color:var(--muted)">(${v>0?'+':''}${v}%)</span>`;
+  const f=(v)=> v==null?'—':v;
+  const pct=(v)=> v==null?'':` <span style="color:var(--muted)">(${v>0?'+':''}${v}%)</span>`;
   const z=tp.entry_zone;
-  const rrBadge=(v)=> v==null?'':`<span style="display:inline-block;background:${v>=1?'rgba(16,185,129,0.15)':'rgba(245,158,11,0.15)'};color:${v>=1?'#10b981':'#f59e0b'};padding:2px 6px;border-radius:4px;font-size:11px;font-weight:800;margin-left:4px;">R:R ${v}</span>`;
-  const entryIcon=tp.entry_type==='pullback'?'↙':tp.entry_type==='breakout'?'↗':'◆';
-  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-    <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.06em;color:#3b82f6;text-transform:uppercase;margin-bottom:6px;">${entryIcon} Vùng mua <span style="font-weight:400;text-transform:none;color:var(--faint)">${escapeHtml(tp.entry_type)}</span></div>
-      <div style="font-size:16px;font-weight:900;color:var(--text);letter-spacing:-0.02em;">${f(z.low)} – ${f(z.high)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px;">mid ${f(z.mid)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4;">${escapeHtml(tp.entry_note)}</div>
-      <div style="font-size:11px;color:var(--faint);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);">KC ${f(tp.resistance)} · HT ${f(tp.support)}</div>
-    </div>
-    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.06em;color:#ef4444;text-transform:uppercase;margin-bottom:6px;">🛑 Cắt lỗ</div>
-      <div style="font-size:20px;font-weight:900;color:#ef4444;letter-spacing:-0.02em;">${f(tp.stop)}${pct(tp.stop_pct)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4;">max(2×ATR, MA20, S1) dưới đáy vùng mua</div>
-    </div>
-    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.06em;color:#10b981;text-transform:uppercase;margin-bottom:6px;">🎯 Mục tiêu</div>
-      <div style="font-size:14px;font-weight:800;color:var(--text);">R1 ${f(tp.targets.r1)}${pct(tp.targets.r1_pct)}${rrBadge(tp.rr.rr1)}</div>
-      <div style="font-size:14px;font-weight:800;color:var(--text);margin-top:4px;">R2 ${f(tp.targets.r2)}${pct(tp.targets.r2_pct)}${rrBadge(tp.rr.rr2)}</div>
-    </div>
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:11px;line-height:1.5;">
+    <div><b style="color:var(--text)">Vùng mua</b> <span style="font-size:10px;color:var(--faint)">${escapeHtml(tp.entry_type)}</span><br><span style="font-weight:700">${f(z.low)} – ${f(z.high)}</span> · mid ${f(z.mid)}<br><span style="color:var(--muted)">${escapeHtml(tp.entry_note)}</span><br><span style="color:var(--muted)">Kháng cự gần nhất ${f(tp.resistance)} · Hỗ trợ ${f(tp.support)}</span></div>
+    <div><b style="color:var(--text)">Cắt lỗ</b><br><span style="font-weight:700;color:var(--down)">${f(tp.stop)}</span>${pct(tp.stop_pct)}<br><span style="color:var(--muted)">max(2×ATR, MA20, S1) dưới đáy vùng mua</span></div>
+    <div><b style="color:var(--text)">Mục tiêu</b><br>R1 ${f(tp.targets.r1)}${pct(tp.targets.r1_pct)}${tp.rr.rr1!=null?` · R:R ${tp.rr.rr1}`:''}<br>R2 ${f(tp.targets.r2)}${pct(tp.targets.r2_pct)}${tp.rr.rr2!=null?` · R:R ${tp.rr.rr2}`:''}</div>
   </div>`;
-}
-function computeModalTradePlan(sym){
-  const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
-  if(!h) return null;
-  const close = h.close, sma10=h.ma?.sma10, sma20=h.ma?.sma20, sma50=h.ma?.sma50, sma200=h.ma?.sma200;
-  const atr=h.risk?.atr14, dist=h.ma?.dist?.sma20, piv=h.pivots, wHigh=h.w52?.high, wLow=h.w52?.low;
-  if(close==null) return null;
-  // resistance/support
-  const candsRes=[sma20,sma50,sma200,piv?.r1,piv?.r2,wHigh].filter(v=>v!=null&&isFinite(v)&&v>close);
-  const resistance=candsRes.length?Math.min(...candsRes):null;
-  const candsSup=[sma20,sma50,sma200,piv?.s1,piv?.s2,wLow].filter(v=>v!=null&&isFinite(v)&&v<close);
-  const support=candsSup.length?Math.max(...candsSup):null;
-  let entry_type='base', low, high, note='';
-  if(dist!=null&&isFinite(dist)&&dist>4&&sma10!=null&&sma20!=null){
-    entry_type='pullback'; low=Math.round(Math.min(sma10,sma20)*0.99*100)/100; high=Math.round(Math.max(sma10,sma20)*1.01*100)/100;
-    note='Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)';
-  } else if(resistance!=null&&(resistance-close)/close<0.03){
-    entry_type='breakout'; low=Math.round(resistance*0.98*100)/100; high=Math.round(resistance*1.02*100)/100;
-    note=`Gần kháng cự ${resistance.toFixed(1)} (<3%) — vùng phá vỡ, cần Vol×2 xác nhận`;
-  } else {
-    low=Math.round(close*0.99*100)/100; high=Math.round(close*1.01*100)/100; note='Vùng mua quanh giá hiện tại ±1%';
-  }
-  const mid=(low+high)/2;
-  const candsStop=[];
-  if(atr!=null&&isFinite(atr)) candsStop.push(low-2*atr);
-  if(sma20!=null) candsStop.push(sma20);
-  if(piv?.s1!=null) candsStop.push(piv.s1);
-  let stop=candsStop.length?Math.min(...candsStop):null;
-  if(stop!=null&&stop>=low) stop=Math.round((low-(atr||low*0.03))*100)/100;
-  else if(stop!=null) stop=Math.round(stop*100)/100;
-  const r1=piv?.r1, r2=piv?.r2;
-  const pct=(v)=> v==null||!isFinite(v)||mid==0?null:Math.round((v-mid)/mid*10000)/100;
-  let rr1=null, rr2=null;
-  if(stop!=null&&stop<mid){
-    const risk=mid-stop;
-    if(r1!=null&&r1>mid) rr1=Math.round((r1-mid)/risk*100)/100;
-    if(r2!=null&&r2>mid) rr2=Math.round((r2-mid)/risk*100)/100;
-  }
-  return {entry_type, entry_zone:{low,high,mid:Math.round(mid*100)/100}, entry_note:note, resistance:resistance!=null?Math.round(resistance*100)/100:null, support:support!=null?Math.round(support*100)/100:null, stop, stop_pct:pct(stop), targets:{r1:r1??null,r2:r2??null,r1_pct:pct(r1),r2_pct:pct(r2)}, rr:{rr1,rr2}};
 }
 function toggleTradeDetail(sym){
   const el=document.getElementById('detail-'+sym);
@@ -1273,7 +1176,7 @@ function meterHTML(conf){
 // --- Star panel: mua chuẩn (da kiem chung) + badge NEW cho ma lan dau xuat hien ---
 function buildBuyPanel(dateStr){
   const useConv = BUY_CONVICTION?.signals && BUY_CONVICTION.date && (!dateStr || BUY_CONVICTION.date === dateStr);
-  const riskOff = REGIME && REGIME.tone === 'risk_off';
+  const riskOff = regimeCore().tone === 'risk_off';
   const factor = BUY_CONVICTION?.regime?.factor;
   const factorNote = factor != null && factor < 1 ? `<span style="font-size:10px;color:#C2413B;margin-left:6px;">×${factor}</span>` : '';
   const wr = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
@@ -1415,7 +1318,6 @@ const HUB_TABS = [
   { value:'watch', label:'👀 Theo dõi' },
   { value:'sell-warning', label:'⚠ Cảnh báo' },
   { value:'reference', label:'📖 Tham khảo' },
-  { value:'rr', label:'📈 R:R ≥1' },
 ];
 
 function buildHubTabs(){
@@ -1462,7 +1364,6 @@ function buildSignalHub(dateStr){
     'watch': 'Không có mã đang chờ xác nhận.',
     'sell-warning': 'Không có cảnh báo bán.',
     'reference': 'Không có tín hiệu tham khảo.',
-    'rr': 'Không có mã R:R ≥1.',
   };
 
   let tbody = filteredRows.map(r => {
@@ -1773,11 +1674,6 @@ function applyFilters(rows, filter, query){
       if (filter === 'ats-sell' && !(r.source === 'ats' && r.signalType === 'sell_warning')) return false;
       if (filter === 'k4-buy' && !(r.source === 'khung4-tplus' && r.signalType === 'valid')) return false;
       if (filter === 'k4-sell' && !(r.source === 'khung4-tplus' && r.signalType === 'sell_warning')) return false;
-      if (filter === 'rr') {
-        const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (typeof computeModalTradePlan === 'function' ? computeModalTradePlan(r.symbol) : null);
-        const rr1 = tp?.rr?.rr1, rr2 = tp?.rr?.rr2;
-        if (!((rr1!=null && rr1>=1) || (rr2!=null && rr2>=1))) return false;
-      }
     }
     if (query && !r.symbol.includes(query)) return false;
     return true;
@@ -1830,16 +1726,21 @@ function copySymbols(){
 function buildChartSection(){
   return `<div>
     <div class="chart-wrap" id="chartWrap">
+      <div class="linked-chart-head"><div><span class="linked-chart-title" id="indexChartLabel">VN-Index</span><span class="linked-chart-sub" id="indexChartMeta"></span></div><span class="zweig-badge" id="zweigBadge">Zweig: chưa đủ dữ liệu</span></div>
+      <div class="zweig-detail" id="zweigDetail">Zweig dùng EMA10 của HOSE Advances/(Advances+Declines); cần tối thiểu 10 phiên A/D hợp lệ.</div>
+      <canvas id="indexChart"></canvas>
+      <div class="linked-chart-divider"></div>
+      <div class="linked-chart-head"><span class="linked-chart-title">Tỷ lệ mã trên MA</span><span class="linked-chart-sub">Nhóm đủ điều kiện thanh khoản</span></div>
       <canvas id="breadthChart"></canvas>
       <div class="chart-tooltip" id="chartTooltip"></div>
       <div class="chart-range-control">
-        <span class="chart-range-label" id="chartRangeLabel">Từ 04/2016 · đến 08/2026</span>
+        <span class="chart-range-label" id="chartRangeLabel">Đang tải khoảng dữ liệu...</span>
         <input type="range" id="chartRangeStart" min="0" max="1000" value="0" step="1">
         <input type="range" id="chartRangeEnd" min="0" max="1000" value="1000" step="1">
         <div class="chart-range-chips">
+          <button class="chart-range-chip" data-months="3">3 tháng</button>
+          <button class="chart-range-chip" data-months="6">6 tháng</button>
           <button class="chart-range-chip" data-months="12">1 năm</button>
-          <button class="chart-range-chip" data-months="36">3 năm</button>
-          <button class="chart-range-chip" data-months="60">5 năm</button>
           <button class="chart-range-chip active" data-months="0">Toàn bộ</button>
         </div>
       </div>
@@ -1873,11 +1774,48 @@ let chartRange = { s: 0, e: 1 };
 
 function renderBreadthChart(m){
   if (!m) return;
-  const cv = document.getElementById('breadthChart'), tt = document.getElementById('chartTooltip'), wr = document.getElementById('chartWrap');
-  if (!cv || !tt || !wr) return;
-  const allPts = ((HISTORY||[]).map(h => { const k = h.markets[activeMarket]; return k && k.pct_above_ma20 != null ? { date: h.date, v10: k.pct_above_ma10, v20: k.pct_above_ma20, v50: k.pct_above_ma50, v200: k.pct_above_ma200 } : null; }).filter(Boolean));
-  if (allPts.length < 2) { wr.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--faint);font-size:12px;">Chưa đủ dữ liệu lịch sử.</div>'; return; }
-  allPts.sort((a,b) => { const da = a.date.split('/'), db = b.date.split('/'); return da[2]-db[2] || da[1]-db[1] || da[0]-db[0]; });
+  const indexCv = document.getElementById('indexChart'), cv = document.getElementById('breadthChart');
+  const tt = document.getElementById('chartTooltip'), wr = document.getElementById('chartWrap');
+  if (!indexCv || !cv || !tt || !wr) return;
+  const indexKey = regimeIndexKey();
+  const allPts = (HISTORY || []).map(h => {
+    const k = h.markets?.[activeMarket];
+    if (!k || k.pct_above_ma20 == null || !parseViDate(h.date)) return null;
+    const eligible = k.ma_eligible_symbols || {};
+    return {
+      date:h.date, indexClose:h.index_closes?.[indexKey] ?? null,
+      v10:Number(k.pct_above_ma10), v20:Number(k.pct_above_ma20),
+      v50:Number(k.pct_above_ma50), v200:Number(k.pct_above_ma200),
+      c20:k.above_ma20_count, c50:k.above_ma50_count,
+      d20:eligible['20'] ?? k.ma_total_symbols, d50:eligible['50'] ?? k.ma_total_symbols,
+    };
+  }).filter(Boolean).sort((a,b) => parseViDate(a.date) - parseViDate(b.date));
+  const label = document.getElementById('indexChartLabel'), meta = document.getElementById('indexChartMeta');
+  if (label) label.textContent = indexKey === 'HNXINDEX' ? 'HNX-Index' : 'VN-Index';
+  if (meta) meta.textContent = activeMarket === 'ALL' ? '(benchmark đại diện cho ALL)' : '';
+  const z = zweigData(), zBadge = document.getElementById('zweigBadge'), zDetail = document.getElementById('zweigDetail');
+  if (zBadge) {
+    let text = 'Zweig EMA10: chưa đủ dữ liệu', state = 'unavailable';
+    if (activeMarket === 'HNX') text = 'Zweig EMA10: chỉ áp dụng HOSE';
+    else if (z?.available) {
+      state = z.state || 'inactive';
+      if (state === 'armed') text = `Zweig: đã kích hoạt · EMA10 ${fmt1((z.ema10||0)*100)}%`;
+      else if (state === 'forming') text = `Zweig: ${fmt1(z.progress_pct)}% · còn ${z.sessions_remaining} phiên`;
+      else if (state === 'confirmed') text = `Zweig xác nhận ${z.confirmed_date || ''}`;
+      else if (state === 'expired') text = 'Zweig: setup gần nhất đã hết hạn';
+      else text = `Zweig: bình thường · EMA10 ${fmt1((z.ema10||0)*100)}%`;
+    }
+    zBadge.className = `zweig-badge ${state}`;
+    zBadge.textContent = text;
+  }
+  if (zDetail) {
+    if (activeMarket === 'HNX') zDetail.textContent = 'Zweig Classic được tính riêng trên HOSE để đồng nhất với VN-Index.';
+    else if (!z?.available) zDetail.textContent = 'Chưa đủ tối thiểu 10 phiên A/D HOSE hợp lệ để khởi tạo EMA10.';
+    else if (z.state === 'armed' || z.state === 'forming') zDetail.textContent = `Setup bắt đầu ${z.armed_date} · ngày ${z.sessions_since_armed}/10 · EMA10 ${fmt1((z.ema10||0)*100)}% · mục tiêu >61,5%.`;
+    else if (z.state === 'confirmed') zDetail.textContent = `Zweig Breadth Thrust đã xác nhận ngày ${z.confirmed_date}, hoàn thành trong ${z.sessions_since_armed} phiên. Marker ZBT được đánh trên VN-Index.`;
+    else zDetail.textContent = `EMA10 hiện tại ${fmt1((z.ema10||0)*100)}% · chưa có setup đi từ dưới 40% lên trên 61,5% trong 10 phiên.`;
+  }
+  if (allPts.length < 2) return;
   let s0 = Math.max(0, Math.floor(chartRange.s * (allPts.length - 1)));
   let e0 = Math.min(allPts.length - 1, Math.ceil(chartRange.e * (allPts.length - 1)));
   if (e0 - s0 < 1) e0 = Math.min(allPts.length - 1, s0 + 1);
@@ -1885,43 +1823,80 @@ function renderBreadthChart(m){
   const rs = document.getElementById('chartRangeStart'), re = document.getElementById('chartRangeEnd');
   if (rs && re) { rs.value = Math.round(chartRange.s * 1000); re.value = Math.round(chartRange.e * 1000); }
   const rl = document.getElementById('chartRangeLabel');
-  if (rl) { const fd = pts[0].date.split('/'), ld = pts[pts.length - 1].date.split('/'); rl.textContent = 'Từ ' + fd[0] + '/' + fd[1] + ' · đến ' + ld[0] + '/' + ld[1]; }
-  const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, h = 260;
-  cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
-  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  const P = { t: 30, r: 14, b: 38, l: 44 }, cw = w - P.l - P.r, ch = h - P.t - P.b;
-  const xp = i => P.l + (i / (pts.length - 1)) * cw, yp = v => P.t + ch - (v / 100) * ch;
+  if (rl) rl.textContent = `Từ ${pts[0].date} · đến ${pts[pts.length - 1].date} · ${pts.length} phiên`;
+  const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, indexH = 185, h = 270;
+  [indexCv, cv].forEach((canvas, i) => {
+    const height = i === 0 ? indexH : h;
+    canvas.width = w * dpr; canvas.height = height * dpr;
+    canvas.style.width = w + 'px'; canvas.style.height = height + 'px';
+  });
+  const indexCtx = indexCv.getContext('2d'), ctx = cv.getContext('2d');
+  indexCtx.scale(dpr, dpr); ctx.scale(dpr, dpr);
+  const P = { t: 28, r: 55, b: 24, l: 48 }, cw = w - P.l - P.r;
+  const xp = i => P.l + (i / (pts.length - 1)) * cw;
   const lines = [{ k: 'v10', c: '#FF4D2E', l: 'MA10' }, { k: 'v20', c: '#22D3EE', l: 'MA20' }, { k: 'v50', c: '#FBBF24', l: 'MA50' }, { k: 'v200', c: '#A78BFA', l: 'MA200' }];
-  const maxTicks = Math.max(2, Math.floor(cw / 55));
-  const months = [];
-  let lastKey = null;
-  pts.forEach((p, i) => { const k = p.date.slice(3, 7) + '-' + p.date.slice(0, 2); if (k !== lastKey) { lastKey = k; months.push({ i: i, d: p.date }); } });
-  const mStep = Math.max(1, Math.ceil(months.length / maxTicks));
-  function drw(idx){
+  const zEvents = activeMarket === 'HNX' ? [] : (z?.events || []);
+  const eventsByDate = new Map();
+  zEvents.forEach(event => { if (event?.date) eventsByDate.set(event.date, event); });
+  function drawIndex(idx){
+    const ch = indexH - P.t - P.b;
+    const values = pts.filter(p => p.indexClose != null).map(p => Number(p.indexClose)).filter(Number.isFinite);
+    indexCtx.clearRect(0, 0, w, indexH);
+    if (!values.length) {
+      indexCtx.fillStyle='#9CA3AF'; indexCtx.font='11px Inter,sans-serif'; indexCtx.textAlign='center';
+      indexCtx.fillText('Lịch sử chỉ số sẽ hiển thị sau lần cập nhật pipeline tiếp theo.', w/2, indexH/2);
+      return;
+    }
+    let lo=Math.min(...values), hi=Math.max(...values), pad=Math.max((hi-lo)*.08, hi*.005);
+    lo-=pad; hi+=pad;
+    const yp = v => P.t + ch - ((v-lo)/(hi-lo||1))*ch;
+    for(let i=0;i<4;i++){
+      const value=lo+(hi-lo)*(i/3), y=yp(value);
+      indexCtx.save();indexCtx.strokeStyle='rgba(255,255,255,.06)';indexCtx.setLineDash([4,4]);indexCtx.beginPath();indexCtx.moveTo(P.l,y);indexCtx.lineTo(w-P.r,y);indexCtx.stroke();indexCtx.restore();
+      indexCtx.fillStyle='#9CA3AF';indexCtx.font='9.5px Inter,sans-serif';indexCtx.textAlign='left';indexCtx.textBaseline='middle';indexCtx.fillText(Math.round(value).toLocaleString('vi-VN'),w-P.r+6,y);
+    }
+    indexCtx.strokeStyle='#C084FC';indexCtx.lineWidth=2.4;indexCtx.lineJoin='round';indexCtx.beginPath();
+    let drawing=false;
+    pts.forEach((p,i)=>{if(p.indexClose==null||!Number.isFinite(Number(p.indexClose))){drawing=false;return;}const x=xp(i),y=yp(Number(p.indexClose));if(!drawing){indexCtx.moveTo(x,y);drawing=true;}else indexCtx.lineTo(x,y);});indexCtx.stroke();
+    pts.forEach((p,i)=>{
+      const event=eventsByDate.get(p.date); if(!event||p.indexClose==null||!Number.isFinite(Number(p.indexClose)))return;
+      const x=xp(i),y=yp(Number(p.indexClose));
+      if(event.kind==='confirmed'){
+        indexCtx.fillStyle='#10B981';indexCtx.beginPath();indexCtx.moveTo(x,y-12);indexCtx.lineTo(x-6,y-2);indexCtx.lineTo(x+6,y-2);indexCtx.closePath();indexCtx.fill();
+        indexCtx.font='9px Inter,sans-serif';indexCtx.textAlign='center';indexCtx.fillText('ZBT',x,y-16);
+      }else if(event.kind==='armed'){
+        indexCtx.fillStyle='#F59E0B';indexCtx.beginPath();indexCtx.arc(x,y,3.5,0,Math.PI*2);indexCtx.fill();
+      }
+    });
+    if(idx>=0&&idx<pts.length){const x=xp(idx);indexCtx.save();indexCtx.strokeStyle='rgba(255,255,255,.22)';indexCtx.setLineDash([3,4]);indexCtx.beginPath();indexCtx.moveTo(x,P.t);indexCtx.lineTo(x,P.t+ch);indexCtx.stroke();indexCtx.restore();}
+  }
+  function drawBreadth(idx){
+    const ch = h - P.t - P.b, yp = v => P.t + ch - (v / 100) * ch;
     ctx.clearRect(0, 0, w, h);
-    [0, 25, 50, 75, 100].forEach(pct => {
+    [0, 20, 50, 80, 100].forEach(pct => {
       const y = yp(pct);
-      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+      ctx.save(); ctx.strokeStyle = pct===50?'rgba(34,211,238,.2)':'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
       ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(w - P.r, y); ctx.stroke(); ctx.restore();
       ctx.fillStyle = '#9CA3AF'; ctx.font = '9.5px Inter,sans-serif';
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(pct + '%', P.l - 6, y);
     });
     lines.forEach(s => {
-      ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.save();ctx.strokeStyle = s.c; ctx.globalAlpha=(s.k==='v20'||s.k==='v50')?1:.62;ctx.lineWidth=(s.k==='v20'||s.k==='v50')?2.5:1.7;ctx.lineJoin='round';ctx.lineCap='round';
       ctx.beginPath(); pts.forEach((p, i) => { const x = xp(i), y = yp(p[s.k]); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
-      ctx.stroke();
+      ctx.stroke();ctx.restore();
       const lx = xp(pts.length - 1), ly = yp(pts[pts.length - 1][s.k]);
-      ctx.fillStyle = s.c; ctx.strokeStyle = s.c; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=s.c;ctx.font='bold 9px Inter,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fmt1(pts[pts.length-1][s.k])+'%',lx+6,ly);
     });
+    const maxTicks=Math.max(2,Math.floor(cw/65)), months=[];let lastKey=null;
+    pts.forEach((p,i)=>{const d=parseViDate(p.date),key=d?`${d.getFullYear()}-${d.getMonth()}`:'';if(key!==lastKey){lastKey=key;months.push({i,d:p.date});}});
+    const mStep=Math.max(1,Math.ceil(months.length/maxTicks));
     ctx.fillStyle = '#9CA3AF'; ctx.font = '9px Inter,sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h - P.b + 8); } });
-    const ld = pts[pts.length - 1].date.split('/'); ctx.fillText(ld[0] + '/' + ld[1], xp(pts.length - 1), h - P.b + 8);
     ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P.l, h - P.b); ctx.lineTo(w - P.r, h - P.b); ctx.stroke();
     lines.forEach((s, i) => {
-      const lx = P.l + i * 100, ly = 14;
+      const lx = P.l + i * (cw / 4), ly = 14;
       ctx.strokeStyle = s.c; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 18, ly); ctx.stroke();
       ctx.fillStyle = '#E5E7EB'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s.l, lx + 24, ly);
     });
@@ -1930,16 +1905,24 @@ function renderBreadthChart(m){
       ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
       ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ch); ctx.stroke(); ctx.restore();
       lines.forEach(s => { const dy = yp(p[s.k]); ctx.fillStyle = '#141920'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, dy, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
-      tt.style.display = 'block';
-      tt.innerHTML = `<div style="font-weight:600;margin-bottom:4px;font-size:11px;">${p.date}</div><div>MA10: <strong>${p.v10.toFixed(1)}%</strong> · MA20: <strong>${p.v20.toFixed(1)}%</strong> · MA50: <strong>${p.v50.toFixed(1)}%</strong> · MA200: <strong>${p.v200.toFixed(1)}%</strong></div>`;
-      const tw = tt.offsetWidth; let tx = Math.round(x - tw / 2);
-      if (tx < 4) tx = 4; if (tx + tw > w - 4) tx = w - tw - 4;
-      tt.style.left = tx + 'px'; tt.style.top = Math.max(4, P.t - 46) + 'px';
-    } else tt.style.display = 'none';
+    }
   }
-  let hi = -1; drw(-1);
-  cv.onmousemove = function(e) { const cr = cv.getBoundingClientRect(), mx = e.clientX - cr.left; let cl = 0, md = Infinity; pts.forEach((_, i) => { const d = Math.abs(xp(i) - mx); if (d < md) { md = d; cl = i; } }); if (cl !== hi) { hi = cl; drw(cl); } };
-  cv.onmouseleave = function() { if (hi !== -1) { hi = -1; drw(-1); } };
+  function draw(idx){
+    drawIndex(idx);drawBreadth(idx);
+    if(idx>=0&&idx<pts.length){
+      const p=pts[idx], event=eventsByDate.get(p.date), den20=p.d20?` (${p.c20??'—'}/${p.d20})`:'', den50=p.d50?` (${p.c50??'—'}/${p.d50})`:'';
+      tt.style.display='block';
+      tt.innerHTML=`<div style="font-weight:700;margin-bottom:3px;">${p.date} · ${indexKey==='HNXINDEX'?'HNX-Index':'VN-Index'} <strong>${p.indexClose!=null?Number(p.indexClose).toLocaleString('vi-VN'):'—'}</strong></div><div>MA10 <strong>${fmt1(p.v10)}%</strong> · MA20 <strong>${fmt1(p.v20)}%${den20}</strong><br>MA50 <strong>${fmt1(p.v50)}%${den50}</strong> · MA200 <strong>${fmt1(p.v200)}%</strong>${event?`<br><span style="color:${event.kind==='confirmed'?'#10B981':'#F59E0B'}">Zweig: ${event.kind}</span>`:''}</div>`;
+      const x=xp(idx),tw=tt.offsetWidth;let tx=Math.round(x-tw/2);tx=Math.max(4,Math.min(w-tw-4,tx));tt.style.left=tx+'px';tt.style.top='34px';
+    }else tt.style.display='none';
+  }
+  function pointerMove(e){
+    const cr=e.currentTarget.getBoundingClientRect(),mx=e.clientX-cr.left;
+    const idx=Math.max(0,Math.min(pts.length-1,Math.round(((mx-P.l)/cw)*(pts.length-1))));
+    draw(idx);
+  }
+  draw(-1);
+  [indexCv,cv].forEach(canvas=>{canvas.onpointermove=pointerMove;canvas.onpointerleave=()=>draw(-1);});
   if (rs && re) {
     rs.oninput = function() { chartRange.s = Math.min(parseInt(rs.value, 10) / 1000, parseInt(re.value, 10) / 1000 - 0.01); renderBreadthChart(m); renderRsiPulseChart(); };
     re.oninput = function() { chartRange.e = Math.max(parseInt(re.value, 10) / 1000, parseInt(rs.value, 10) / 1000 + 0.01); renderBreadthChart(m); renderRsiPulseChart(); };
@@ -1948,8 +1931,8 @@ function renderBreadthChart(m){
   chips.forEach(ch => {
     ch.onclick = function() {
       const monthsBack = parseInt(ch.dataset.months, 10) || 0;
-      const span = monthsBack > 0 ? monthsBack * 21 : allPts.length;
-      chartRange.s = Math.max(0, (allPts.length - span) / (allPts.length - 1));
+      if(monthsBack>0){const last=parseViDate(allPts[allPts.length-1].date),cutoff=new Date(last);cutoff.setMonth(cutoff.getMonth()-monthsBack);const first=allPts.findIndex(p=>parseViDate(p.date)>=cutoff);chartRange.s=Math.max(0,first/(allPts.length-1));}
+      else chartRange.s=0;
       chartRange.e = 1;
       chips.forEach(c => c.classList.toggle('active', c === ch));
       renderBreadthChart(m);
@@ -2005,8 +1988,8 @@ function renderRsiPulseChart(){
   chips.forEach(ch => {
     ch.onclick = function() {
       const monthsBack = parseInt(ch.dataset.months, 10) || 0;
-      const span = monthsBack > 0 ? monthsBack * 21 : allPts.length;
-      chartRange.s = Math.max(0, (allPts.length - span) / (allPts.length - 1));
+      if(monthsBack>0){const last=parseViDate(allPts[allPts.length-1].date),cutoff=new Date(last);cutoff.setMonth(cutoff.getMonth()-monthsBack);const first=allPts.findIndex(p=>parseViDate(p.date)>=cutoff);chartRange.s=Math.max(0,first/(allPts.length-1));}
+      else chartRange.s=0;
       chartRange.e = 1;
       chips.forEach(c => c.classList.toggle('active', c === ch));
       renderBreadthChart(LATEST?.markets?.[activeMarket]);
@@ -2099,7 +2082,7 @@ function buildAppendixSection(m){
     return list.map(s => {
       const isDual = dualSet && dualSet.has(s);
       const cls = isDual ? 'chip dual' : (kind === 'up' ? 'chip up' : kind === 'down' ? 'chip down' : 'chip');
-      return `<span class="${cls}" data-sym="${s}" title="Xem thẻ sức khỏe">${s}</span>`;
+      return `<span class="${cls}">${s}</span>`;
     }).join('');
   };
   const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
@@ -2258,7 +2241,7 @@ function shQuickTake(h, ma, o, w){
     else if (w.pos <= 15) bits.push('Gần đáy 52 tuần — rủi ro cao, cần xác nhận đảo chiều trước khi bắt đáy.');
   }
   if (h.w52 && h.w52.new_high) bits.unshift('Vừa lập đỉnh 52 tuần mới — tín hiệu strength rất tích cực.');
-  return bits.map(b => `• ${b}`).join('<br>');
+  return bits.join(' ');
 }
 function buildStockCardHTML(sym){
   const h = STOCK_HEALTH && STOCK_HEALTH.symbols && STOCK_HEALTH.symbols[sym];
@@ -2320,12 +2303,8 @@ function buildStockCardHTML(sym){
       ${(conv => conv ? `<span class="tag" style="background:${conv.tier==='A'?'rgba(34,197,94,0.14)':conv.tier==='B'?'rgba(245,165,36,0.12)':'rgba(128,128,128,0.12)'};color:${conv.tier==='A'?'#22C55E':conv.tier==='B'?'#E8A33D':'#9CA3AF'};padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">${conv.tier==='A'?'★ ':''}Hạng ${conv.tier} · ${conv.conviction}đ</span>` : '')(getConviction(sym))}
       <span class="sh-score-lab">Tổng hợp ${(h.overall * 100).toFixed(0)} · MA ${(h.ma_score * 100).toFixed(0)} · Dao động ${(h.osc_score * 100).toFixed(0)} (thang -100…+100)</span>
     </div>
-    <div class="sh-hero-grid">
-      <div class="sh-sec hero hero-full"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;">${shQuickTake(h, ma, o, w)}</div></div>
-      <div class="sh-sec hero"><h4>Xu hướng — MA stack</h4><div class="sh-chips">${maChips}</div></div>
-      ${((tp)=>{ const ctp = tp || computeModalTradePlan(sym); return ctp ? `<div class="sh-sec hero"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(ctp)}</div>` : '<div class="sh-sec hero"><h4>Kế hoạch lệnh</h4><span style="color:var(--muted);font-size:11px;">Không đủ dữ liệu</span></div>';})((getConviction(sym)||{}).trade_plan)}
-    </div>
-    <details open style="margin-top:20px;"><summary style="font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;list-style:none;">▾ Chi tiết kỹ thuật</summary>
+    <div class="sh-sec"><h4>Nhận xét nhanh</h4><div class="sig-why" style="max-width:none;font-size:11px;line-height:1.6;">${shQuickTake(h, ma, o, w)}</div></div>
+    <div class="sh-sec"><h4>Xu hướng — MA stack</h4><div class="sh-chips">${maChips}</div></div>
     <div class="sh-sec"><h4>Dao động</h4>${oscRows}</div>
     <div class="sh-sec"><h4>Vị trí 52 tuần ${w.pct_from_high != null ? '· cách đỉnh ' + w.pct_from_high + '%' : ''}</h4>
       <div class="sh-52w"><span class="lo">${w.low != null ? w.low : '—'}</span>${shGaugeBar(w.pos != null ? w.pos : 50, 0, 100)}<span class="hi">${w.high != null ? w.high : '—'}</span></div>
@@ -2333,9 +2312,9 @@ function buildStockCardHTML(sym){
     <div class="sh-sec"><h4>Hiệu suất</h4><div class="sh-grid">${perfCells}</div></div>
     <div class="sh-sec"><h4>Rủi ro & thanh khoản</h4><div class="sh-grid">${riskCells}</div></div>
     ${pivCells ? `<div class="sh-sec"><h4>Pivot phiên trước</h4><div class="sh-grid">${pivCells}</div></div>` : ''}
+    ${((tp)=> tp ? `<div class="sh-sec"><h4>Kế hoạch lệnh</h4>${tradePlanDetailHTML(tp)}</div>` : '')((getConviction(sym)||{}).trade_plan)}
     <div class="sh-sec"><h4>Giá 90 phiên</h4><canvas class="sh-spark" id="shSpark"></canvas></div>
     <div class="sh-sec"><h4>Tín hiệu hệ thống đang bắt mã này</h4>${sigHTML}${radarTag}</div>
-    </details>
   `;
 }
 function openStockModal(sym){
@@ -2393,7 +2372,7 @@ const RADAR_REASONS = {
   'RS20 vuot benchmark':'RS20 vượt benchmark','RS20 dang cai thien':'RS20 đang cải thiện',
   'giu tren MA50':'Giữ trên MA50','giu tren MA20':'Giữ trên MA20',
   'volume phien tang tot':'Volume phiên tăng tốt','nen gia co hep':'Nền giá co hẹp',
-  'gan dinh nen 20 phien':'Gần đỉnh nền 20 phiên','volume can o gan dinh':'Volume cạn ở gần đỉnh','Volume spike khi nen gia (gom hang)':'⚡ Volume spike khi giá nén — gom hàng kiểu Wyckoff'
+  'gan dinh nen 20 phien':'Gần đỉnh nền 20 phiên','volume can o gan dinh':'Volume cạn ở gần đỉnh'
 };
 
 function radarLabelReason(x){ return RADAR_REASONS[x] || x; }
@@ -2446,7 +2425,6 @@ function renderRadarContent(){
       <button type="button" data-filter="rsStrong">RS > 80</button>
       <button type="button" data-filter="volumeStrong">Volume > 70</button>
       <button type="button" data-filter="baseTight">Nền giá > 70</button>
-      <button type="button" data-filter="volSpike">⚡ Vol Spike</button>
       <button type="button" data-filter="nearBreakout">Gần breakout</button>
       <button type="button" data-filter="clear">Xóa lọc</button>
     </div>
@@ -2490,7 +2468,6 @@ function filteredRadarRows(){
     if (activeRadarFilters.has('volumeStrong')&&Number(sc.volume||0)<70) return false;
     if (activeRadarFilters.has('baseTight')&&Number(sc.contraction||0)<70) return false;
     if (activeRadarFilters.has('nearBreakout')&&Number(r.position20||0)<80) return false;
-    if (activeRadarFilters.has('volSpike')&&Number(r.vol_spike_ratio||0)<1.5) return false;
     return true;
   }).sort((a,b)=>(Number(b[radarSortKey])||0)-(Number(a[radarSortKey])||0));
 }
@@ -2509,7 +2486,7 @@ function renderRadarTable(){
       <td><div class="score">${RADAR_FMT(r.score)}</div>${radarScoreBar(r.score)}</td>
       <td><b style="color:${r.rs20>=0?'var(--green)':'var(--red)'}">RS20 ${RADAR_SIGNED(r.rs20)}</b><div class="sub">RS60 ${RADAR_SIGNED(r.rs60)} | Trend ${RADAR_SIGNED(r.rs_trend)}</div></td>
       <td><div>DD60 ${RADAR_SIGNED(r.drawdown60)}%</div><div class="sub">Return20 ${RADAR_SIGNED(r.return20)}%</div></td>
-      <td><div>U/D ${RADAR_FMT(r.up_down_volume_ratio,2)}${r.vol_spike_ratio!=null?` · <span style="color:${r.vol_spike_ratio>=1.5?'var(--green)':'var(--muted)'}">Spike ${RADAR_FMT(r.vol_spike_ratio,1)}x</span>`:''}</div><div class="sub">Dry-up ${RADAR_FMT(r.vol_dry_ratio,2)} | A ${RADAR_FMT(r.accumulation_days,0)} / D ${RADAR_FMT(r.distribution_days,0)}</div></td>
+      <td><div>U/D ${RADAR_FMT(r.up_down_volume_ratio,2)}</div><div class="sub">Dry-up ${RADAR_FMT(r.vol_dry_ratio,2)} | A ${RADAR_FMT(r.accumulation_days,0)} / D ${RADAR_FMT(r.distribution_days,0)}</div></td>
       <td><div>R20 ${RADAR_FMT(r.range20)}%</div><div class="sub">R60 ${RADAR_FMT(r.range60)}%</div></td>
       <td><div>Pos20 ${RADAR_FMT(r.position20)}%</div>${radarScoreBar(r.position20)}</td>
       <td><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:240px;">${(r.reasons||[]).map(x => `<span class="reason">${escapeHtml(radarLabelReason(x))}</span>`).join('')}</div></td>
@@ -2519,7 +2496,7 @@ function renderRadarTable(){
 
 function buildRegimePanel(){
   if (!REGIME) return '';
-  const r = REGIME;
+  const r = regimeCore();
   const tone = (r.tone||'').toLowerCase();
   const toneLabel = {risk_off:'RISK-OFF',neutral:'TRUNG LẬP',risk_on:'RISK-ON',overheated:'QUÁ NÓNG'}[tone] || tone;
   const comps = r.components||{};
@@ -2527,13 +2504,15 @@ function buildRegimePanel(){
     const labels = {ad_ratio:'A/D',pct_above_ma20:'%MA20',pct_above_ma50:'%MA50',index_position:'Chỉ số',rsi_pulse:'RSI',volume_ud:'KL T/G'};
     return `<div class="ri"><div class="ri-l">${labels[k]||k}</div><div class="ri-v" style="color:${v.points>=70?'var(--up)':v.points>=40?'#b45309':'var(--down)'}">${v.points.toFixed(0)}/100</div></div>`;
   }).join('');
-  const idx = r.index||{};
+  const idx = REGIME?.index?.VNI || {};
   let alertHtml = '';
-  if (r.divergence && r.divergence.state !== 'none'){
-    const cls = r.divergence.state==='bearish'?'color:#991b1b':'color:#065f46';
-    const ico = r.divergence.state==='bearish'?'⚠️':'💡';
-    alertHtml = `<div class="regime-alert" style="${cls}">${ico} ${escapeHtml(r.divergence.state==='bearish'?'Phân kỳ giảm: giá gần đỉnh nhưng breadth yếu — cảnh báo đảo chiều':'Phân kỳ tăng: giá gần đáy nhưng breadth cải thiện — cơ hội')}</div>`;
+  const divergence = REGIME?.divergence;
+  if (divergence && divergence.state !== 'none'){
+    const cls = divergence.state==='bearish'?'color:#991b1b':'color:#065f46';
+    const ico = divergence.state==='bearish'?'⚠️':'💡';
+    alertHtml = `<div class="regime-alert" style="${cls}">${ico} ${escapeHtml(divergence.state==='bearish'?'Phân kỳ giảm: giá gần đỉnh nhưng breadth yếu — cảnh báo đảo chiều':'Phân kỳ tăng: giá gần đáy nhưng breadth cải thiện — cơ hội')}</div>`;
   }
+  const momentum = REGIME?.breadth_momentum;
   return `<div class="regime-panel">
     <div class="regime-grid">
       <div class="regime-gauge">
@@ -2549,15 +2528,14 @@ function buildRegimePanel(){
       </div>
     </div>
     ${alertHtml}
-    ${((z)=> z ? (z.active ? `<div class="regime-alert" style="color:#065f46;background:rgba(16,185,129,0.10);border-color:rgba(16,185,129,0.30);">🚀 ZWEIG THRUST HOSE ${z.prior_low!=null?z.prior_low.toFixed(3):''} → ${z.score!=null?z.score.toFixed(3):''} ngày ${z.date||''} — xác nhận đảo chiều breadth, thường +6-12 tháng tích cực</div>` : `<div style="font-size:11px;color:var(--muted);margin-top:6px;">Zweig EMA10 HOSE: ${z.score!=null?z.score.toFixed(3):'—'}${z.active?' 🚀 Thrust':''}</div>`) : '')(r.zweig||REGIME?.zweig)}
-    ${r.momentum?`<div class="regime-momentum">Breadth momentum (osc): <b style="color:var(--text)">${Number(r.momentum.osc).toFixed(2)}</b> · ${r.momentum.trend||'—'}</div>`:''}
+    ${momentum?.available?`<div class="regime-momentum">Breadth momentum (osc): <b style="color:var(--text)">${Number(momentum.oscillator).toFixed(2)}</b> · signal ${Number(momentum.signal).toFixed(2)}</div>`:''}
   </div>`;
 }
 function drawRegimeGauge(){
   const c=document.getElementById('regimeCanvas');
   if(!c||!REGIME) return;
   const ctx=c.getContext('2d');
-  const score=REGIME.score||0;
+  const score=regimeCore().score||0;
   const cx=90,cy=100,radius=70;
   ctx.lineWidth=14;ctx.lineCap='round';
   ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI,0);ctx.strokeStyle='#e5e7eb';ctx.stroke();

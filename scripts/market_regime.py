@@ -8,6 +8,7 @@ Cac thanh phan:
                             RSI pulse, ty le KL tang/giam.
   B. Phan ky Gia vs Breadth: so dinh/day VNI voi %MA20 -> canh bao dao chieu.
   C. Breadth Momentum      : McClellan-style tu (%MA20 - 50).
+  D. Zweig Breadth Thrust  : EMA10 cua HOSE Adv/(Adv+Dec), 0.40 -> 0.615.
 
 Cach chay:
   python scripts/market_regime.py
@@ -30,6 +31,11 @@ OUTPUT_JSON = DATA_DIR / "market_regime.json"
 
 INDEX_CACHE = {"VNI": "VNI.csv", "HNXINDEX": "HNXINDEX.csv"}
 MARKET = "ALL"
+ZWEIG_MARKET = "HOSE"
+ZWEIG_EMA_SPAN = 10
+ZWEIG_LOWER_THRESHOLD = 0.40
+ZWEIG_UPPER_THRESHOLD = 0.615
+ZWEIG_WINDOW_SESSIONS = 10
 
 # Trong so cac thanh phan regime (tong = 1.0)
 WEIGHTS = {
@@ -347,61 +353,149 @@ def breadth_momentum(history: list, lookback: int = 500) -> dict:
     }
 
 
-def compute_zweig(history: list, market: str = "HOSE", window: int = 10) -> dict:
-    """Zweig Breadth Thrust EMA10 HOSE-only. lower 0.40 -> upper 0.615 trong 10 ngay."""
-    ratios: list[float | None] = []
-    dates: list[str | None] = []
+# --- Zweig Breadth Thrust ----------------------------------------------------
+
+def zweig_ema10_series(history: list, market: str = ZWEIG_MARKET,
+                       span: int = ZWEIG_EMA_SPAN) -> list[dict]:
+    """Tinh EMA adjust=False tu HOSE Adv/(Adv+Dec), bo unchanged."""
+    by_date: dict[datetime, dict] = {}
     for entry in history:
-        m = (entry.get("markets") or {}).get(market) or {}
-        a, d = m.get("advances"), m.get("declines")
-        if a is not None and d is not None and (a + d) > 0:
-            ratios.append(float(a) / float(a + d))
-        else:
-            ratios.append(None)
-        dates.append(entry.get("date"))
-    # EMA10
-    s = pd.Series(ratios)
-    ema = s.ewm(span=window, adjust=False, min_periods=window).mean()
-    # Tim thrust gan nhat
-    active = False
-    thrust_date = None
-    score = float(ema.iloc[-1]) if len(ema) and pd.notna(ema.iloc[-1]) else None
-    prior_low = None
-    thrust_size = None
-    if len(ema) >= window + 10:
-        # Duyet tu cuoi ve truoc tim lan thrust gan nhat trong 30 ngay
-        for i in range(len(ema) - 1, max(-1, len(ema) - 30), -1):
-            if pd.isna(ema.iloc[i]) or pd.isna(ema.iloc[max(0, i - 10)]):
-                continue
-            window_ema = ema.iloc[max(0, i - 10):i]
-            if len(window_ema) < 10 or window_ema.isna().any():
-                continue
-            low = float(window_ema.min())
-            cur = float(ema.iloc[i])
-            if low < 0.40 and cur > 0.615:
-                active = (i == len(ema) - 1) or (len(ema) - 1 - i) <= 10  # kich hoat trong 10 phien gan nhat
-                # Chi lay thrust gan nhat
-                if i == len(ema) - 1 or active:
-                    thrust_date = dates[i]
-                    prior_low = round(low, 3)
-                    thrust_size = round(cur - low, 3)
-                    score = round(cur, 3)
-                    break
-        # Neu khong co thrust gan nhat, lay score hien tai
-        if score is not None:
-            score = round(score, 3)
-    return {
-        "available": len([r for r in ratios if r is not None]) >= window,
-        "active": active,
-        "score": score,
-        "date": thrust_date,
-        "prior_low": prior_low,
-        "thrust_size": thrust_size,
-        "market": market,
-        "window": window,
-        "lower": 0.40,
-        "upper": 0.615,
+        date = parse_market_date(entry.get("date"))
+        if date is not None:
+            by_date[date] = entry
+
+    alpha = 2.0 / (span + 1.0)
+    ema = None
+    valid_count = 0
+    series = []
+    for date in sorted(by_date):
+        market_data = ((by_date[date].get("markets") or {}).get(market) or {})
+        ratio = None
+        try:
+            advances = float(market_data.get("advances"))
+            declines = float(market_data.get("declines"))
+            if advances >= 0 and declines >= 0 and advances + declines > 0:
+                ratio = advances / (advances + declines)
+        except (TypeError, ValueError):
+            ratio = None
+
+        valid = ratio is not None
+        if valid:
+            ema = ratio if ema is None else alpha * ratio + (1.0 - alpha) * ema
+            valid_count += 1
+        visible_ema = ema if valid_count >= span else None
+        series.append({
+            "date": date.strftime(DATE_FMT),
+            "ratio": round(ratio, 6) if ratio is not None else None,
+            "ema10": round(visible_ema, 6) if visible_ema is not None else None,
+            "valid": valid,
+        })
+    return series
+
+
+def _zweig_state_machine(
+    series: list[dict],
+    lower_threshold: float = ZWEIG_LOWER_THRESHOLD,
+    upper_threshold: float = ZWEIG_UPPER_THRESHOLD,
+    window_sessions: int = ZWEIG_WINDOW_SESSIONS,
+) -> dict:
+    """Theo doi setup; ngay arm la 0, xac nhan o ngay thu 10 van hop le."""
+    setup = None
+    terminal = None
+    events = []
+    last_row = None
+
+    for pos, row in enumerate(series):
+        last_row = row
+        ema = row.get("ema10")
+        valid_ema = bool(row.get("valid")) and ema is not None
+
+        if setup is not None and pos - setup["position"] > window_sessions:
+            terminal = {
+                "state": "expired",
+                "date": row.get("date"),
+                "armed_date": setup["date"],
+                "position": pos,
+            }
+            events.append({"date": row.get("date"), "kind": "expired", "ema10": ema})
+            setup = None
+
+        if valid_ema and ema < lower_threshold:
+            if setup is None:
+                events.append({"date": row.get("date"), "kind": "armed", "ema10": ema})
+            setup = {"date": row.get("date"), "position": pos}
+            terminal = None
+            continue
+
+        if setup is not None and valid_ema and ema > upper_threshold:
+            age = pos - setup["position"]
+            if age <= window_sessions:
+                terminal = {
+                    "state": "confirmed",
+                    "date": row.get("date"),
+                    "armed_date": setup["date"],
+                    "position": pos,
+                    "sessions_since_armed": age,
+                }
+                events.append({"date": row.get("date"), "kind": "confirmed", "ema10": ema})
+                setup = None
+
+    if not series or not any(row.get("ema10") is not None for row in series):
+        return {
+            "available": False,
+            "state": "unavailable",
+            "events": events,
+        }
+
+    current_ema = last_row.get("ema10") if last_row else None
+    result = {
+        "available": True,
+        "current_observation_available": bool(last_row and last_row.get("valid")),
+        "state": "inactive",
+        "date": last_row.get("date") if last_row else None,
+        "ratio": last_row.get("ratio") if last_row else None,
+        "ema10": current_ema,
+        "armed_date": None,
+        "confirmed_date": None,
+        "sessions_since_armed": None,
+        "sessions_remaining": None,
+        "progress_pct": None,
+        "window_sessions": window_sessions,
+        "thresholds": {"lower": lower_threshold, "upper": upper_threshold},
+        "events": events,
     }
+    if setup is not None:
+        age = len(series) - 1 - setup["position"]
+        result.update({
+            "state": "armed" if current_ema is not None and current_ema < lower_threshold else "forming",
+            "armed_date": setup["date"],
+            "sessions_since_armed": age,
+            "sessions_remaining": max(0, window_sessions - age),
+            "progress_pct": round(_clamp(
+                ((current_ema - lower_threshold) / (upper_threshold - lower_threshold)) * 100.0
+            ), 1) if current_ema is not None else None,
+        })
+    elif terminal is not None:
+        result["state"] = terminal["state"]
+        result["armed_date"] = terminal.get("armed_date")
+        if terminal["state"] == "confirmed":
+            result["confirmed_date"] = terminal["date"]
+            result["sessions_since_armed"] = terminal.get("sessions_since_armed")
+            result["signal_age_sessions"] = len(series) - 1 - terminal["position"]
+            result["progress_pct"] = 100.0
+    return result
+
+
+def zweig_breadth_thrust(history: list, market: str = ZWEIG_MARKET) -> dict:
+    series = zweig_ema10_series(history, market=market)
+    result = _zweig_state_machine(series)
+    result.update({
+        "market": market,
+        "ema_period": ZWEIG_EMA_SPAN,
+        "formula": "EMA10[Advances/(Advances+Declines)]",
+        "valid_sessions": sum(row.get("valid", False) for row in series),
+    })
+    return result
 
 
 # --- Build output ------------------------------------------------------------
@@ -438,7 +532,7 @@ def main() -> int:
     regime = build_regime(latest, history)
     divergence = detect_divergence(history, load_index_frame("VNI"))
     momentum = breadth_momentum(history)
-    zweig = compute_zweig(history)
+    zweig = zweig_breadth_thrust(history)
 
     indexes = {}
     for name in INDEX_CACHE:
@@ -452,7 +546,7 @@ def main() -> int:
         "regime": regime,
         "divergence": divergence,
         "breadth_momentum": momentum,
-        "zweig": zweig,
+        "zweig_breadth_thrust": zweig,
         "index": indexes,
     }
     OUTPUT_JSON.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -462,7 +556,7 @@ def main() -> int:
     print(f"Regime: {regime['score']} - {regime['label']} ({regime['tone']}) | {date}")
     print(f"Divergence: {divergence['state']}")
     print(f"Momentum: osc={momentum.get('oscillator')} ({momentum.get('extreme')})")
-    print(f"Zweig: {'KICH HOAT ' + str(zweig.get('date')) if zweig.get('active') else 'khong kich hoat'} (score={zweig.get('score')})")
+    print(f"Zweig EMA10: {zweig.get('state')} ({zweig.get('ema10')})")
     print(f"Da ghi: {OUTPUT_JSON}")
     return 0
 

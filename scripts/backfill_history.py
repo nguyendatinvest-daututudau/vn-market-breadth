@@ -16,6 +16,7 @@ Quy trinh:
 """
 from __future__ import annotations
 
+import json
 import os
 import time
 from datetime import datetime
@@ -34,6 +35,7 @@ from fetch_and_compute import (
     _load_exchange_universe,
     _save_exchange_universe,
     _write_json,
+    load_index_closes_by_date,
     update_ohlc,
 )
 from ssi_client import SSIClient
@@ -116,14 +118,20 @@ def _market_summary(total_frame: pd.DataFrame) -> tuple[dict, dict]:
             f"pct_above_ma{w}": round(c[w][0] / c[w][1] * 100, 1) if c[w][1] else 0.0
             for w in MA_WINDOWS
         }
+        pcts[dstr].update({f"above_ma{w}_count": c[w][0] for w in MA_WINDOWS})
+        pcts[dstr]["ma_eligible_symbols"] = {str(w): c[w][1] for w in MA_WINDOWS}
         pcts[dstr]["rsi_pulse"] = rsi
     return counts, pcts
 
 
 def _empty_pct() -> dict:
-    return {
+    entry = {
         f"pct_above_ma{w}": 0.0 for w in MA_WINDOWS
-    } | {"rsi_pulse": {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": RSI_PERIOD}}
+    }
+    entry.update({f"above_ma{w}_count": 0 for w in MA_WINDOWS})
+    entry["ma_eligible_symbols"] = {str(w): 0 for w in MA_WINDOWS}
+    entry["rsi_pulse"] = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": RSI_PERIOD}
+    return entry
 
 
 def _combine_counts(c1: dict, c2: dict | None) -> dict:
@@ -144,6 +152,8 @@ def _counts_to_pct(counts: dict, rsi: dict | None) -> dict:
         f"pct_above_ma{w}": round(counts[w][0] / counts[w][1] * 100, 1) if counts[w][1] else 0.0
         for w in MA_WINDOWS
     }
+    entry.update({f"above_ma{w}_count": counts[w][0] for w in MA_WINDOWS})
+    entry["ma_eligible_symbols"] = {str(w): counts[w][1] for w in MA_WINDOWS}
     entry["rsi_pulse"] = rsi or {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": RSI_PERIOD}
     return entry
 
@@ -205,6 +215,14 @@ def main() -> None:
     all_dates = [d for d in all_dates if parse_market_date(d) is not None and parse_market_date(d) >= DISPLAY_START]
     all_dates.sort(key=lambda d: parse_market_date(d) or datetime.min)
 
+    try:
+        old_history = json.loads(HISTORY_JSON.read_text(encoding="utf-8")) if HISTORY_JSON.exists() else []
+    except (OSError, ValueError, TypeError):
+        old_history = []
+    old_by_date = {entry.get("date"): entry for entry in old_history if entry.get("date")}
+    index_closes = load_index_closes_by_date()
+    ad_keys = ("advances", "declines", "unchanged", "ad_ratio", "total_symbols")
+
     history = []
     for dstr in all_dates:
         markets: dict = {}
@@ -226,7 +244,18 @@ def main() -> None:
                     "period": RSI_PERIOD,
                 }
         markets["ALL"] = _counts_to_pct(all_counts, rsi_sum) if all_counts is not None else _empty_pct()
-        history.append({"date": dstr, "markets": markets})
+        old_markets = (old_by_date.get(dstr) or {}).get("markets") or {}
+        for market, values in markets.items():
+            old_values = old_markets.get(market) or {}
+            for key in ad_keys:
+                if old_values.get(key) is not None:
+                    values[key] = old_values[key]
+        old_indexes = (old_by_date.get(dstr) or {}).get("index_closes") or {}
+        history.append({
+            "date": dstr,
+            "markets": markets,
+            "index_closes": index_closes.get(dstr, old_indexes),
+        })
 
     if not history:
         print("Khong co ngay nao du lieu, thoat.")
