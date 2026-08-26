@@ -703,6 +703,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
     </div>
 
     ${REGIME && REGIME.tone === 'risk_off' ? `<div style="border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#FF8A8A;"><b>⚠️ RISK-OFF:</b> theo kiểm chứng 10 năm, các tín hiệu mua trong giai đoạn risk-off có tỉ lệ thắng <b>âm -7 đến -11pp</b> so với baseline. Hạn chế mua mới, ưu tiên bảo toàn vốn.</div>` : ''}
+    ${REGIME?.zweig?.active ? `<div style="border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.08);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#6EE7B7;"><b>🚀 ZWEIG THRUST:</b> Breadth thrust HOSE ${REGIME.zweig.prior_low!=null?REGIME.zweig.prior_low.toFixed(3):''} → ${REGIME.zweig.score!=null?REGIME.zweig.score.toFixed(3):''} ngày ${REGIME.zweig.date||''} — xác nhận đảo chiều breadth, thường +6-12 tháng tích cực <a href="#market" onclick="switchView('market')" style="color:#6EE7B7;text-decoration:underline;">→ Độ rộng thị trường</a></div>` : ''}
 
     <div class="home-grid">
       <div class="home-col">
@@ -2548,6 +2549,7 @@ function buildRegimePanel(){
       </div>
     </div>
     ${alertHtml}
+    ${((z)=> z ? (z.active ? `<div class="regime-alert" style="color:#065f46;background:rgba(16,185,129,0.10);border-color:rgba(16,185,129,0.30);">🚀 ZWEIG THRUST HOSE ${z.prior_low!=null?z.prior_low.toFixed(3):''} → ${z.score!=null?z.score.toFixed(3):''} ngày ${z.date||''} — xác nhận đảo chiều breadth, thường +6-12 tháng tích cực</div>` : `<div style="font-size:11px;color:var(--muted);margin-top:6px;">Zweig EMA10 HOSE: ${z.score!=null?z.score.toFixed(3):'—'}${z.active?' 🚀 Thrust':''}</div>`) : '')(r.zweig||REGIME?.zweig)}
     ${r.momentum?`<div class="regime-momentum">Breadth momentum (osc): <b style="color:var(--text)">${Number(r.momentum.osc).toFixed(2)}</b> · ${r.momentum.trend||'—'}</div>`:''}
   </div>`;
 }

@@ -347,6 +347,63 @@ def breadth_momentum(history: list, lookback: int = 500) -> dict:
     }
 
 
+def compute_zweig(history: list, market: str = "HOSE", window: int = 10) -> dict:
+    """Zweig Breadth Thrust EMA10 HOSE-only. lower 0.40 -> upper 0.615 trong 10 ngay."""
+    ratios: list[float | None] = []
+    dates: list[str | None] = []
+    for entry in history:
+        m = (entry.get("markets") or {}).get(market) or {}
+        a, d = m.get("advances"), m.get("declines")
+        if a is not None and d is not None and (a + d) > 0:
+            ratios.append(float(a) / float(a + d))
+        else:
+            ratios.append(None)
+        dates.append(entry.get("date"))
+    # EMA10
+    s = pd.Series(ratios)
+    ema = s.ewm(span=window, adjust=False, min_periods=window).mean()
+    # Tim thrust gan nhat
+    active = False
+    thrust_date = None
+    score = float(ema.iloc[-1]) if len(ema) and pd.notna(ema.iloc[-1]) else None
+    prior_low = None
+    thrust_size = None
+    if len(ema) >= window + 10:
+        # Duyet tu cuoi ve truoc tim lan thrust gan nhat trong 30 ngay
+        for i in range(len(ema) - 1, max(-1, len(ema) - 30), -1):
+            if pd.isna(ema.iloc[i]) or pd.isna(ema.iloc[max(0, i - 10)]):
+                continue
+            window_ema = ema.iloc[max(0, i - 10):i]
+            if len(window_ema) < 10 or window_ema.isna().any():
+                continue
+            low = float(window_ema.min())
+            cur = float(ema.iloc[i])
+            if low < 0.40 and cur > 0.615:
+                active = (i == len(ema) - 1) or (len(ema) - 1 - i) <= 10  # kich hoat trong 10 phien gan nhat
+                # Chi lay thrust gan nhat
+                if i == len(ema) - 1 or active:
+                    thrust_date = dates[i]
+                    prior_low = round(low, 3)
+                    thrust_size = round(cur - low, 3)
+                    score = round(cur, 3)
+                    break
+        # Neu khong co thrust gan nhat, lay score hien tai
+        if score is not None:
+            score = round(score, 3)
+    return {
+        "available": len([r for r in ratios if r is not None]) >= window,
+        "active": active,
+        "score": score,
+        "date": thrust_date,
+        "prior_low": prior_low,
+        "thrust_size": thrust_size,
+        "market": market,
+        "window": window,
+        "lower": 0.40,
+        "upper": 0.615,
+    }
+
+
 # --- Build output ------------------------------------------------------------
 
 def build_regime(latest: dict, history: list) -> dict:
@@ -381,6 +438,7 @@ def main() -> int:
     regime = build_regime(latest, history)
     divergence = detect_divergence(history, load_index_frame("VNI"))
     momentum = breadth_momentum(history)
+    zweig = compute_zweig(history)
 
     indexes = {}
     for name in INDEX_CACHE:
@@ -394,6 +452,7 @@ def main() -> int:
         "regime": regime,
         "divergence": divergence,
         "breadth_momentum": momentum,
+        "zweig": zweig,
         "index": indexes,
     }
     OUTPUT_JSON.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -403,6 +462,7 @@ def main() -> int:
     print(f"Regime: {regime['score']} - {regime['label']} ({regime['tone']}) | {date}")
     print(f"Divergence: {divergence['state']}")
     print(f"Momentum: osc={momentum.get('oscillator')} ({momentum.get('extreme')})")
+    print(f"Zweig: {'KICH HOAT ' + str(zweig.get('date')) if zweig.get('active') else 'khong kich hoat'} (score={zweig.get('score')})")
     print(f"Da ghi: {OUTPUT_JSON}")
     return 0
 
