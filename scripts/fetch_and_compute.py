@@ -305,6 +305,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     ohlc_advances = 0
     ohlc_declines = 0
     ohlc_unchanged = 0
+    up_volume = 0.0
+    down_volume = 0.0
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
     trend_distribution = _empty_trend_distribution()
     total_valid = 0
@@ -357,10 +359,13 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
             pct = round(float((last_close / close[-2] - 1) * 100), 6)
             ad_distribution[_ad_bucket_index(pct)]["count"] += 1
             total_distribution += 1
+            vol_today = float(volume_today) if volume_today is not None and not pd.isna(volume_today) else 0.0
             if pct > 0:
                 ohlc_advances += 1
+                up_volume += vol_today
             elif pct < 0:
                 ohlc_declines += 1
+                down_volume += vol_today
             else:
                 ohlc_unchanged += 1
         if len(close) >= 15:
@@ -447,6 +452,9 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         "ohlc_declines": ohlc_declines,
         "ohlc_unchanged": ohlc_unchanged,
         "ohlc_ad_total": ohlc_advances + ohlc_declines + ohlc_unchanged,
+        "up_volume": round(up_volume),
+        "down_volume": round(down_volume),
+        "up_down_volume_ratio": round(up_volume / down_volume, 3) if down_volume > 0 else None,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
         "latest_ohlc_date": format_market_date(max(latest_dates)) if latest_dates else "",
@@ -589,6 +597,9 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
         "declines_pct":    round(ad["declines"] / total_ad * 100, 1) if total_ad else 0.0,
         "unchanged_pct":   round(ad["unchanged"] / total_ad * 100, 1) if total_ad else 0.0,
         "ad_ratio":        ad["ad_ratio"],
+        "up_volume":       ma.get("up_volume"),
+        "down_volume":     ma.get("down_volume"),
+        "up_down_volume_ratio": ma.get("up_down_volume_ratio"),
         "pct_above_ma10":  ma["pct_above_ma10"],
         "pct_above_ma20":  ma["pct_above_ma20"],
         "pct_above_ma50":  ma["pct_above_ma50"],
@@ -673,6 +684,9 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
     else:
         data_status = "partial"
 
+    all_up_vol = sum(int(s.get("up_volume") or 0) for s in snapshots)
+    all_down_vol = sum(int(s.get("down_volume") or 0) for s in snapshots)
+
     return {
         "exchange":        "ALL",
         "date":            format_market_date(latest_date),
@@ -686,6 +700,9 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "declines_pct":    round(dec / total * 100, 1) if total else 0.0,
         "unchanged_pct":   round(unc / total * 100, 1) if total else 0.0,
         "ad_ratio":        round(adv / dec, 2) if dec else None,
+        "up_volume":       all_up_vol or None,
+        "down_volume":     all_down_vol or None,
+        "up_down_volume_ratio": round(all_up_vol / all_down_vol, 3) if all_down_vol > 0 else None,
         "pct_above_ma10":  round(ma10 / ma_eligible[10] * 100, 1) if ma_eligible[10] else 0.0,
         "pct_above_ma20":  round(ma20 / ma_eligible[20] * 100, 1) if ma_eligible[20] else 0.0,
         "pct_above_ma50":  round(ma50 / ma_eligible[50] * 100, 1) if ma_eligible[50] else 0.0,
@@ -749,6 +766,9 @@ def _compact_history_markets(markets_dict: dict) -> dict:
             "declines": snap.get("declines"),
             "unchanged": snap.get("unchanged"),
             "ad_ratio": snap.get("ad_ratio"),
+            "up_volume": snap.get("up_volume"),
+            "down_volume": snap.get("down_volume"),
+            "up_down_volume_ratio": snap.get("up_down_volume_ratio"),
             "total_symbols": snap.get("total_symbols"),
             "ma_total_symbols": snap.get("ma_total_symbols"),
         }
@@ -763,12 +783,101 @@ def append_history(markets_dict: dict) -> None:
         except Exception:
             history = []
 
+    history = _backfill_ud_volume(history)
+
     today_date = markets_dict["ALL"]["date"]
     history = [h for h in history if h.get("date") != today_date]
     history.append({"date": today_date, "markets": _compact_history_markets(markets_dict)})
     history = history[-2900:]  # gioi han ~10 nam phien giao dich
 
     _write_json(HISTORY_JSON, history)
+
+
+INDEX_CACHE_SYMBOLS = {"VNI", "HNXINDEX", "VNINDEX", "VN30"}
+
+
+def _backfill_ud_volume(history: list) -> list:
+    """Backfill mot lan up_volume/down_volume/ratio cho history tu OHLC cache.
+    Idempotent: bo qua neu entry gan nhat da co field. Universe hien tai ap
+    nguoc qua khur (survivorship bias) — chap nhan cho chi bao ti le."""
+    if not history:
+        return history
+    tail = history[-3:]
+    if all(((h.get("markets") or {}).get("ALL") or {}).get("up_down_volume_ratio") is not None for h in tail):
+        return history
+    if not CACHE_DIR.exists():
+        return history
+
+    print("Backfill UD volume cho history tu OHLC cache (mot lan)...")
+    sym_to_market = {}
+    try:
+        payload = json.loads(SYMBOL_UNIVERSES_JSON.read_text(encoding="utf-8"))
+        for market, entry in (payload.get("exchanges") or {}).items():
+            for sym in entry.get("symbols") or []:
+                sym_to_market[str(sym).upper()] = market
+    except (OSError, ValueError, TypeError):
+        pass
+
+    frames = []
+    cache_files = [p for p in CACHE_DIR.glob("*.csv") if p.stem.upper() not in INDEX_CACHE_SYMBOLS]
+    for path in cache_files:
+        sym = path.stem.upper()
+        try:
+            df = _load_cache(sym, CACHE_DIR)
+        except Exception:
+            continue
+        if df.empty or len(df) < 2 or "Volume" not in df.columns:
+            continue
+        diff = df["Close"].diff()
+        dates = pd.to_datetime(df["TradingDate"], dayfirst=True, errors="coerce")
+        sub = pd.DataFrame({
+            "date": dates.dt.strftime("%Y-%m-%d"),
+            "up": df["Volume"].where(diff > 0, 0.0),
+            "down": df["Volume"].where(diff < 0, 0.0),
+            "market": sym_to_market.get(sym, ""),
+        }).dropna(subset=["date"])
+        if sub.empty:
+            continue
+        frames.append(sub)
+
+    if not frames:
+        return history
+
+    big = pd.concat(frames, ignore_index=True)
+    per_date_all = big.groupby("date")[["up", "down"]].sum()
+    per_date_market = big.groupby(["date", "market"])[["up", "down"]].sum()
+
+    filled = 0
+    for entry in history:
+        markets = entry.get("markets") or {}
+        try:
+            d_iso = pd.to_datetime(entry.get("date"), dayfirst=True).strftime("%Y-%m-%d")
+        except Exception:
+            continue
+        if d_iso not in per_date_all.index:
+            continue
+        row = per_date_all.loc[d_iso]
+        if not (row["up"] > 0 or row["down"] > 0):
+            continue
+        for market in list(markets.keys()) + ["ALL"]:
+            m = markets.get(market)
+            if m is None or m.get("up_down_volume_ratio") is not None:
+                continue
+            if market == "ALL":
+                up, down = float(row["up"]), float(row["down"])
+            else:
+                try:
+                    mr = per_date_market.loc[(d_iso, market)]
+                    up, down = float(mr["up"]), float(mr["down"])
+                except KeyError:
+                    continue
+            m["up_volume"] = int(round(up))
+            m["down_volume"] = int(round(down))
+            m["up_down_volume_ratio"] = round(up / down, 3) if down > 0 else None
+        filled += 1
+
+    print(f"Backfill UD volume: {filled}/{len(history)} ngay.")
+    return history
 
 
 HISTORY_SYSTEM_KEEP_KEYS = {"date", "all_signals"}

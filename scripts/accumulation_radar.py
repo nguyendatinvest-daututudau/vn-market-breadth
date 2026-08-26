@@ -147,6 +147,8 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
     pos20 = _position_in_range(df, 20)
     up_down_ratio = _up_down_volume_ratio(df, 20)
     acc_days, dist_days = _accumulation_distribution_days(df, 30)
+    vol_ma20 = float(df["Volume"].iloc[-20:].mean()) if "Volume" in df.columns else None
+    vol_spike_ratio = round(float(df["Volume"].iloc[-1] / vol_ma20), 2) if vol_ma20 and vol_ma20 > 0 and not pd.isna(vol_ma20) else None
     range10 = _range_pct(df, 10)
 
     if None in (ret20, ret60, dd60, range20, range60, pos20):
@@ -197,6 +199,8 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
         vol_dry_score = 0.0
 
     volume_score = 0.60 * vol_ratio_score + 0.40 * acc_day_score
+    if vol_spike_ratio is not None and vol_spike_ratio >= 1.5 and pos20 < 70:
+        volume_score = min(100.0, volume_score + 10.0)
 
     contraction = max(0.0, min(1.0, (range60 - range20) / range60)) if range60 > 0 else 0.0
     tightness_score = 100.0 - _score_between(range20, 8.0, 35.0)
@@ -236,6 +240,8 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
         reasons.append("Giữ trên MA20")
     if up_down_ratio and up_down_ratio >= 1.2:
         reasons.append("Volume phiên tăng tốt")
+    if vol_spike_ratio is not None and vol_spike_ratio >= 1.5 and pos20 < 70:
+        reasons.append("Volume spike khi nen gia (gom hang)")
     if contraction_score >= 60:
         reasons.append("Nền giá co hẹp")
     if pos20 >= 80:
@@ -264,6 +270,7 @@ def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict
         "range60": round(float(range60), 2),
         "position20": round(float(pos20), 1),
         "up_down_volume_ratio": round(float(up_down_ratio), 2) if up_down_ratio else None,
+        "vol_spike_ratio": round(float(vol_spike_ratio), 2) if vol_spike_ratio is not None else None,
         "vol_dry_ratio": round(float(vol_dry_ratio), 2) if vol_dry_ratio is not None else None,
         "accumulation_days": acc_days,
         "distribution_days": dist_days,
