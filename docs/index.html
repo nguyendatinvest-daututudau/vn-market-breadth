@@ -1414,6 +1414,7 @@ const HUB_TABS = [
   { value:'watch', label:'👀 Theo dõi' },
   { value:'sell-warning', label:'⚠ Cảnh báo' },
   { value:'reference', label:'📖 Tham khảo' },
+  { value:'rr', label:'📈 R:R ≥1' },
 ];
 
 function buildHubTabs(){
@@ -1460,6 +1461,7 @@ function buildSignalHub(dateStr){
     'watch': 'Không có mã đang chờ xác nhận.',
     'sell-warning': 'Không có cảnh báo bán.',
     'reference': 'Không có tín hiệu tham khảo.',
+    'rr': 'Không có mã R:R ≥1.',
   };
 
   let tbody = filteredRows.map(r => {
@@ -1770,6 +1772,11 @@ function applyFilters(rows, filter, query){
       if (filter === 'ats-sell' && !(r.source === 'ats' && r.signalType === 'sell_warning')) return false;
       if (filter === 'k4-buy' && !(r.source === 'khung4-tplus' && r.signalType === 'valid')) return false;
       if (filter === 'k4-sell' && !(r.source === 'khung4-tplus' && r.signalType === 'sell_warning')) return false;
+      if (filter === 'rr') {
+        const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (typeof computeModalTradePlan === 'function' ? computeModalTradePlan(r.symbol) : null);
+        const rr1 = tp?.rr?.rr1, rr2 = tp?.rr?.rr2;
+        if (!((rr1!=null && rr1>=1) || (rr2!=null && rr2>=1))) return false;
+      }
     }
     if (query && !r.symbol.includes(query)) return false;
     return true;
