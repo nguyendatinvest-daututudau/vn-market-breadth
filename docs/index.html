@@ -996,7 +996,13 @@ function buildTrendDistributionPanel(m){
 function buildUdVolumePanel(m){
   const ratio = m?.up_down_volume_ratio;
   const up = m?.up_volume, down = m?.down_volume;
-  if (ratio == null && up == null) return '';
+  const hasData = ratio!=null || up!=null;
+  if (!hasData) {
+    return `<div class="panel" style="padding:16px;">
+      <div class="ctx-title">UD VOLUME — dòng tiền nhóm tăng vs nhóm giảm</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">Đang chờ dữ liệu phiên đầu tiên sau khi deploy (15:10 hôm nay). Panel sẽ hiện ratio + Up/Down volume + chart lịch sử sau khi CI chạy xong.</div>
+    </div>`;
+  }
   const fmtVol = v => v==null?'—':(v>=1e9?(v/1e9).toFixed(1)+'B':(v/1e6).toFixed(1)+'M');
   const color = ratio==null?'var(--muted)':ratio>=1?'var(--up)':'var(--down)';
   const note = ratio==null?'Chưa có dữ liệu':ratio>=1?'Tiền tập trung nhóm mã tăng':'Tiền tập trung nhóm mã giảm';
