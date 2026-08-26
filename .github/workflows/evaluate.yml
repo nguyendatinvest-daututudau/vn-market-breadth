@@ -89,6 +89,12 @@ jobs:
       - name: Calibrate buy conviction thresholds
         run: python scripts/calibrate_conviction.py
 
+      - name: Backfill Zweig A/D history
+        run: python scripts/backfill_zweig.py
+
+      - name: Backtest Zweig thresholds
+        run: python scripts/backtest_zweig.py
+
       - name: Commit evaluation results
         run: |
           git config user.name "github-actions[bot]"
