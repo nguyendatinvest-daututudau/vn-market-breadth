@@ -1,0 +1,10 @@
+#!/bin/sh
+# Pre-commit hook: chặn revert UI và lỗi logic
+set -e
+echo ">> check_frontend"
+python scripts/check_frontend.py
+echo ">> pytest"
+python -m pytest -q
+echo ">> compileall"
+python -m compileall -q scripts
+echo "pre-commit OK"
