@@ -197,6 +197,7 @@ def compute_trade_plan(
     pivots: dict | None,
     w52_high: float | None,
     w52_low: float | None,
+    high20: float | None = None,
 ) -> dict | None:
     """Ke hoach vao lenh cho tung diem mua hang A/B. Tra ve None neu thieu du lieu cot loi."""
     if close is None or not math.isfinite(close) or close <= 0:
@@ -263,16 +264,45 @@ def compute_trade_plan(
     if stop is not None and stop >= entry_low:
         stop = round(min(pct_stop, atr_stop) if atr_stop is not None else pct_stop, 2)
 
-    # Muc tieu: khang cu gan nhat tren entry_mid
-    res_cands: list[float] = []
-    for v in (sma20, sma50, sma200, (pivots or {}).get("r1"), (pivots or {}).get("r2"), w52_high):
-        if v is not None and math.isfinite(v) and v > entry_mid:
-            res_cands.append(float(v))
-    nearest_res = min(res_cands) if res_cands else None
-    r1 = float(nearest_res) if nearest_res is not None else None
-    # r2 giu lai pivot r2 neu co va khac r1, de hien thi them muc tieu xa
+    # Muc tieu: B - theo entry_type, distance >= max(3%, 0.9*ATR), fallback 1.8*ATR
+    piv_r1 = (pivots or {}).get("r1")
     piv_r2 = (pivots or {}).get("r2")
-    r2 = float(piv_r2) if piv_r2 is not None and math.isfinite(piv_r2) and piv_r2 != r1 else None
+    if entry_type == "breakout":
+        pool = [high20, piv_r1, piv_r2]
+    elif entry_type == "pullback":
+        pool = [sma50, sma200, piv_r1]
+    else:
+        pool = [high20, sma50, sma200, piv_r1, piv_r2]
+    cands = sorted([float(x) for x in pool if x is not None and math.isfinite(x) and x > entry_mid])
+    # distance filter
+    if atr14 is not None and math.isfinite(atr14) and atr14 > 0:
+        min_dist = max(entry_mid * 0.03, 0.9 * atr14)
+    else:
+        min_dist = entry_mid * 0.03
+    r1 = None
+    for c in cands:
+        if c - entry_mid >= min_dist:
+            r1 = float(c)
+            break
+    if r1 is None:
+        if atr14 is not None and math.isfinite(atr14) and atr14 > 0:
+            r1 = round(entry_mid + 1.8 * atr14, 2)
+        else:
+            r1 = round(entry_mid * 1.03, 2)
+    # R2: W52_high only as R2, plus remaining candidates
+    r2 = None
+    remaining = [c for c in cands if r1 is not None and c > r1]
+    w52_cands = [float(w52_high)] if w52_high is not None and math.isfinite(w52_high) and w52_high > (r1 or entry_mid) else []
+    # Prefer next candidate, else W52
+    if remaining:
+        r2 = float(remaining[0])
+    elif w52_cands:
+        r2 = w52_cands[0]
+    else:
+        if atr14 is not None and math.isfinite(atr14) and r1 is not None:
+            r2 = round(r1 + 0.9 * atr14, 2)
+        elif r1 is not None:
+            r2 = round(r1 * 1.03, 2)
     if r2 is not None and r1 is not None and r2 <= r1:
         r2 = None
 
@@ -385,6 +415,7 @@ def build_records(
                 pivots=piv if isinstance(piv, dict) else None,
                 w52_high=w52.get("high"),
                 w52_low=w52.get("low"),
+                high20=h.get("high20"),
             )
         records.append({
             "symbol": sym,

@@ -265,6 +265,8 @@ def compute_symbol_health(df: pd.DataFrame, symbol: str, idx_close: pd.Series | 
     new_high = bool(hi52 is not None and last >= hi52)
     new_low = bool(lo52 is not None and last <= lo52)
 
+    high20 = float(df["High"].tail(20).max()) if len(df) >= 20 and df["High"].notna().any() else None
+    high20 = _r(high20) if high20 is not None and math.isfinite(high20) else None
     vol20 = float(df["Volume"].tail(20).mean()) if df["Volume"].notna().any() else None
     last_vol = float(df["Volume"].iloc[-1]) if math.isfinite(float(df["Volume"].iloc[-1])) else None
     rel_vol = _r(last_vol / vol20, 2) if last_vol and vol20 and vol20 > 0 else None
@@ -308,6 +310,7 @@ def compute_symbol_health(df: pd.DataFrame, symbol: str, idx_close: pd.Series | 
             "vol_w": vol_w, "vol_m": vol_m,
             "beta": _r(_beta(close, idx_close)),
         },
+        "high20": high20,
         "pivots": _pivots(df),
         "spark": [_r(v) for v in close.tail(SPARK_BARS).tolist()],
     }

@@ -1276,9 +1276,28 @@ function fallbackTradePlan(h){
     }
     if(stop!=null) stop=Math.round(stop*100)/100;
     if(stop!=null && stop>=entry_low) stop=Math.round((atrStop!=null?Math.min(pctStop,atrStop):pctStop)*100)/100;
-    const resCands=[sma20,sma50,sma200,piv?.r1,piv?.r2,w52h].filter(v=>v!=null && isFinite(v) && v>entry_mid);
-    const nearestRes=resCands.length?Math.min(...resCands):null;
-    let r1=nearestRes!=null?nearestRes:null, r2=piv?.r2!=null && isFinite(piv.r2) && piv.r2!=r1 ? piv.r2 : null;
+    const high20=h.high20;
+    const piv_r1=piv?.r1, piv_r2=piv?.r2;
+    let pool;
+    if(entry_type==='breakout') pool=[high20, piv_r1, piv_r2];
+    else if(entry_type==='pullback') pool=[sma50,sma200,piv_r1];
+    else pool=[high20,sma50,sma200,piv_r1,piv_r2];
+    let cands=pool.filter(v=>v!=null && isFinite(v) && v>entry_mid).sort((a,b)=>a-b);
+    const minDist= atr14!=null && isFinite(atr14) && atr14>0 ? Math.max(entry_mid*0.03, 0.9*atr14) : entry_mid*0.03;
+    let r1=null;
+    for(const c of cands){ if(c - entry_mid >= minDist){ r1=c; break; } }
+    if(r1==null){
+      if(atr14!=null && isFinite(atr14) && atr14>0) r1=Math.round((entry_mid+1.8*atr14)*100)/100;
+      else r1=Math.round(entry_mid*1.03*100)/100;
+    }
+    let r2=null;
+    const remaining=cands.filter(c=>c>r1);
+    if(remaining.length) r2=remaining[0];
+    else if(w52h!=null && isFinite(w52h) && w52h>r1) r2=w52h;
+    else {
+      if(atr14!=null && isFinite(atr14) && r1!=null) r2=Math.round((r1+0.9*atr14)*100)/100;
+      else if(r1!=null) r2=Math.round(r1*1.03*100)/100;
+    }
     if(r2!=null && r1!=null && r2<=r1) r2=null;
     const pctFn=v=> v==null||!isFinite(v)||entry_mid==0 ? null : Math.round((v-entry_mid)/entry_mid*10000)/100;
     let rr1=null, rr2=null;
