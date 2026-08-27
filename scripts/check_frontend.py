@@ -67,6 +67,11 @@ def main() -> int:
         if "legacy = REGIME?.zweig" in text:
             ok = fail("còn fallback legacy REGIME?.zweig") and False
 
+    # 5b. Nhận xét nhanh phải xuống dòng
+    if "shQuickTake" in text:
+        if "join('<br>')" not in text:
+            ok = fail("shQuickTake phải xuống dòng (join <br>)") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
