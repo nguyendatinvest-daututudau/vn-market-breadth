@@ -17,6 +17,9 @@ tự động cập nhật qua GitHub Actions, hiển thị qua GitHub Pages.
 - **Market Commentary**: Nhận định thị trường tự động (breadth + kỹ thuật VN-Index)
 - **Accumulation Radar**: hub riêng phát hiện cổ phiếu khỏe âm thầm trong thị trường xấu
 - **Market Regime**: thước đo trạng thái thị trường (điểm 0-100 + Risk-Off/Trung lập/Risk-On/Quá nóng), phân kỳ giá-breadth, breadth momentum
+- **Buy Conviction**: hạng A/B/C + trade plan (vùng mua, stop hỗ trợ gần nhất floor 3%/2ATR, target kháng cự gần nhất)
+- **Zweig Breadth Thrust**: EMA10 HOSE Advances/(Advances+Declines) 0.40->0.615 trong 10 phiên
+- **Stock Health**: MA stack, RSI/Stoch/MACD/ADX, 52W, ATR/Beta, pivot, sparkline
 - **Intraday Breadth (realtime)**: A/D theo phiên từ SSI v3 Streaming (trade + OHLCV 1m + quote), chạy thủ công khi đang giao dịch
 
 ## Cấu trúc repo
@@ -42,7 +45,7 @@ scripts/
   requirements.txt
 data/
   breadth_latest.json     # snapshot breadth mới nhất
-  breadth_history.json    # lịch sử ~120 phiên
+  breadth_history.json    # lịch sử ~2660 phiên (2016->nay, 10 năm)
   strategy_signals.json   # tín hiệu pre-breakout
   ensemble_signals.json   # tín hiệu ensemble
   momentum_signals.json   # tín hiệu momentum

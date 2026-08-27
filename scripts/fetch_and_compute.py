@@ -740,6 +740,27 @@ def _write_json(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _assert_manifest(expected_date: str) -> None:
+    """Dam bao breadth_latest, market_regime va buy_conviction cung phien."""
+    from _shared import parse_market_date
+    exp = parse_market_date(expected_date)
+    if exp is None:
+        raise ValueError(f"expected_date invalid: {expected_date}")
+    for name in ("market_regime.json", "buy_conviction.json"):
+        p = DATA_DIR / name
+        if not p.exists():
+            continue
+        try:
+            d = json.loads(p.read_text(encoding="utf-8")).get("date")
+            got = parse_market_date(d)
+            if got is None or abs((got - exp).days) > 1:
+                raise ValueError(f"{name} date {d} lệch với breadth {expected_date}")
+        except ValueError:
+            raise
+        except Exception:
+            continue
+
+
 def _sync_docs_data(include_signal_outputs: bool = True):
     """Dong bo du lieu sang docs/data/ cho GitHub Pages."""
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -1047,12 +1068,13 @@ def main():
     append_history(markets_dict, load_index_closes_by_date())
     print(f"Da cap nhat history.")
 
-    # Market regime (gauge + phan ky + breadth momentum)
+    # Market regime (gauge + phan ky + breadth momentum) - critical
     try:
         run_market_regime()
         print(f"Da cap nhat market regime.")
     except Exception as e:
         print(f"Loi sinh market regime: {e}")
+        raise
 
     # Generate market commentary
     try:
@@ -1119,6 +1141,7 @@ def main():
                 print(f"Da ghi tin hieu {label}.\n")
             except Exception as e:
                 print(f"Loi sinh tin hieu {label}: {e}")
+                raise
         append_signals_history(all_snap["date"])
         # Conviction doc ket qua cac he vua sinh -> phai chay cuoi cung.
         try:
@@ -1126,8 +1149,16 @@ def main():
             print(f"Da ghi buy conviction.\n")
         except Exception as e:
             print(f"Loi sinh buy conviction: {e}")
+            raise
     else:
         print(f"Bo qua sinh tin hieu: du lieu thi truong {all_snap['data_status']} ({all_snap['date'] or 'khong co ngay'}).")
+
+    # Manifest check before sync
+    try:
+        _assert_manifest(all_snap["date"])
+    except Exception as e:
+        print(f"Manifest check failed: {e}")
+        raise
 
     # This is deliberately last so Pages never sees a mixture of old and new outputs.
     _sync_docs_data(include_signal_outputs=signals_allowed)

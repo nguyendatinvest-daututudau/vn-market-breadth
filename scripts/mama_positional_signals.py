@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from cache_utils import load_cache as _load_cache
-from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, json_default as _json_default, list_symbols, signal_market_date, vn_now
+from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, is_market_data_fresh, json_default as _json_default, list_symbols, signal_market_date, vn_now
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -250,7 +250,7 @@ def compute_mama_positional_system(
     }
 
 
-def audit_symbol(symbol: str) -> tuple[dict | None, dict]:
+def audit_symbol(symbol: str, reference_date=None) -> tuple[dict | None, dict]:
     df = _load_cache(symbol, CACHE_DIR).sort_values("TradingDate").reset_index(drop=True)
     audit = {
         "symbol": symbol,
@@ -263,6 +263,11 @@ def audit_symbol(symbol: str) -> tuple[dict | None, dict]:
         required = ("Open", "High", "Low", "Close", "Volume")
         audit["reason"] = "missing_ohlcv_or_history"
         audit["missing_columns"] = [c for c in required if c not in df.columns]
+        return None, audit
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
+        audit["reason"] = "stale_quote"
+        audit["reference_date"] = format_market_date(ref)
         return None, audit
 
     last_volume = df["Volume"].iloc[-1]
@@ -323,8 +328,8 @@ def audit_symbol(symbol: str) -> tuple[dict | None, dict]:
     }, audit
 
 
-def analyze_symbol(symbol: str) -> dict | None:
-    result, _audit = audit_symbol(symbol)
+def analyze_symbol(symbol: str, reference_date=None) -> dict | None:
+    result, _audit = audit_symbol(symbol, reference_date)
     return result
 
 
@@ -344,10 +349,11 @@ def main():
     signals = []
     audit = []
     skipped_ohlc = 0
+    reference_date = signal_market_date()
     bar = tqdm(symbols, desc="[MAMA] Positional", unit="sym")
     for sym in bar:
         bar.set_postfix_str(sym, refresh=True)
-        result, item_audit = audit_symbol(sym)
+        result, item_audit = audit_symbol(sym, reference_date)
         audit.append(item_audit)
         if result:
             signals.append(result)

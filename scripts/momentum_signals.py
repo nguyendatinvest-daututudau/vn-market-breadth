@@ -18,7 +18,7 @@ from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
 import pandas as pd
-from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, signal_market_date, vn_now
+from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, is_market_data_fresh, signal_market_date, vn_now
 from _shared import (SCORE_MA, SCORE_BREAKOUT, SCORE_ROC, SCORE_HYBRID,
                      BONUS_VOL_SURGE, BONUS_ADX_STRONG, BONUS_RSI_GOLD,
                      json_default as _json_default)
@@ -253,9 +253,12 @@ def compute_bonuses(df: pd.DataFrame, rsi14: float | None = None, adx14: float |
 
 # --- Per-symbol analysis ----------------------------------------------------
 
-def analyze_symbol(symbol: str) -> dict | None:
+def analyze_symbol(symbol: str, reference_date=None) -> dict | None:
     df = _load_cache(symbol, CACHE_DIR)
     if len(df) < 210:
+        return None
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
         return None
 
     close = df["Close"].values
@@ -340,11 +343,12 @@ def main():
     symbols = get_filtered_symbols()
     tqdm.write(f"\nPhan tich {len(symbols)} ma...\n")
 
+    reference_date = signal_market_date()
     signals = []
     bar = tqdm(symbols, desc="[MOM] Momentum", unit="sym")
     for sym in bar:
         bar.set_postfix_str(sym, refresh=True)
-        result = analyze_symbol(sym)
+        result = analyze_symbol(sym, reference_date)
         if result:
             signals.append(result)
 

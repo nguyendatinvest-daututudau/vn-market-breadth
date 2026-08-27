@@ -74,12 +74,20 @@ def build_frame(symbol: str) -> pd.DataFrame | None:
     df = df.sort_values("TradingDate").reset_index(drop=True)
     n = len(df)
 
-    close = df["Close"].astype(float)
-    volume = df["Volume"].fillna(0.0).astype(float)
-    high = df["High"].astype(float)
-    low = df["Low"].astype(float)
+    close = pd.to_numeric(df["Close"], errors="coerce").astype(float)
+    volume = pd.to_numeric(df["Volume"], errors="coerce").fillna(0.0).astype(float)
+    high = pd.to_numeric(df["High"], errors="coerce").astype(float)
+    low = pd.to_numeric(df["Low"], errors="coerce").astype(float)
+    valid_price = close.gt(0) & np.isfinite(close) & np.isfinite(volume)
+    close = close.where(valid_price)
+    volume = volume.where(valid_price, 0.0)
 
-    fwd = {lf: (close.shift(-lf) / close - 1.0) for lf in FWD_OPTIONS}
+    fwd = {}
+    for lf in FWD_OPTIONS:
+        f = close.shift(-lf) / close - 1.0
+        f[~np.isfinite(f)] = np.nan
+        f[close.le(0) | ~np.isfinite(close)] = np.nan
+        fwd[lf] = f
 
     ma20 = close.rolling(20).mean()
     ma50 = close.rolling(50).mean()
@@ -114,11 +122,14 @@ def build_frame(symbol: str) -> pd.DataFrame | None:
 
     rsi_gold = (rsi >= 50) & (rsi <= 68)
     has_signal = strategy_ok & (score >= 30)
-    # raw: base + bonuses (single-count) + rsi_gold. Live double-counts vol/adx via buy_conviction, so keep single here for calibration clarity
-    raw = (score
+    # raw mirror production: momentum score includes rsi_gold/vol/adx once, conviction adds vol/adx second time
+    momentum_score = (score
            + np.where(vol_ratio >= VOL_BONUS_RATIO, VOL_BONUS_POINTS, 0.0)
            + np.where(adx > ADX_BONUS_LEVEL, ADX_BONUS_POINTS, 0.0)
-           + np.where(rsi_gold, 10.0, 0.0)
+           + np.where(rsi_gold, 10.0, 0.0))
+    raw = (momentum_score
+           + np.where(vol_ratio >= VOL_BONUS_RATIO, VOL_BONUS_POINTS, 0.0)
+           + np.where(adx > ADX_BONUS_LEVEL, ADX_BONUS_POINTS, 0.0)
            + np.where(dist_ma20 > EXT_DIST_MA20_MAX, EXT_PENALTY_POINTS, 0.0))
 
     out = pd.DataFrame({
@@ -163,20 +174,27 @@ def apply_regime_factor(big: pd.DataFrame, regime_map: dict[pd.Timestamp, str]) 
 
 def hit_stats(df: pd.DataFrame, mask: pd.Series, fwd: str = "fwd10") -> dict | None:
     sub = df.loc[mask & df["_valid"], ["date", fwd]].dropna()
+    sub = sub[np.isfinite(sub[fwd])]
     if len(sub) < 30:
+        return None
+    vals = sub[fwd].to_numpy(dtype=float)
+    vals = vals[np.isfinite(vals)]
+    if len(vals) < 30:
         return None
     years = sub["date"].dt.year
     train = sub.loc[years < OOS_YEAR, fwd]
+    train = train[np.isfinite(train)]
     test = sub.loc[years >= OOS_YEAR, fwd]
+    test = test[np.isfinite(test)]
     return {
         "n": int(len(sub)),
-        "hit2": round(float((sub[fwd] >= 0.02).mean()), 4),
-        "mean": round(float(sub[fwd].mean()), 4),
-        "median": round(float(sub[fwd].median()), 4),
+        "hit2": round(float((vals >= 0.02).mean()), 4),
+        "mean": round(float(np.nanmean(vals)), 4),
+        "median": round(float(np.nanmedian(vals)), 4),
         "train_n": int(len(train)),
-        "train_hit2": round(float((train >= 0.02).mean()), 4) if len(train) >= 30 else None,
+        "train_hit2": round(float((train.to_numpy(dtype=float) >= 0.02).mean()), 4) if len(train) >= 30 else None,
         "test_n": int(len(test)),
-        "test_hit2": round(float((test >= 0.02).mean()), 4) if len(test) >= 30 else None,
+        "test_hit2": round(float((test.to_numpy(dtype=float) >= 0.02).mean()), 4) if len(test) >= 30 else None,
     }
 
 

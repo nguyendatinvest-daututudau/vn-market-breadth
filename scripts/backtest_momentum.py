@@ -144,9 +144,6 @@ def get_filtered_symbols() -> list[str]:
         df = _load_cache(sym, CACHE_DIR)
         if len(df) < MIN_SYMBOL_HISTORY:
             continue
-        vol_avg = df["Volume"].dropna().iloc[-20:].mean()
-        if pd.isna(vol_avg) or vol_avg < MIN_AVG_VOLUME:
-            continue
         symbols.append(sym)
     return symbols
 

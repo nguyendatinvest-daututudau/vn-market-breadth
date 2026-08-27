@@ -21,7 +21,7 @@ import pandas as pd
 
 from cache_utils import load_cache as _load_cache
 from khung4_tplus_signals import compute_khung4_tplus
-from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, json_default as _json_default, list_symbols, signal_market_date, vn_now
+from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, is_market_data_fresh, json_default as _json_default, list_symbols, signal_market_date, vn_now
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -99,9 +99,12 @@ def compute_tplus(df: pd.DataFrame) -> dict:
     return compute_khung4_tplus(df)
 
 
-def analyze_symbol(symbol: str) -> dict | None:
+def analyze_symbol(symbol: str, reference_date=None) -> dict | None:
     df = _load_cache(symbol, CACHE_DIR).sort_values("TradingDate").reset_index(drop=True)
     if not has_ohlcv(df):
+        return None
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
         return None
 
     volume = df["Volume"]
@@ -189,10 +192,11 @@ def main():
 
     signals = []
     skipped_ohlc = 0
+    reference_date = signal_market_date()
     bar = tqdm(symbols, desc="[LM] Luc Mach", unit="sym")
     for sym in bar:
         bar.set_postfix_str(sym, refresh=True)
-        result = analyze_symbol(sym)
+        result = analyze_symbol(sym, reference_date)
         if result:
             signals.append(result)
         else:

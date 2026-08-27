@@ -14,7 +14,7 @@ from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
 import pandas as pd
-from _shared import tqdm, CACHE_DIR, DATA_DIR, DOCS_DATA_DIR, DEFAULT_WEIGHTS, WEIGHTS_PATH, format_market_date, signal_market_date, vn_now
+from _shared import tqdm, CACHE_DIR, DATA_DIR, DOCS_DATA_DIR, DEFAULT_WEIGHTS, WEIGHTS_PATH, format_market_date, is_market_data_fresh, signal_market_date, vn_now
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -122,9 +122,12 @@ def compute_momentum(df: pd.DataFrame) -> dict:
     return {"signal": signal, "roc10": round(roc10, 2), "roc20": round(roc20, 2), "vol_slope": round(vol_slope, 4)}
 
 
-def analyze_symbol(symbol: str, weights: dict | None = None) -> dict | None:
+def analyze_symbol(symbol: str, weights: dict | None = None, reference_date=None) -> dict | None:
     df = _load_cache(symbol, CACHE_DIR)
     if len(df) < 210:
+        return None
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
         return None
     if "Volume" in df.columns:
         vol_avg = df["Volume"].dropna().iloc[-20:].mean()
@@ -174,11 +177,12 @@ def main():
     tqdm.write(f"\nPhan tich {len(symbols)} ma...\n")
 
     weights = _load_weights()
+    reference_date = signal_market_date()
     signals = []
     bar = tqdm(symbols, desc="[ALL] Ensemble", unit="sym")
     for sym in bar:
         bar.set_postfix_str(sym, refresh=True)
-        result = analyze_symbol(sym, weights)
+        result = analyze_symbol(sym, weights, reference_date)
         if result:
             signals.append(result)
 

@@ -15,7 +15,7 @@ from cache_utils import load_cache as _load_cache, compute_rsi_numpy
 
 import numpy as np
 import pandas as pd
-from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, signal_market_date, vn_now
+from _shared import tqdm, DATA_DIR, CACHE_DIR, DOCS_DATA_DIR, format_market_date, is_market_data_fresh, signal_market_date, vn_now
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -77,6 +77,7 @@ def detect_base_quality(df: pd.DataFrame) -> dict:
     # 4. OBV trend trong base (10%)
     # OBV calculation
     obv_base = np.zeros(len(base))
+    obv_base[0] = base_vol[0] if not np.isnan(base_vol[0]) else 0
     for i in range(1, len(base)):
         if not np.isnan(base[i]) and not np.isnan(base[i-1]):
             if base[i] > base[i-1]:
@@ -164,10 +165,13 @@ def compute_vol_regime(df: pd.DataFrame) -> dict:
     return {"vol_ratio": vol_ratio, "vol_gradient": vol_gradient}
 
 
-def analyze_symbol(symbol: str) -> dict | None:
+def analyze_symbol(symbol: str, reference_date=None) -> dict | None:
     """Phan tich 1 symbol, tra ve signal data neu dat, None neu khong."""
     df = _load_cache(symbol, CACHE_DIR)
     if len(df) < 63:
+        return None
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
         return None
 
     base = detect_base_quality(df)
@@ -249,10 +253,11 @@ def main():
     tqdm.write(f"\nPhan tich {len(symbols)} ma...\n")
 
     signals = []
+    reference_date = signal_market_date()
     bar = tqdm(symbols, desc="[ALL] Pre-breakout", unit="sym")
     for sym in bar:
         bar.set_postfix_str(sym, refresh=True)
-        result = analyze_symbol(sym)
+        result = analyze_symbol(sym, reference_date)
         if result and result["composite_score"] >= 60:
             signals.append(result)
 

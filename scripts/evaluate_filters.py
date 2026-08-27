@@ -222,9 +222,9 @@ def backtest_symbol(symbol: str, skip_heavy: bool) -> pd.DataFrame | None:
                            "b60_70": (60, 70), "b70_80": (70, 80), "b80_plus": (80, 999)}.items():
         out[name] = bucket(lo, hi)
 
-    out["bonus_vol"] = (strategy_ok & (bonuses["vol_surge"] == 1)).astype(np.int8)
-    out["bonus_adx"] = (strategy_ok & (bonuses["adx_strong"] == 1)).astype(np.int8)
-    out["bonus_rsi"] = (strategy_ok & (bonuses["rsi_gold"] == 1)).astype(np.int8)
+    out["bonus_vol"] = (strategy_ok & (score >= 30) & (bonuses["vol_surge"] == 1)).astype(np.int8)
+    out["bonus_adx"] = (strategy_ok & (score >= 30) & (bonuses["adx_strong"] == 1)).astype(np.int8)
+    out["bonus_rsi"] = (strategy_ok & (score >= 30) & (bonuses["rsi_gold"] == 1)).astype(np.int8)
 
     # --- Common-filter permutation ---
     out["perm_trend"] = (trend_ok & vol_ok).astype(np.int8)

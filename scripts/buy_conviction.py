@@ -239,28 +239,42 @@ def compute_trade_plan(
         return None
     entry_mid = (entry_low + entry_high) / 2.0
 
-    # Cat lo: max(2×ATR, SMA20, S1) duoi entry_low
-    stop = None
-    cands_stop: list[float] = []
-    if atr14 is not None and math.isfinite(atr14) and atr14 > 0:
-        cands_stop.append(entry_low - 2 * atr14)
-    if sma20 is not None and math.isfinite(sma20):
-        cands_stop.append(float(sma20))
-    s1 = (pivots or {}).get("s1")
-    if s1 is not None and math.isfinite(s1):
-        cands_stop.append(float(s1))
-    if cands_stop:
-        stop = round(min(cands_stop), 2)
-        # Dam bao stop duoi entry_low
-        if stop >= entry_low:
-            # Neu cac moc deu tren entry_low (hiem), lay entry_low - 2*ATR hoac -3%
-            stop = round(entry_low - (2 * atr14 if atr14 and math.isfinite(atr14) else entry_low * 0.03), 2)
+    # Cat lo: ho tro gan nhat duoi entry_low, floor toi thieu 3% va 2*ATR
+    support_cands: list[float] = []
+    for v in (sma20, sma50, sma200, (pivots or {}).get("s1"), (pivots or {}).get("s2"), w52_low):
+        if v is not None and math.isfinite(v) and v < entry_low:
+            support_cands.append(float(v))
+    nearest_support = max(support_cands) if support_cands else None
+    atr_stop = entry_low - 2 * atr14 if atr14 is not None and math.isfinite(atr14) and atr14 > 0 else None
+    pct_stop = entry_low * 0.97
+    # Stop = gan nhat, nhung phai dam bao cach it nhat 3% va 2*ATR
+    if nearest_support is not None:
+        stop = nearest_support
+        # Enforce floor: stop phai <= min(entry_low*0.97, entry_low-2ATR) neu co
+        floors = [x for x in (pct_stop, atr_stop) if x is not None and math.isfinite(x)]
+        if floors:
+            floor = min(floors)
+            if stop > floor:
+                stop = floor
+    else:
+        floors = [x for x in (atr_stop, pct_stop) if x is not None and math.isfinite(x)]
+        stop = min(floors) if floors else round(entry_low * 0.97, 2)
+    stop = round(float(stop), 2) if stop is not None and math.isfinite(stop) else None
+    if stop is not None and stop >= entry_low:
+        stop = round(min(pct_stop, atr_stop) if atr_stop is not None else pct_stop, 2)
 
-    # Muc tieu R1/R2
-    r1 = (pivots or {}).get("r1")
-    r2 = (pivots or {}).get("r2")
-    r1 = float(r1) if r1 is not None and math.isfinite(r1) else None
-    r2 = float(r2) if r2 is not None and math.isfinite(r2) else None
+    # Muc tieu: khang cu gan nhat tren entry_mid
+    res_cands: list[float] = []
+    for v in (sma20, sma50, sma200, (pivots or {}).get("r1"), (pivots or {}).get("r2"), w52_high):
+        if v is not None and math.isfinite(v) and v > entry_mid:
+            res_cands.append(float(v))
+    nearest_res = min(res_cands) if res_cands else None
+    r1 = float(nearest_res) if nearest_res is not None else None
+    # r2 giu lai pivot r2 neu co va khac r1, de hien thi them muc tieu xa
+    piv_r2 = (pivots or {}).get("r2")
+    r2 = float(piv_r2) if piv_r2 is not None and math.isfinite(piv_r2) and piv_r2 != r1 else None
+    if r2 is not None and r1 is not None and r2 <= r1:
+        r2 = None
 
     def _pct(v: float | None) -> float | None:
         if v is None or not math.isfinite(v) or entry_mid == 0:

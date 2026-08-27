@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: evaluate-filters
+  group: market-data
   cancel-in-progress: false
 
 jobs:
@@ -50,8 +50,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/ohlc_cache
-          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}
+          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}-${{ github.run_id }}
           restore-keys: |
+            ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}-
             ohlc-cache-v2-
 
       - name: Validate SSI secrets
@@ -83,7 +84,7 @@ jobs:
           SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}
 
       - name: Backfill HOSE A/D for Zweig EMA10
-        run: python scripts/backfill_zweig.py --refresh
+        run: python scripts/backfill_zweig.py
         env:
           SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
           SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
@@ -106,7 +107,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ docs/
+          git add data/evaluation_filters.json data/evaluation_history.json data/buy_conviction_calibration.json data/backtest_zweig.json docs/data/evaluation_filters.json docs/data/evaluation_history.json docs/data/buy_conviction_calibration.json docs/data/backtest_zweig.json docs/data/market_regime.json data/market_regime.json
           if git diff --cached --quiet; then
             echo "No evaluation changes to commit."
             exit 0

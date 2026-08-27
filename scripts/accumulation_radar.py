@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from cache_utils import load_cache as _load_cache
-from _shared import CACHE_DIR, DATA_DIR, DOCS_DATA_DIR, format_market_date, json_default, list_symbols, signal_market_date, tqdm, vn_now
+from _shared import CACHE_DIR, DATA_DIR, DOCS_DATA_DIR, format_market_date, is_market_data_fresh, json_default, list_symbols, signal_market_date, tqdm, vn_now
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -96,7 +96,9 @@ def _accumulation_distribution_days(df: pd.DataFrame, days: int = 30) -> tuple[i
     return acc, dist
 
 
-def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
+def _benchmark_returns(symbols: list[str], reference_date=None) -> dict[str, float]:
+    from _shared import signal_market_date as _sig_date
+    ref = reference_date if reference_date is not None else _sig_date()
     rets20 = []
     rets20_5ago = []
     rets60 = []
@@ -104,6 +106,8 @@ def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
     for symbol in symbols:
         df = _load_cache(symbol, CACHE_DIR).sort_values("TradingDate")
         if len(df) < MIN_HISTORY:
+            continue
+        if ref is not None and not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
             continue
         close = df["Close"]
         r20 = _pct_change(close, 20)
@@ -128,9 +132,12 @@ def _benchmark_returns(symbols: list[str]) -> dict[str, float]:
     }
 
 
-def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict | None = None) -> dict | None:
+def analyze_symbol(symbol: str, benchmark: dict[str, float], latest_prices: dict | None = None, reference_date=None) -> dict | None:
     df = _load_cache(symbol, CACHE_DIR).sort_values("TradingDate").reset_index(drop=True)
     if len(df) < MIN_HISTORY:
+        return None
+    ref = reference_date if reference_date is not None else signal_market_date()
+    if not is_market_data_fresh(df["TradingDate"].iloc[-1], ref):
         return None
     if df["Volume"].iloc[-20:].mean() < MIN_AVG_VOLUME:
         return None
@@ -299,14 +306,15 @@ def main() -> None:
             tqdm.write("WARN: Khong doc duoc latest_prices.json, dung cache date\n")
 
     symbols = list_symbols(min_history=MIN_HISTORY, min_volume=MIN_AVG_VOLUME)
-    benchmark = _benchmark_returns(symbols)
+    reference_date = signal_market_date()
+    benchmark = _benchmark_returns(symbols, reference_date)
     tqdm.write(f"Phan tich {len(symbols)} ma, benchmark proxy: {benchmark}\n")
 
     rows = []
     bar = tqdm(symbols, desc="[ALL] Accumulation", unit="sym")
     for symbol in bar:
         bar.set_postfix_str(symbol, refresh=True)
-        result = analyze_symbol(symbol, benchmark, latest_prices)
+        result = analyze_symbol(symbol, benchmark, latest_prices, reference_date)
         if result:
             rows.append(result)
 
