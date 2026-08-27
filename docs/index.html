@@ -1789,10 +1789,6 @@ function renderBreadthChart(m){
       d20:eligible['20'] ?? k.ma_total_symbols, d50:eligible['50'] ?? k.ma_total_symbols,
     };
   }).filter(Boolean).sort((a,b) => parseViDate(a.date) - parseViDate(b.date));
-  const label = document.getElementById('indexChartLabel'), meta = document.getElementById('indexChartMeta');
-  const idxCnt = pts.filter(p=>p.indexClose!=null).length;
-  if (label) label.textContent = indexKey === 'HNXINDEX' ? 'HNX-Index' : 'VN-Index';
-  if (meta) meta.textContent = (activeMarket === 'ALL' ? '(benchmark đại diện cho ALL) · ' : '') + `${idxCnt}/${pts.length} phiên có index`;
   const z = zweigData(), zBadge = document.getElementById('zweigBadge'), zDetail = document.getElementById('zweigDetail');
   if (zBadge) {
     let text = 'Zweig EMA10: chưa đủ dữ liệu', state = 'unavailable';
@@ -1820,6 +1816,10 @@ function renderBreadthChart(m){
   let e0 = Math.min(allPts.length - 1, Math.ceil(chartRange.e * (allPts.length - 1)));
   if (e0 - s0 < 1) e0 = Math.min(allPts.length - 1, s0 + 1);
   const pts = allPts.slice(s0, e0 + 1);
+  const label = document.getElementById('indexChartLabel'), meta = document.getElementById('indexChartMeta');
+  const idxCnt = pts.filter(p=>p.indexClose!=null).length;
+  if (label) label.textContent = indexKey === 'HNXINDEX' ? 'HNX-Index' : 'VN-Index';
+  if (meta) meta.textContent = (activeMarket === 'ALL' ? '(benchmark đại diện cho ALL) · ' : '') + `${idxCnt}/${pts.length} phiên có index`;
   const rs = document.getElementById('chartRangeStart'), re = document.getElementById('chartRangeEnd');
   if (rs && re) { rs.value = Math.round(chartRange.s * 1000); re.value = Math.round(chartRange.e * 1000); }
   const rl = document.getElementById('chartRangeLabel');
@@ -2082,7 +2082,8 @@ function buildAppendixSection(m){
     return list.map(s => {
       const isDual = dualSet && dualSet.has(s);
       const cls = isDual ? 'chip dual' : (kind === 'up' ? 'chip up' : kind === 'down' ? 'chip down' : 'chip');
-      return `<span class="${cls}">${s}</span>`;
+      const esc = String(s).replace(/"/g, '&quot;');
+      return `<span class="${cls}" data-sym="${esc}" style="cursor:pointer;" title="Xem thẻ sức khỏe">${s}</span>`;
     }).join('');
   };
   const dualSet = new Set((m.above_ma20_symbols||[]).filter(x => (m.above_ma50_symbols||[]).includes(x)));
