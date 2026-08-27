@@ -77,6 +77,13 @@ def main() -> int:
         if "background:rgba(59,130,246" not in text or "R:R" not in text:
             ok = fail("tradePlanDetailHTML mất màu/card - phải có 3 card xanh/đỏ/xanh và R:R badge") and False
 
+    # 5d. Mã quan sát phải có lọc R:R >=1
+    if "HUB_TABS" in text:
+        if "value:'rr'" not in text and 'value:"rr"' not in text:
+            ok = fail("HUB_TABS thiếu lọc R:R >=1") and False
+        if "filter === 'rr'" not in text:
+            ok = fail("applyFilters thiếu lọc rr") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
