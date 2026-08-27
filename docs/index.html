@@ -431,7 +431,6 @@
       <div class="nav-search"><input id="stockSearch" list="stockList" placeholder="Tra cứu mã..." autocomplete="off" onkeydown="if(event.key==='Enter'){const v=this.value.trim().toUpperCase(); if(v){openStockModal(v); this.blur();}}"></div>
       <datalist id="stockList"></datalist>
       <span class="nav-date" id="navDate"></span>
-      <button class="nav-cta" onclick="switchView('signals')">Tín hiệu</button>
     </div>
   </div>
 </nav>
@@ -752,8 +751,11 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
 
     ${adDistributionHTML}
 
+    ${buildUdVolumePanel(m)}
+
     ${trendDistributionHTML}
   `;
+  requestAnimationFrame(renderUdVolumeChart);
 
   // ===== VIEW: BIỂU ĐỒ LỊCH SỬ =====
   document.getElementById('view-chart').innerHTML = `
@@ -998,6 +1000,62 @@ function buildTrendDistributionPanel(m){
     return `<div class="trend-item"><div class="trend-item-top"><span><i class="trend-dot" style="background:${item.color}"></i>${item.label}</span><span class="trend-item-pct">${pct.toFixed(1)}%</span></div><div class="trend-item-note">${count.toLocaleString('vi-VN')} mã · ${item.note}</div></div>`;
   }).join('');
   return `<div><div class="ctx-title">Phân bổ xu hướng theo MA stack · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div></div>`;
+}
+
+function buildUdVolumePanel(m){
+  const ratio = m?.up_down_volume_ratio;
+  const up = m?.up_volume, down = m?.down_volume;
+  const hasData = ratio!=null || up!=null;
+  if (!hasData) {
+    return `<div class="panel" style="padding:16px;">
+      <div class="ctx-title">UD VOLUME — dòng tiền nhóm tăng vs nhóm giảm</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">Đang chờ dữ liệu phiên đầu tiên sau khi deploy (15:10 hôm nay). Panel sẽ hiện ratio + Up/Down volume + chart lịch sử sau khi CI chạy xong.</div>
+    </div>`;
+  }
+  const fmtVol = v => v==null?'—':(v>=1e9?(v/1e9).toFixed(1)+'B':(v/1e6).toFixed(1)+'M');
+  const color = ratio==null?'var(--muted)':ratio>=1?'var(--up)':'var(--down)';
+  const note = ratio==null?'Chưa có dữ liệu':ratio>=1?'Tiền tập trung nhóm mã tăng':'Tiền tập trung nhóm mã giảm';
+  const barUp = ratio!=null? Math.min(100, Math.max(0, (ratio/(ratio+1))*100)) : 50;
+  return `<div class="panel" style="padding:16px;">
+    <div class="ctx-title">UD VOLUME — dòng tiền nhóm tăng vs nhóm giảm</div>
+    <div style="display:flex;gap:16px;align-items:center;margin-top:10px;">
+      <div style="min-width:90px;text-align:center;"><div style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;">Ratio</div><div style="font-size:28px;font-weight:900;color:${color};">${ratio!=null?ratio.toFixed(2):'—'}</div><div style="font-size:11px;color:var(--muted);">${note}</div></div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;"><span>Tăng ${fmtVol(up)}</span><span>Giảm ${fmtVol(down)}</span></div>
+        <div style="height:12px;border-radius:6px;overflow:hidden;display:flex;background:var(--panel-tint);border:1px solid var(--border);"><div style="width:${barUp}%;background:var(--up);"></div><div style="width:${100-barUp}%;background:var(--down);"></div></div>
+        <div style="font-size:10px;color:var(--faint);margin-top:4px;">≥1: tiền ở nhóm tăng · &lt;1: tiền ở nhóm giảm · Backfill từ universe hiện tại</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;"><canvas id="udVolumeChart" height="80"></canvas></div>
+  </div>`;
+}
+
+function renderUdVolumeChart(){
+  const cv = document.getElementById('udVolumeChart');
+  if(!cv || !HISTORY) return;
+  const pts = HISTORY.map(h => {
+    const v = h.markets?.ALL?.up_down_volume_ratio;
+    return v==null?null:Number(v);
+  }).filter(v=>v!=null);
+  const allPts = HISTORY.map(h => h.markets?.ALL?.up_down_volume_ratio).map(v=>v==null?null:Number(v));
+  const validPts = allPts.filter(v=>v!=null);
+  if(validPts.length < 5) return;
+  const dpr = window.devicePixelRatio||1, w=cv.clientWidth||600, h=80;
+  cv.width=w*dpr; cv.height=h*dpr; cv.style.height=h+'px';
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const maxV = Math.max(2.5, ...validPts), minV=0;
+  const rng=maxV-minV||1;
+  const yRef = h-6-((1.0-minV)/rng)*(h-12);
+  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(2,yRef); ctx.lineTo(w-2,yRef); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle='#22C55E'; ctx.lineWidth=1.6; ctx.beginPath();
+  let started=false;
+  validPts.slice(-250).forEach((v,i,arr)=>{
+    const x=2+(i/(arr.length-1))*(w-4), y=h-6-((v-minV)/rng)*(h-12);
+    if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.fillStyle='rgba(34,197,94,0.08)';
+  ctx.lineTo(w-2,h); ctx.lineTo(2,h); ctx.closePath(); ctx.fill();
 }
 
 function buildRsiPulseChartPanel(m){
