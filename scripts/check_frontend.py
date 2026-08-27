@@ -72,6 +72,11 @@ def main() -> int:
         if "join('<br>')" not in text:
             ok = fail("shQuickTake phải xuống dòng (join <br>)") and False
 
+    # 5c. Kế hoạch lệnh phải có màu (card layout)
+    if "tradePlanDetailHTML" in text:
+        if "background:rgba(59,130,246" not in text or "R:R" not in text:
+            ok = fail("tradePlanDetailHTML mất màu/card - phải có 3 card xanh/đỏ/xanh và R:R badge") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
