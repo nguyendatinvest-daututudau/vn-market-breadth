@@ -2621,7 +2621,7 @@ const RADAR_REASONS = {
   'RS20 vuot benchmark':'RS20 vượt benchmark','RS20 dang cai thien':'RS20 đang cải thiện',
   'giu tren MA50':'Giữ trên MA50','giu tren MA20':'Giữ trên MA20',
   'volume phien tang tot':'Volume phiên tăng tốt','nen gia co hep':'Nền giá co hẹp',
-  'gan dinh nen 20 phien':'Gần đỉnh nền 20 phiên','volume can o gan dinh':'Volume cạn ở gần đỉnh'
+  'gan dinh nen 20 phien':'Gần đỉnh nền 20 phiên','volume can o gan dinh':'Volume cạn ở gần đỉnh','Volume spike khi nen gia (gom hang)':'⚡ Volume spike khi giá nén — gom hàng kiểu Wyckoff'
 };
 
 function radarLabelReason(x){ return RADAR_REASONS[x] || x; }
@@ -2674,6 +2674,7 @@ function renderRadarContent(){
       <button type="button" data-filter="rsStrong">RS > 80</button>
       <button type="button" data-filter="volumeStrong">Volume > 70</button>
       <button type="button" data-filter="baseTight">Nền giá > 70</button>
+      <button type="button" data-filter="volSpike">⚡ Vol Spike</button>
       <button type="button" data-filter="nearBreakout">Gần breakout</button>
       <button type="button" data-filter="clear">Xóa lọc</button>
     </div>
@@ -2716,6 +2717,7 @@ function filteredRadarRows(){
     if (activeRadarFilters.has('rsStrong')&&Number(sc.relative_strength||0)<80) return false;
     if (activeRadarFilters.has('volumeStrong')&&Number(sc.volume||0)<70) return false;
     if (activeRadarFilters.has('baseTight')&&Number(sc.contraction||0)<70) return false;
+    if (activeRadarFilters.has('volSpike')&&Number(r.vol_spike_ratio||0)<1.5) return false;
     if (activeRadarFilters.has('nearBreakout')&&Number(r.position20||0)<80) return false;
     return true;
   }).sort((a,b)=>(Number(b[radarSortKey])||0)-(Number(a[radarSortKey])||0));
@@ -2735,7 +2737,7 @@ function renderRadarTable(){
       <td><div class="score">${RADAR_FMT(r.score)}</div>${radarScoreBar(r.score)}</td>
       <td><b style="color:${r.rs20>=0?'var(--green)':'var(--red)'}">RS20 ${RADAR_SIGNED(r.rs20)}</b><div class="sub">RS60 ${RADAR_SIGNED(r.rs60)} | Trend ${RADAR_SIGNED(r.rs_trend)}</div></td>
       <td><div>DD60 ${RADAR_SIGNED(r.drawdown60)}%</div><div class="sub">Return20 ${RADAR_SIGNED(r.return20)}%</div></td>
-      <td><div>U/D ${RADAR_FMT(r.up_down_volume_ratio,2)}</div><div class="sub">Dry-up ${RADAR_FMT(r.vol_dry_ratio,2)} | A ${RADAR_FMT(r.accumulation_days,0)} / D ${RADAR_FMT(r.distribution_days,0)}</div></td>
+      <td><div>U/D ${RADAR_FMT(r.up_down_volume_ratio,2)}${r.vol_spike_ratio!=null?` · <span style="color:${r.vol_spike_ratio>=1.5?'var(--green)':'var(--muted)'}">Spike ${RADAR_FMT(r.vol_spike_ratio,1)}x</span>`:''}</div><div class="sub">Dry-up ${RADAR_FMT(r.vol_dry_ratio,2)} | A ${RADAR_FMT(r.accumulation_days,0)} / D ${RADAR_FMT(r.distribution_days,0)}</div></td>
       <td><div>R20 ${RADAR_FMT(r.range20)}%</div><div class="sub">R60 ${RADAR_FMT(r.range60)}%</div></td>
       <td><div>Pos20 ${RADAR_FMT(r.position20)}%</div>${radarScoreBar(r.position20)}</td>
       <td><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:240px;">${(r.reasons||[]).map(x => `<span class="reason">${escapeHtml(radarLabelReason(x))}</span>`).join('')}</div></td>

@@ -84,6 +84,12 @@ def main() -> int:
         if "filter === 'rr'" not in text:
             ok = fail("applyFilters thiếu lọc rr") and False
 
+    # 5e. Radar Vol Spike
+    if 'data-filter="volSpike"' not in text:
+        ok = fail("Radar thiếu nút Vol Spike") and False
+    if 'vol_spike_ratio' not in text:
+        ok = fail("Radar thiếu vol_spike_ratio") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
