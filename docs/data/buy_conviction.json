@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-02T19:59:22.849982+07:00",
-  "date": "28/08/2026",
+  "generated_at": "2026-09-03T20:03:23.341026+07:00",
+  "date": "03/09/2026",
   "regime": {
-    "label": "Risk-On",
+    "label": null,
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -11,62 +11,10 @@
   },
   "cap_a": 12,
   "counts": {
-    "A": 1,
+    "A": 0,
     "B": 0,
     "C": 0,
-    "in_panel": 1
+    "in_panel": 0
   },
-  "signals": [
-    {
-      "symbol": "BAF",
-      "base_score": 40,
-      "conviction": 50,
-      "tier": "A",
-      "eligible_for_a": true,
-      "in_panel": true,
-      "components": {
-        "base_score": 40,
-        "vol_bonus": false,
-        "adx_bonus": true,
-        "extension_penalty": false
-      },
-      "shadow": {
-        "consecutive_days": 1,
-        "streak_fatigue": false,
-        "atr_pct": 1.7,
-        "atr_band_over": false,
-        "w52_healthy": true,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 2.73,
-      "vol_ratio": 1.42,
-      "adx14": 39.3,
-      "last_price": 32600.0,
-      "confirm_sources": [],
-      "trade_plan": {
-        "entry_type": "breakout",
-        "entry_zone": {
-          "low": 32340.0,
-          "high": 33660.0,
-          "mid": 33000.0
-        },
-        "entry_note": "Gần kháng cự 33000.0 (<3%) — vùng phá vỡ, cần Vol×2 xác nhận",
-        "resistance": 33000.0,
-        "support": 32050.0,
-        "stop": 31208.46,
-        "stop_pct": -5.43,
-        "targets": {
-          "r1": 34018.39,
-          "r2": 34527.58,
-          "r1_pct": 3.09,
-          "r2_pct": 4.63
-        },
-        "rr": {
-          "rr1": 0.57,
-          "rr2": 0.85
-        }
-      },
-      "rank_in_day": 1
-    }
-  ]
+  "signals": []
 }
