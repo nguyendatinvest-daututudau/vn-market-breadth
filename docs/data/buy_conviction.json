@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-04T19:54:07.028369+07:00",
-  "date": "04/09/2026",
+  "generated_at": "2026-09-07T21:28:09.964477+07:00",
+  "date": "07/09/2026",
   "regime": {
-    "label": null,
+    "label": "Trung lập",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -13,8 +13,40 @@
   "counts": {
     "A": 0,
     "B": 0,
-    "C": 0,
+    "C": 1,
     "in_panel": 0
   },
-  "signals": []
+  "signals": [
+    {
+      "symbol": "VIC",
+      "base_score": 35,
+      "conviction": 35,
+      "tier": "C",
+      "eligible_for_a": true,
+      "in_panel": false,
+      "components": {
+        "base_score": 35,
+        "vol_bonus": false,
+        "adx_bonus": false,
+        "extension_penalty": true
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 4.0,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 12.33,
+      "vol_ratio": 0.97,
+      "adx14": 27.9,
+      "last_price": 245000.0,
+      "confirm_sources": [
+        "ensemble"
+      ],
+      "trade_plan": null,
+      "rank_in_day": 1
+    }
+  ]
 }
