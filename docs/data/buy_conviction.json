@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-07T21:28:09.964477+07:00",
-  "date": "07/09/2026",
+  "generated_at": "2026-09-08T20:03:26.746877+07:00",
+  "date": "08/09/2026",
   "regime": {
-    "label": "Trung lập",
+    "label": "Risk-On",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -12,20 +12,20 @@
   "cap_a": 12,
   "counts": {
     "A": 0,
-    "B": 0,
-    "C": 1,
+    "B": 1,
+    "C": 0,
     "in_panel": 0
   },
   "signals": [
     {
-      "symbol": "VIC",
-      "base_score": 35,
-      "conviction": 35,
-      "tier": "C",
+      "symbol": "PVT",
+      "base_score": 45,
+      "conviction": 45,
+      "tier": "B",
       "eligible_for_a": true,
       "in_panel": false,
       "components": {
-        "base_score": 35,
+        "base_score": 45,
         "vol_bonus": false,
         "adx_bonus": false,
         "extension_penalty": true
@@ -33,19 +33,42 @@
       "shadow": {
         "consecutive_days": 0,
         "streak_fatigue": false,
-        "atr_pct": 4.0,
+        "atr_pct": 3.2,
         "atr_band_over": false,
         "w52_healthy": false,
         "rs_vs_vni": null
       },
-      "dist_ma20": 12.33,
-      "vol_ratio": 0.97,
-      "adx14": 27.9,
-      "last_price": 245000.0,
+      "dist_ma20": 5.76,
+      "vol_ratio": 1.46,
+      "adx14": 23.5,
+      "last_price": 21300.0,
       "confirm_sources": [
-        "ensemble"
+        "ensemble",
+        "luc_mach"
       ],
-      "trade_plan": null,
+      "trade_plan": {
+        "entry_type": "pullback",
+        "entry_zone": {
+          "low": 19938.6,
+          "high": 20588.85,
+          "mid": 20263.72
+        },
+        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
+        "resistance": 29728.0,
+        "support": 20140.0,
+        "stop": 18563.98,
+        "stop_pct": -8.39,
+        "targets": {
+          "r1": 21500.88,
+          "r2": 29728.0,
+          "r1_pct": 6.11,
+          "r2_pct": 46.71
+        },
+        "rr": {
+          "rr1": 0.73,
+          "rr2": 5.57
+        }
+      },
       "rank_in_day": 1
     }
   ]
