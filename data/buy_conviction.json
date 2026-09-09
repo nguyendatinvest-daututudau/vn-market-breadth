@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-08T20:03:26.746877+07:00",
-  "date": "08/09/2026",
+  "generated_at": "2026-09-09T20:12:31.894449+07:00",
+  "date": "09/09/2026",
   "regime": {
-    "label": "Risk-On",
+    "label": "Trung lập",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -18,55 +18,52 @@
   },
   "signals": [
     {
-      "symbol": "PVT",
-      "base_score": 45,
+      "symbol": "VIC",
+      "base_score": 35,
       "conviction": 45,
       "tier": "B",
       "eligible_for_a": true,
       "in_panel": false,
       "components": {
-        "base_score": 45,
+        "base_score": 35,
         "vol_bonus": false,
-        "adx_bonus": false,
+        "adx_bonus": true,
         "extension_penalty": true
       },
       "shadow": {
         "consecutive_days": 0,
         "streak_fatigue": false,
-        "atr_pct": 3.2,
+        "atr_pct": 4.0,
         "atr_band_over": false,
         "w52_healthy": false,
         "rs_vs_vni": null
       },
-      "dist_ma20": 5.76,
-      "vol_ratio": 1.46,
-      "adx14": 23.5,
-      "last_price": 21300.0,
-      "confirm_sources": [
-        "ensemble",
-        "luc_mach"
-      ],
+      "dist_ma20": 11.94,
+      "vol_ratio": 0.77,
+      "adx14": 31.7,
+      "last_price": 247700.0,
+      "confirm_sources": [],
       "trade_plan": {
         "entry_type": "pullback",
         "entry_zone": {
-          "low": 19938.6,
-          "high": 20588.85,
-          "mid": 20263.72
+          "low": 219072.15,
+          "high": 240369.9,
+          "mid": 229721.02
         },
         "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
-        "resistance": 29728.0,
-        "support": 20140.0,
-        "stop": 18563.98,
-        "stop_pct": -8.39,
+        "resistance": 252666.67,
+        "support": 243666.67,
+        "stop": 164383.25,
+        "stop_pct": -28.44,
         "targets": {
-          "r1": 21500.88,
-          "r2": 29728.0,
-          "r1_pct": 6.11,
-          "r2_pct": 46.71
+          "r1": 252666.67,
+          "r2": 265000.0,
+          "r1_pct": 9.99,
+          "r2_pct": 15.36
         },
         "rr": {
-          "rr1": 0.73,
-          "rr2": 5.57
+          "rr1": 0.35,
+          "rr2": 0.54
         }
       },
       "rank_in_day": 1
