@@ -1,51 +1,51 @@
 {
-  "generated_at": "2026-08-26T17:48:42.767999+07:00",
-  "date": "26/08/2026",
+  "generated_at": "2026-09-10T20:02:29.558364+07:00",
+  "date": "10/09/2026",
   "regime": {
-    "score": 76.0,
+    "score": 57.4,
     "label": "Risk-On",
     "tone": "risk_on",
     "components": {
       "ad_ratio": {
-        "value": 1.46,
-        "points": 68.4
+        "value": 0.8,
+        "points": 34.0
       },
       "pct_above_ma20": {
-        "value": 73.0,
-        "points": 81.5
+        "value": 35.1,
+        "points": 55.1
       },
       "pct_above_ma50": {
-        "value": 40.9,
-        "points": 60.9
+        "value": 33.3,
+        "points": 53.3
       },
       "index_position": {
         "value": {
-          "close": 1821.32,
-          "ma20": 1762.9,
+          "close": 1829.23,
+          "ma20": 1790.21,
           "above_ma20": true,
-          "ma50": 1786.83,
+          "ma50": 1782.89,
           "above_ma50": true,
-          "ma200": 1779.72,
+          "ma200": 1788.14,
           "above_ma200": true,
-          "rsi": 62.8,
-          "macd_hist": 9.11,
+          "rsi": 59.4,
+          "macd_hist": 5.33,
           "macd_up": true
         },
         "points": 98.0
       },
       "rsi_pulse": {
         "value": {
-          "under_30": 1,
-          "over_70": 2,
-          "over_50": 97,
-          "total": 159,
+          "under_30": 5,
+          "over_70": 4,
+          "over_50": 52,
+          "total": 154,
           "period": 14
         },
-        "points": 50.4
+        "points": 49.6
       },
       "volume_ud": {
-        "value": 4.8,
-        "points": 95.0
+        "value": 1.023,
+        "points": 51.1
       }
     },
     "weights": {
@@ -58,33 +58,33 @@
     }
   },
   "divergence": {
-    "state": "none",
-    "note": "Không có phân kỳ rõ rệt giữa giá và độ rộng.",
+    "state": "bearish",
+    "note": "Giá ở vùng đỉnh nhưng độ rộng (% trên MA20) không xác nhận — rủi ro đảo chiều giảm.",
     "detail": {
       "sessions": 21,
-      "last_close": 1821.32,
-      "price_high": 1821.32,
-      "price_low": 1704.68,
-      "last_pct_above_ma20": 73.0,
+      "last_close": 1829.23,
+      "price_high": 1853.08,
+      "price_low": 1726.69,
+      "last_pct_above_ma20": 35.1,
       "pct_high": 78.8,
-      "pct_low": 9.1
+      "pct_low": 33.5
     }
   },
   "breadth_momentum": {
     "available": true,
-    "oscillator": 8.92,
-    "signal": 6.54,
-    "histogram": 2.38,
+    "oscillator": 3.16,
+    "signal": 5.59,
+    "histogram": -2.43,
     "extreme": "none",
-    "last_pct_above_ma20": 73.0
+    "last_pct_above_ma20": 35.1
   },
   "zweig_breadth_thrust": {
     "available": true,
     "current_observation_available": true,
     "state": "expired",
-    "date": "26/08/2026",
-    "ratio": 0.580537,
-    "ema10": 0.498431,
+    "date": "10/09/2026",
+    "ratio": 0.439446,
+    "ema10": 0.421597,
     "armed_date": "28/07/2026",
     "confirmed_date": null,
     "sessions_since_armed": null,
@@ -160,32 +160,32 @@
     "market": "HOSE",
     "ema_period": 10,
     "formula": "EMA10[Advances/(Advances+Declines)]",
-    "valid_sessions": 301
+    "valid_sessions": 308
   },
   "index": {
     "VNI": {
-      "close": 1821.32,
-      "ma20": 1762.9,
+      "close": 1829.23,
+      "ma20": 1790.21,
       "above_ma20": true,
-      "ma50": 1786.83,
+      "ma50": 1782.89,
       "above_ma50": true,
-      "ma200": 1779.72,
+      "ma200": 1788.14,
       "above_ma200": true,
-      "rsi": 62.8,
-      "macd_hist": 9.11,
+      "rsi": 59.4,
+      "macd_hist": 5.33,
       "macd_up": true
     },
     "HNXINDEX": {
-      "close": 281.96,
-      "ma20": 283.67,
+      "close": 278.37,
+      "ma20": 282.29,
       "above_ma20": false,
-      "ma50": 293.25,
+      "ma50": 286.65,
       "above_ma50": false,
-      "ma200": 268.42,
+      "ma200": 269.11,
       "above_ma200": true,
-      "rsi": 46.8,
-      "macd_hist": 0.38,
-      "macd_up": true
+      "rsi": 42.4,
+      "macd_hist": -0.07,
+      "macd_up": false
     }
   }
 }
