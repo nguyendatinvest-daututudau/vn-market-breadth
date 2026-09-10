@@ -45,6 +45,7 @@ from accumulation_radar import main as run_accumulation_radar
 from market_regime import main as run_market_regime
 from stock_health import main as run_stock_health
 from buy_conviction import main as run_buy_conviction
+from signal_performance import main as run_signal_performance
 from backfill_index import main as run_backfill_index
 
 LATEST_JSON = DATA_DIR / "breadth_latest.json"
@@ -766,7 +767,7 @@ def _sync_docs_data(include_signal_outputs: bool = True):
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
     files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "backtest_zweig.json", "latest_prices.json", "stock_health.json", "buy_conviction.json"]
     if include_signal_outputs:
-        files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json"])
+        files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json", "signal_performance.json"])
     for f in files:
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
@@ -1150,6 +1151,12 @@ def main():
         except Exception as e:
             print(f"Loi sinh buy conviction: {e}")
             raise
+        # Do hieu qua tin hieu that (khong chan pipeline khi loi).
+        try:
+            run_signal_performance()
+            print(f"Da ghi signal performance.\n")
+        except Exception as e:
+            print(f"Loi sinh signal performance: {e}")
     else:
         print(f"Bo qua sinh tin hieu: du lieu thi truong {all_snap['data_status']} ({all_snap['date'] or 'khong co ngay'}).")
 
