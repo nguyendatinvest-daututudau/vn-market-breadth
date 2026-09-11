@@ -346,19 +346,7 @@
   @media(max-width:700px){#radarView .legend{grid-template-columns:1fr;}}
 
   /* Perf view */
-  #perfView .perf-q{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-  @media(max-width:760px){#perfView .perf-q{grid-template-columns:1fr;}}
-  #perfView .perf-qcard{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--panel-tint);}
-  #perfView .perf-qcard b{display:block;font-size:13px;margin-bottom:4px;}
-  #perfView .perf-qcard span{font-size:11.5px;color:var(--muted);line-height:1.5;}
   #perfView .rate{font-weight:900;font-size:15px;}
-  #perfView .verdict{font-size:12px;line-height:1.6;background:var(--panel-tint);border-left:3px solid var(--accent);border-radius:6px;padding:8px 12px;margin-top:8px;}
-  #perfView .sys-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px;}
-  #perfView .sys-card{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--panel);}
-  #perfView .sys-card h3{font-size:14px;margin-bottom:6px;}
-  #perfView .kv{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);}
-  #perfView .kv:last-child{border-bottom:none;}
-  #perfView .kv .k{color:var(--muted);} #perfView .kv .v{font-weight:700;}
 
   /* Regime panel */
   .regime-panel{background:var(--panel-tint);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
@@ -2959,20 +2947,33 @@ function perfOutcomeLabel(sys, outcome){
   return map[outcome] || outcome || '—';
 }
 
+function perfThinTag(n){ return n < 15 ? ' <span class="tag ens-w" title="Mẫu còn mỏng, chưa nên kết luận">mẫu mỏng</span>' : ''; }
+function perfThinRow(n){ return n < 15 ? ' style="opacity:.55;"' : ''; }
+
+// Câu chốt 1 dòng cho từng cách đánh (giữ lại tên perfVerdict cho khối Ôm để guard không vỡ).
 function perfVerdict(key, s){
-  const lb = s.label;
-  const nT10 = (s.horizons?.T10 || {}).n || 0;
-  const nR1 = (s.plan_real || {}).n || 0;
-  if (nT10 < 15 && nR1 < 15) return `<b>${escapeHtml(lb)}</b>: mẫu còn mỏng (n=${nT10}), chưa nên kết luận — theo dõi thêm vài phiên.`;
-  const hit2 = (s.horizons?.T10 || {}).hit2;
-  const pm5 = s.pm5?.hit_p5_first_rate;
-  const r1 = s.plan_real?.r1_first_rate;
-  const parts = [];
-  if (r1 !== null && r1 !== undefined) parts.push(r1 >= 0.6 ? `kỷ luật tốt: 10 lệnh thì ~${Math.round(r1 * 10)} lệnh chạm R1 trước stop` : r1 >= 0.45 ? `kỷ luật trung bình: ~${Math.round(r1 * 10)}/10 lệnh chạm R1 trước` : `kỷ luật yếu: chỉ ~${Math.round(r1 * 10)}/10 lệnh chạm R1 trước stop`);
-  if (pm5 !== null && pm5 !== undefined) parts.push(pm5 >= 0.5 ? `hợp đánh lướt T+3–T+5 (bật +5% nhanh)` : `không hợp đánh lướt, bật +5% chậm`);
-  if (hit2 !== null && hit2 !== undefined && pm5 !== null && pm5 !== undefined && pm5 - hit2 > 0.12) parts.push(`hay bật lên rồi xìu — phải chốt sớm, không ôm đủ 10 phiên`);
-  if (!parts.length) return `<b>${escapeHtml(lb)}</b>: chưa đủ dữ liệu.`;
-  return `<b>${escapeHtml(lb)}</b>: ${parts.join(' · ')}.`;
+  const t10 = s.horizons?.T10 || {};
+  if ((t10.n || 0) < 15) return 'Mẫu mỏng — chưa kết luận, theo dõi thêm.';
+  const hit2 = t10.hit2, pm5 = s.pm5?.hit_p5_first_rate;
+  let out = `10 lệnh ôm đủ 10 phiên thì ~${Math.round((hit2 || 0) * 10)} lệnh lãi ≥2%.`;
+  if (hit2 != null && pm5 != null && pm5 - hit2 > 0.12) out += ' Hay bật lên rồi xìu — phải chốt sớm, không ôm đủ 10 phiên.';
+  return out;
+}
+function perfLướtVerdict(s){
+  const pm5 = s.pm5 || {};
+  if ((pm5.n || 0) < 15) return 'Mẫu mỏng — chưa kết luận, theo dõi thêm.';
+  const p5 = pm5.hit_p5_first_rate || 0, m5 = pm5.hit_m5_first_rate || 0;
+  let out = `Bật +5% trong ~${pm5.median_bars ?? '?'} phiên.`;
+  out += m5 >= 0.4 ? ` Thủng −5% cũng cao (${perfPct(m5)}) — chốt nửa ở +5%, cắt nhanh.` : ` Thủng −5% thấp (${perfPct(m5)}) — giữ tự tin hơn.`;
+  return out;
+}
+function perfPlanVerdict(s){
+  const pr = s.plan_real || {};
+  if ((pr.n || 0) < 15) return 'Mẫu mỏng — chưa kết luận, theo dõi thêm.';
+  const r1 = pr.r1_first_rate || 0;
+  let out = r1 >= 0.6 ? `Gồng tới R1 được (10 lệnh ~${Math.round(r1 * 10)} lệnh chạm R1 trước).` : r1 >= 0.45 ? `Gồng R1 tạm được (~${Math.round(r1 * 10)}/10 lệnh).` : `Đừng gồng — R1 yếu (~${Math.round(r1 * 10)}/10 lệnh).`;
+  if (pr.r2_touch_rate != null && pr.r2_touch_rate >= 0.15) out += ` ${perfPct(pr.r2_touch_rate)} còn đi tiếp tới R2.`;
+  return out;
 }
 
 function renderPerfContent(){
@@ -2982,27 +2983,36 @@ function renderPerfContent(){
     `Đo trên <b>${perfData.total_buy_signals || 0} lệnh mua thật</b> · ${perfData.history_sessions || 0} phiên (${escapeHtml(range[0] || '')} → ${escapeHtml(range[1] || '')})`
     + (genDate ? ` · Tính lúc ${genDate.toLocaleString('vi-VN')}` : '')
     + (perfData.date ? ` · Tự cập nhật mỗi phiên qua pipeline` : '');
-  const rows = perfData.leaderboard || [];
-  const lb = rows.map(r => {
-    const t10 = r.hit2_T10;
-    return `<tr>
-      <td><b>${escapeHtml(r.label)}</b></td>
-      <td><span class="rate" style="color:${perfRateColor(t10)}">${perfPct(t10)}</span><div class="sub">n=${r.n ?? 0}</div></td>
-      <td><span class="rate" style="color:${perfRateColor(r.hit_p5_first_rate)}">${perfPct(r.hit_p5_first_rate)}</span><div class="sub">n=${r.pm5_n ?? 0}</div></td>
-      <td><span class="rate" style="color:${perfRateColor(r.r1_first_rate)}">${perfPct(r.r1_first_rate)}</span><div class="sub">n=${r.plan_real_n ?? 0}</div></td>
+  const systems = Object.values(perfData.per_system || {});
+  const by = (fn) => systems.slice().sort((a, b) => (fn(b) ?? -1) - (fn(a) ?? -1));
+  const lướtRows = by(s => s.pm5?.hit_p5_first_rate).map((s, i) => {
+    const pm5 = s.pm5 || {};
+    return `<tr${perfThinRow(pm5.n || 0)}>
+      <td class="sub">${i + 1}</td>
+      <td><b>${escapeHtml(s.label)}</b>${perfThinTag(pm5.n || 0)}</td>
+      <td><span class="rate" style="color:${perfRateColor(pm5.hit_p5_first_rate)}">${perfPct(pm5.hit_p5_first_rate)}</span> <span class="sub">n=${pm5.n ?? 0}</span></td>
+      <td><span style="color:${perfRateColor(1 - (pm5.hit_m5_first_rate ?? 0))}">${perfPct(pm5.hit_m5_first_rate)}</span> <span class="sub">thủng</span></td>
+      <td class="sub">${perfLướtVerdict(s)}</td>
     </tr>`;
   }).join('');
-  const sysCards = Object.entries(perfData.per_system || {}).map(([key, s]) => {
-    const t10 = s.horizons?.T10 || {};
-    const pm5 = s.pm5 || {};
+  const planRows = by(s => s.plan_real?.r1_first_rate).map((s, i) => {
     const pr = s.plan_real || {};
-    const row = (k, v) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`;
-    return `<div class="sys-card"><h3>${escapeHtml(s.label)}</h3>
-      ${row('Ôm 10 phiên lãi 2%', `<span style="color:${perfRateColor(t10.hit2)}">${perfPct(t10.hit2)}</span> (n=${t10.n ?? 0})`)}
-      ${row('+5% trước −5%', `<span style="color:${perfRateColor(pm5.hit_p5_first_rate)}">${perfPct(pm5.hit_p5_first_rate)}</span> (n=${pm5.n ?? 0}${pm5.median_bars != null ? `, ~${pm5.median_bars} phiên` : ''})`)}
-      ${row('R1 trước stop', `<span style="color:${perfRateColor(pr.r1_first_rate)}">${perfPct(pr.r1_first_rate)}</span> (n=${pr.n ?? 0}${pr.r2_touch_rate != null ? `, R2 ${perfPct(pr.r2_touch_rate)}` : ''})`)}
-      <div class="verdict">${perfVerdict(key, s)}</div>
-    </div>`;
+    return `<tr${perfThinRow(pr.n || 0)}>
+      <td class="sub">${i + 1}</td>
+      <td><b>${escapeHtml(s.label)}</b>${perfThinTag(pr.n || 0)}</td>
+      <td><span class="rate" style="color:${perfRateColor(pr.r1_first_rate)}">${perfPct(pr.r1_first_rate)}</span> <span class="sub">n=${pr.n ?? 0}</span></td>
+      <td><span class="sub">stop ${perfPct(pr.stop_first_rate)}${pr.r2_touch_rate != null ? ` · R2 ${perfPct(pr.r2_touch_rate)}` : ''}</span></td>
+      <td class="sub">${perfPlanVerdict(s)}</td>
+    </tr>`;
+  }).join('');
+  const omRows = by(s => s.horizons?.T10?.hit2).map((s, i) => {
+    const t10 = s.horizons?.T10 || {};
+    return `<tr${perfThinRow(t10.n || 0)}>
+      <td class="sub">${i + 1}</td>
+      <td><b>${escapeHtml(s.label)}</b>${perfThinTag(t10.n || 0)}</td>
+      <td><span class="rate" style="color:${perfRateColor(t10.hit2)}">${perfPct(t10.hit2)}</span> <span class="sub">n=${t10.n ?? 0}</span></td>
+      <td class="sub">${perfVerdict(s.label, s)}</td>
+    </tr>`;
   }).join('');
   const recent = (perfData.recent || []).slice(-30).reverse().map(r => {
     const sysLb = (perfData.per_system?.[r.system] || {}).label || r.system;
@@ -3016,23 +3026,35 @@ function renderPerfContent(){
     </tr>`;
   }).join('');
   document.getElementById('perfContent').innerHTML = `
-    <div class="perf-q">
-      <div class="perf-qcard"><b>1 · Ôm 10 phiên có lãi 2%?</b><span>Nhìn giá đóng cửa đúng phiên thứ 10. Mã tăng nóng rồi hạ nhiệt trước đó vẫn tính trượt — cách chấm khó nhất.</span></div>
-      <div class="perf-qcard"><b>2 · Có chạm +5% trước khi thủng −5%?</b><span>Cách chấm của dân lướt sóng T+3–T+5: chỉ cần bật lên +5% trước khi rơi −5%, trong 20 phiên.</span></div>
-      <div class="perf-qcard"><b>3 · Kế hoạch lệnh có đúng?</b><span>Tái dựng đúng vùng mua/stop/R1 từng hiển thị, xem giá chạm R1 trước hay stop trước trong 20 phiên.</span></div>
+    <div class="panel" style="margin-bottom:14px;">
+      <div class="panel-head"><div><div class="panel-title">⚡ Lướt T+3–T+5 — chạm +5% trước khi thủng −5%?</div><div class="sub">Chốt nhanh, cắt nhanh trong 20 phiên · cột “Thủng” càng thấp càng an toàn</div></div></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>#</th><th>Hệ</th><th title="Chạm +5% trước −5%, 20 phiên">Bật +5%</th><th title="Thủng −5% trước — mặt rủi ro">Thủng −5%</th><th>Dùng thế nào</th>
+      </tr></thead><tbody>${lướtRows || '<tr><td colspan="5">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
     </div>
     <div class="panel" style="margin-bottom:14px;">
-      <div class="panel-head"><div><div class="panel-title">Bảng xếp hạng hệ tín hiệu</div><div class="sub">Tự cập nhật mỗi phiên — phiên mới chưa đủ 20 phiên sẽ tự loại khỏi mẫu.</div></div></div>
+      <div class="panel-head"><div><div class="panel-title">🎯 Đánh kỷ luật theo plan — chạm R1 trước hay stop trước?</div><div class="sub">Tái dựng đúng vùng mua/stop/R1 từng hiển thị · R2 = số lệnh còn đi tiếp tới mục tiêu xa</div></div></div>
       <div class="table-wrap"><table><thead><tr>
-        <th>Hệ</th><th title="Giá đóng T+10 lãi ≥2%">Ôm 10 phiên</th><th title="+5% trước −5%, 20 phiên">Lướt +5%</th><th title="R1 thật trước stop, 20 phiên">Kỷ luật R1</th>
-      </tr></thead><tbody>${lb || '<tr><td colspan="4">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
+        <th>#</th><th>Hệ</th><th title="R1 thật trước stop, 20 phiên">R1 trước</th><th>Mặt đối ứng</th><th>Dùng thế nào</th>
+      </tr></thead><tbody>${planRows || '<tr><td colspan="5">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
     </div>
-    <div class="sys-grid">${sysCards}</div>
+    <div class="panel" style="margin-bottom:14px;">
+      <h2 class="accordion collapsed" onclick="toggleAccordion(this)">🛋 Ôm 10 phiên — đóng cửa T+10 lãi ≥2%?</h2>
+      <div class="accordion-body collapsed">
+        <div class="sub" style="margin-bottom:8px;">Cách chấm khó nhất: tăng nóng rồi hạ nhiệt trước T+10 vẫn tính trượt</div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>#</th><th>Hệ</th><th>Ôm T+10</th><th>Nhận xét</th>
+        </tr></thead><tbody>${omRows || '<tr><td colspan="4">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
+      </div>
+    </div>
     <div class="panel" style="margin-bottom:0;">
-      <div class="panel-head"><div><div class="panel-title">30 lệnh gần nhất</div><div class="sub">Bấm vào mã để xem thẻ sức khỏe. “Đang chờ” = chưa đủ phiên để kết luận.</div></div></div>
-      <div class="table-wrap"><table><thead><tr>
-        <th>Ngày</th><th>Mã</th><th>Hệ</th><th style="text-align:right;">Giá vào</th><th>Lướt +5%</th><th>Kỷ luật R1</th>
-      </tr></thead><tbody>${recent || '<tr><td colspan="6">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
+      <h2 class="accordion collapsed" onclick="toggleAccordion(this)">30 lệnh gần nhất</h2>
+      <div class="accordion-body collapsed">
+        <div class="sub" style="margin-bottom:8px;">Bấm vào mã để xem thẻ sức khỏe. “Đang chờ” = chưa đủ phiên để kết luận.</div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>Ngày</th><th>Mã</th><th>Hệ</th><th style="text-align:right;">Giá vào</th><th>Lướt +5%</th><th>Kỷ luật R1</th>
+        </tr></thead><tbody>${recent || '<tr><td colspan="6">Chưa có dữ liệu.</td></tr>'}</tbody></table></div>
+      </div>
     </div>`;
 }
 
