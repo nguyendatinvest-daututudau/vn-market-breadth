@@ -120,6 +120,13 @@ def main() -> int:
     if 'Báo mua rõ' not in text:
         ok = fail("thiếu nhãn Báo mua rõ trong actionForRow") and False
 
+    # 5k. Tab tín hiệu gọn: why thu gọn, score hậu tố, sort gần chuẩn, giá gộp
+    for token in ("toggleSigWhy", "vì sao? ▸", "watchNearness", "sigScoreText"):
+        if token not in text:
+            ok = fail(f"thiếu {token} (tab tín hiệu gọn)") and False
+    if 'tr.tier-ref{opacity' in text:
+        ok = fail("còn làm mờ dòng reference (tr.tier-ref opacity)") and False
+
     # 5h. Lịch sử tín hiệu dạng biểu đồ đường
     for token in ("sigHistChart", "renderSigHistChart", "sigHistPoints", "toggleSigHistSeries"):
         if token not in text:

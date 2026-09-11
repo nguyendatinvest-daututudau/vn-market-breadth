@@ -144,6 +144,8 @@
   .sig-expl{font-size:12.5px;color:var(--text);line-height:1.45;max-width:340px;}
 .sig-why{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:340px;border-left:2px solid rgba(255,77,46,0.45);padding-left:8px;}
 .sig-action{font-size:12.5px;color:var(--text);line-height:1.55;margin-bottom:5px;max-width:360px;border-left:2px solid var(--up);padding-left:8px;}
+.sig-why-toggle{font-size:11px;color:var(--faint);cursor:pointer;margin-top:2px;user-select:none;}
+.sig-why-toggle:hover{color:var(--accent);}
   .sig-source{display:flex;gap:3px;flex-wrap:wrap;}
   .src-tag{font-family:var(--font-all);font-size:10.5px;padding:2px 8px;border-radius:4px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);}
   .src-tag.hy{color:#d946ef;border-color:rgba(217,70,239,0.25);background:rgba(217,70,239,0.06);}
@@ -246,7 +248,7 @@
   .hub-table tbody tr:nth-child(even){background:rgba(138,129,114,0.05);}
   .hub-table tr.tier-good td:first-child{box-shadow:inset 3px 0 0 var(--up);}
   .hub-table tr.tier-warn td:first-child{box-shadow:inset 3px 0 0 #C2413B;}
-  .hub-table tr.tier-ref{opacity:.55;}
+  .hub-table tr.tier-ref td:first-child{box-shadow:inset 3px 0 0 rgba(148,163,184,.45);}
   .hub-table tr.row-ens td{background:rgba(6,182,212,0.07);}
   .hub-table tr.row-ens td:first-child{box-shadow:inset 3px 0 0 var(--accent-2);}
   .ens-strength{display:inline-block;height:6px;border-radius:3px;background:rgba(6,182,212,0.18);width:56px;vertical-align:middle;margin-right:6px;position:relative;overflow:hidden;}
@@ -1546,13 +1548,9 @@ function buildSignalHub(dateStr){
   const capped = globalSearch && filteredRows.length > SEARCH_CAP;
   if (capped) filteredRows = filteredRows.slice(0, SEARCH_CAP);
 
-  // Tab Theo doi: Ensemble (he co trong so backtest) len truoc, LM/K4 sau
+  // Tab Theo doi: sort theo do gan chuan mua (gan dat nguong nhat len truoc).
   if (activeFilter === 'watch') {
-    filteredRows.sort((a, b) => {
-      const ea = a.source === 'ensemble' ? 1 : 0;
-      const eb = b.source === 'ensemble' ? 1 : 0;
-      return eb - ea || (Number(b.score) || 0) - (Number(a.score) || 0);
-    });
+    filteredRows.sort((a, b) => watchNearness(b) - watchNearness(a) || (Number(b.score) || 0) - (Number(a.score) || 0));
   }
 
   const EMPTY_MSG = {
@@ -1601,12 +1599,11 @@ function buildSignalHub(dateStr){
 
     return `<tr class="${rowCls}" title="${escapeHtml(srcNote)} · ${escapeHtml((r.strategies || []).join(', '))}">
       ${globalSearch ? `<td class="sub" style="white-space:nowrap;">${escapeHtml(r.sigDate || '')}</td>` : ''}
-      <td class="mono" style="font-weight:700;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${r.repeat}</td>
-      <td class="num mono">${escapeHtml(r.score)}</td>
+      <td class="mono" style="font-weight:700;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${r.repeat}<div class="sub" style="font-weight:400;">${escapeHtml(r.price ?? '—')}</div></td>
+      <td class="num mono" title="Thang điểm riêng từng hệ — không so trực tiếp">${escapeHtml(sigScoreText(r))}</td>
       <td>${typeTag}${convTag}${winrateStr}</td>
       <td>${conf}</td>
-      <td>${actionForRow(r)}${sigExplainCell(r)}</td>
-      <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
+      <td>${actionForRow(r)}${sigExplainCell(r, true)}</td>
     </tr>`;
   }).join('');
 
@@ -1622,10 +1619,33 @@ function buildSignalHub(dateStr){
   return `${searchNote}<div class="table-scroll"><table class="hub-table">
     <thead><tr>
       ${globalSearch ? '<th>Ngày</th>' : ''}
-      <th>Mã</th><th class="num">Score</th><th>Loại</th><th>Xác nhận</th><th>Chi tiết</th><th class="num">Giá</th>
+      <th>Mã</th><th class="num">Score</th><th>Loại</th><th>Xác nhận</th><th>Chi tiết</th>
     </tr></thead>
     <tbody>${tbody}</tbody>
   </table></div>`;
+}
+
+// Do gan chuan mua (0-1) cho tab Theo doi: Ens weak theo %/65,
+// LM watch theo phe mua, K4 watch o giua.
+function watchNearness(r){
+  if (r.source === 'ensemble' && r.signalType === 'weak') return Math.min(1, (parseFloat(r.score) || 0) / 65);
+  if (r.source === 'luc-mach' && r.signalType === 'watch') {
+    if (r.watchDir === 'buy') return 0.8;
+    if (r.watchDir === 'mixed') return 0.5;
+    return 0.3;
+  }
+  if (r.source === 'khung4-tplus' && r.signalType === 'watch') return 0.5;
+  return 0.3;
+}
+
+// Score kem hau to he de khong so nham thang do (57 Ens, B3/6, 80 Mom).
+const SIG_SCORE_SUFFIX = {momentum:'Mom', ensemble:'Ens', mama:'MAMA', ats:'ATS', 'khung4-tplus':'K4'};
+function sigScoreText(r){
+  if (r.source === 'luc-mach' && (r.buyScore != null || r.sellScore != null)) {
+    return [r.buyScore != null ? `B${r.buyScore}/6` : '', r.sellScore != null ? `S${r.sellScore}/6` : ''].filter(Boolean).join(' · ');
+  }
+  const suf = SIG_SCORE_SUFFIX[r.source];
+  return suf ? `${r.score} ${suf}` : r.score;
 }
 
 // Gợi ý khi tab Mua chuẩn trống: ứng viên gần chuẩn nhất + lệnh Buy hệ khác.
@@ -1689,10 +1709,19 @@ function collectAllSignals(dateStr){
   return _collectSignals(MOMENTUM, SIGNALS, ENSEMBLE, LUC_MACH, MAMA_POSITIONAL, ADVANCED_TRAILSTOP, KHUNG4_TPLUS);
 }
 
-function sigExplainCell(r){
+function sigExplainCell(r, collapsed){
   const e = escapeHtml(r.expl || '');
   const w = r.why ? `<div class="sig-why">${escapeHtml(r.why)}</div>` : '';
-  return `<div class="sig-expl">${e}</div>${w}`;
+  const body = `<div class="sig-expl">${e}</div>${w}`;
+  if (!collapsed || (!e && !r.why)) return body;
+  return `<div class="sig-why-toggle" onclick="toggleSigWhy(this)">vì sao? ▸</div><div class="sig-why-body" style="display:none;">${body}</div>`;
+}
+function toggleSigWhy(el){
+  const b = el ? el.nextElementSibling : null;
+  if (!b) return;
+  const open = b.style.display !== 'none';
+  b.style.display = open ? 'none' : '';
+  el.textContent = open ? 'vì sao? ▸' : 'vì sao? ▾';
 }
 
 // --- Dòng hành động: gộp tầng + phong độ hệ + kế hoạch lệnh + lịch sử mã ---
@@ -1886,6 +1915,7 @@ function _collectSignals(momSrc, stratSrc, ensSrc, lmSrc, mamaSrc, atsSrc, k4Src
       result.push({
         symbol: s.symbol, score: s.score,
         signalType: s.signal_type, source: 'luc-mach', watchDir,
+        buyScore: s.buy_score ?? null, sellScore: s.sell_score ?? null,
         strategies: s.strategies || [], expl: parts.join(' + '), why: whyLucMach(s),
         rsi: null, adx: null,
         vol: s.last_volume ? Math.round(s.last_volume).toLocaleString('vi-VN') : null,
