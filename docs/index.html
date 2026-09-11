@@ -824,7 +824,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
           </div>
         </div>
         <select id="signalDateSelect" style="display:none;"><option value="">Hôm nay</option></select>
-        <input id="searchInput" type="text" placeholder="Tìm mã..." oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
+        <input id="searchInput" type="text" placeholder="Tìm mã mọi phiên..." title="Gõ để tìm trong toàn bộ lịch sử tín hiệu, không chỉ phiên đang chọn" oninput="searchQuery=this.value.toUpperCase();renderSignalTable()">
         <button class="btn-copy" id="copyBtn" onclick="copySymbols()">Copy DS</button>
       </div>
       <div id="signalTableContainer">${signalsHTML}</div>
@@ -1518,10 +1518,14 @@ function buildHubTabs(){
 
 // --- Unified signal table ---
 function buildSignalHub(dateStr){
-  let rows = collectAllSignals(dateStr);
-  if (!rows.length) return '<div class="note" style="margin-bottom:0;">Chưa có tín hiệu cho ngày này.</div>';
+  const q = (searchQuery || '').trim();
+  const globalSearch = q.length > 0;
+  let rows = globalSearch ? collectSearchSignals(q) : collectAllSignals(dateStr);
+  if (!rows.length) return globalSearch
+    ? `<div class="buy-empty">Không tìm thấy mã chứa "<b>${escapeHtml(q)}</b>" trong toàn bộ lịch sử tín hiệu.</div>`
+    : '<div class="note" style="margin-bottom:0;">Chưa có tín hiệu cho ngày này.</div>';
 
-  const previousDay = previousSignalHistory(dateStr);
+  const previousDay = globalSearch ? null : previousSignalHistory(dateStr);
   const prevSymbols = new Set(previousDay ? _collectSignals(
     previousDay.momentum, previousDay.strategy, previousDay.ensemble, previousDay.luc_mach,
     previousDay.mama_positional, previousDay.advanced_trailstop, previousDay.khung4_tplus,
@@ -1536,7 +1540,11 @@ function buildSignalHub(dateStr){
     return { ...r, repeat };
   });
 
-  let filteredRows = applyFilters(rows, activeFilter, searchQuery);
+  let filteredRows = applyFilters(rows, activeFilter, globalSearch ? '' : searchQuery);
+  const totalHits = filteredRows.length;
+  const SEARCH_CAP = 200;
+  const capped = globalSearch && filteredRows.length > SEARCH_CAP;
+  if (capped) filteredRows = filteredRows.slice(0, SEARCH_CAP);
 
   // Tab Theo doi: Ensemble (he co trong so backtest) len truoc, LM/K4 sau
   if (activeFilter === 'watch') {
@@ -1591,6 +1599,7 @@ function buildSignalHub(dateStr){
     const srcNote = methodLabel(r.source);
 
     return `<tr class="${rowCls}" title="${escapeHtml(srcNote)} · ${escapeHtml((r.strategies || []).join(', '))}">
+      ${globalSearch ? `<td class="sub" style="white-space:nowrap;">${escapeHtml(r.sigDate || '')}</td>` : ''}
       <td class="mono" style="font-weight:700;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${r.repeat}</td>
       <td class="num mono">${escapeHtml(r.score)}</td>
       <td>${typeTag}${winrateStr}</td>
@@ -1600,14 +1609,41 @@ function buildSignalHub(dateStr){
     </tr>`;
   }).join('');
 
-  if (!tbody) return `<div class="buy-empty">${EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.'}</div>`;
+  if (!tbody) return `<div class="buy-empty">${globalSearch ? `Mã "<b>${escapeHtml(q)}</b>" có trong lịch sử nhưng không khớp bộ lọc <b>${escapeHtml(activeFilter)}</b>.` : (EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.')}</div>`;
 
-  return `<div class="table-scroll"><table class="hub-table">
+  const searchNote = globalSearch
+    ? `<div class="sub" style="margin-bottom:8px;">Tìm "<b>${escapeHtml(q)}</b>" trong toàn bộ ${SIGNALS_HISTORY ? SIGNALS_HISTORY.length : 0} phiên · ${totalHits} kết quả${capped ? ` (hiển thị ${SEARCH_CAP} mới nhất)` : ''} · bấm mã để xem thẻ sức khỏe</div>`
+    : '';
+
+  return `${searchNote}<div class="table-scroll"><table class="hub-table">
     <thead><tr>
+      ${globalSearch ? '<th>Ngày</th>' : ''}
       <th>Mã</th><th class="num">Score</th><th>Loại</th><th>Xác nhận</th><th>Chi tiết</th><th class="num">Giá</th>
     </tr></thead>
     <tbody>${tbody}</tbody>
   </table></div>`;
+}
+
+// Tìm mã trong TOÀN BỘ lịch sử tín hiệu (mọi phiên), mới nhất trước.
+// Mỗi dòng kết quả được gắn sigDate để bảng hiển thị cột Ngày.
+function collectSearchSignals(query){
+  const q = String(query || '').trim().toUpperCase();
+  if (!q) return [];
+  const out = [];
+  const addedDates = new Set();
+  const pushDay = (dayLabel, e) => {
+    if (!e) return;
+    _collectSignals(e.momentum, e.strategy, e.ensemble, e.luc_mach, e.mama_positional, e.advanced_trailstop, e.khung4_tplus).forEach(r => {
+      if (r.symbol && r.symbol.includes(q)) out.push({ ...r, sigDate: dayLabel });
+    });
+  };
+  if (SIGNALS_HISTORY) SIGNALS_HISTORY.forEach(h => { addedDates.add(h.date); pushDay(h.date, h); });
+  const todayLabel = LATEST?.markets?.ALL?.date;
+  if (todayLabel && !addedDates.has(todayLabel)) {
+    pushDay(todayLabel, { momentum: MOMENTUM, strategy: SIGNALS, ensemble: ENSEMBLE, luc_mach: LUC_MACH, mama_positional: MAMA_POSITIONAL, advanced_trailstop: ADVANCED_TRAILSTOP, khung4_tplus: KHUNG4_TPLUS });
+  }
+  out.sort((a, b) => (signalDateValue(b.sigDate) || 0) - (signalDateValue(a.sigDate) || 0));
+  return out;
 }
 
 let activeSignalDate = null; // null = hom nay
@@ -1981,9 +2017,10 @@ document.addEventListener('click', (e)=>{
 });
 
 function copySymbols(){
-  let rows = collectAllSignals(activeSignalDate);
+  const q = (searchQuery || '').trim();
+  let rows = q ? collectSearchSignals(q) : collectAllSignals(activeSignalDate);
   if (!rows.length) return;
-  let filtered = applyFilters(rows, activeFilter, searchQuery);
+  let filtered = applyFilters(rows, activeFilter, q ? '' : searchQuery);
   let text = [...new Set(filtered.map(r => r.symbol))].join(', ');
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBtn');

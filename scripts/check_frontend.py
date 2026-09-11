@@ -101,6 +101,12 @@ def main() -> int:
     if 'EMBEDDED_SIGNAL_PERFORMANCE' not in text:
         ok = fail("thiếu EMBEDDED_SIGNAL_PERFORMANCE") and False
 
+    # 5g. Tìm mã toàn lịch sử tín hiệu
+    if 'collectSearchSignals' not in text:
+        ok = fail("thiếu collectSearchSignals (tìm mã mọi phiên)") and False
+    if 'sigDate' not in text:
+        ok = fail("thiếu cột Ngày (sigDate) cho tìm kiếm toàn lịch sử") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
