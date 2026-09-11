@@ -1783,6 +1783,7 @@ function buyConvictionAction(r){
   if (!perfData || !perfData.per_system || !r) return '';
   const verdict = `Báo mua rõ — Conviction hạng ${r.tier}${r.conviction != null ? ` (${r.conviction}đ)` : ''}`;
   const seen = new Set(), bits = [];
+  let rateSrc = null;
   (r.confirm_sources || []).forEach(b => {
     const k = perfKeyFromSourceBadge(b);
     if (!k || seen.has(k)) return;
@@ -1790,6 +1791,7 @@ function buyConvictionAction(r){
     const s = perfData.per_system[k];
     if (!s) return;
     const pm5 = s.pm5 || {}, pr = s.plan_real || {};
+    if (!rateSrc && (pr.n || 0) >= 15) rateSrc = {label: s.label, n: pr.n, r1: pr.r1_first_rate, stop: pr.stop_first_rate};
     if ((pm5.n || 0) >= 15 && pm5.hit_p5_first_rate >= 0.5) bits.push(`${s.label} hợp lướt ${perfPct(pm5.hit_p5_first_rate)}`);
     if ((pr.n || 0) >= 15 && pr.r1_first_rate >= 0.6) bits.push(`${s.label} gồng R1 được ${perfPct(pr.r1_first_rate)}`);
   });
@@ -1798,7 +1800,11 @@ function buyConvictionAction(r){
   const tp = r.trade_plan;
   const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1, rr1 = tp?.rr?.rr1;
   if (ez && stop != null && r1 != null) {
-    planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop">Cắt ${escapeHtml(String(fmtPrice(stop)))}</span><span class="sp-tp">Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}</span>${rr1 != null ? `<span class="sp-rr">R:R ${escapeHtml(String(rr1))}</span>` : ''}</div>`;
+    const r1Pct = rateSrc ? ` · ${perfPct(rateSrc.r1)}` : '';
+    const stopPct = rateSrc ? ` · ${perfPct(rateSrc.stop)}` : '';
+    const r1Title = rateSrc ? ` title="${escapeHtml(rateSrc.label + ': đo thật ' + rateSrc.n + ' lệnh — ' + perfPct(rateSrc.r1) + ' số lệnh chạm R1 trước')}"` : '';
+    const stopTitle = rateSrc ? ` title="${escapeHtml(rateSrc.label + ': đo thật ' + rateSrc.n + ' lệnh — ' + perfPct(rateSrc.stop) + ' số lệnh chạm stop trước')}"` : '';
+    planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop"${stopTitle}>Cắt ${escapeHtml(String(fmtPrice(stop)))}${stopPct}</span><span class="sp-tp"${r1Title}>Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}${r1Pct}</span>${rr1 != null ? `<span class="sp-rr">R:R ${escapeHtml(String(rr1))}</span>` : ''}</div>`;
   }
   let hist = '';
   const st = perfSymbolStatsAll(r.symbol);
@@ -1849,6 +1855,7 @@ function actionForRow(r){
     fit = bits.join(' · ');
   }
   // Tầng 3: 3 chip Mua / Cắt / Chốt (bỏ qua với lệnh bán).
+  // Chip Cắt/Chốt kèm % chạm đo thật của hệ (first-touch 20 phiên).
   let planHTML = '';
   if (!isSell) {
     try {
@@ -1856,8 +1863,17 @@ function actionForRow(r){
       const h = syms ? syms[r.symbol] : null;
       const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (h ? fallbackTradePlan(h) : null);
       const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1;
+      let r1Rate = null, stopRate = null, rateNote = '';
+      if (s && (s.plan_real?.n || 0) >= 15) {
+        r1Rate = s.plan_real.r1_first_rate; stopRate = s.plan_real.stop_first_rate;
+        rateNote = `${s.label}: đo thật ${s.plan_real.n} lệnh trong 20 phiên`;
+      }
       if (ez && stop != null && r1 != null) {
-        planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop">Cắt ${escapeHtml(String(fmtPrice(stop)))}</span><span class="sp-tp">Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}</span></div>`;
+        const r1Pct = r1Rate != null ? ` · ${perfPct(r1Rate)}` : '';
+        const stopPct = stopRate != null ? ` · ${perfPct(stopRate)}` : '';
+        const r1Title = r1Rate != null ? ` title="${escapeHtml(rateNote + ' — ' + perfPct(r1Rate) + ' số lệnh chạm R1 trước')}"` : '';
+        const stopTitle = stopRate != null ? ` title="${escapeHtml(rateNote + ' — ' + perfPct(stopRate) + ' số lệnh chạm stop trước')}"` : '';
+        planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop"${stopTitle}>Cắt ${escapeHtml(String(fmtPrice(stop)))}${stopPct}</span><span class="sp-tp"${r1Title}>Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}${r1Pct}</span></div>`;
       }
     } catch(e) {}
   }
