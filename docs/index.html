@@ -151,6 +151,7 @@
 .sp-buy{background:rgba(59,130,246,.12);color:#7fb0ff;border:1px solid rgba(59,130,246,.35);}
 .sp-stop{background:rgba(248,113,113,.12);color:#ff9c9c;border:1px solid rgba(248,113,113,.35);}
 .sp-tp{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.35);}
+.sp-rr{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.35);}
 .sig-hist{font-size:11px;color:var(--faint);}
 .sig-why-toggle{font-size:11px;color:var(--faint);cursor:pointer;margin-top:2px;user-select:none;}
 .sig-why-toggle:hover{color:var(--accent);}
@@ -856,6 +857,14 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
   if (currentView === 'chart' || currentView === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
   else if (currentView === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
   requestAnimationFrame(() => renderSigHistChart());
+  // Nền: có số hiệu quả thì vẽ thêm khối hành động ở panel Mua chuẩn (1 lần).
+  if (!perfData && !perfHomeRefreshDone && currentView === 'home') {
+    ensurePerfData().then(() => {
+      perfHomeRefreshDone = true;
+      if (currentView !== 'home') return;
+      render();
+    }).catch(() => {});
+  }
 }
 
 function adRatioNote(r){
@@ -1393,7 +1402,7 @@ function buildBuyPanel(dateStr){
         const price = `<td class="num mono">${escapeHtml(String(r.last_price ?? '\u2014'))}</td>`;
         const conditions = `<td>${convictionCondChips(r.components)}${r.shadow?.extension_pct != null ? `<span class="tag wat" style="font-size:10px;">${r.shadow.extension_pct.toFixed(1)}%</span>` : ''}</td>`;
         const sources = `<td>${convictionSources(r.confirm_sources)}</td>`;
-        const why = `<td class="sig-expl">${escapeHtml(r.why || '')}</td>`;
+        const why = `<td class="sig-expl">${buyConvictionAction(r)}${escapeHtml(r.why || '')}</td>`;
         const mainRow = `<tr class="tier-good">${symbol}${score}${price}${conditions}${sources}${why}</tr>`;
         const detailRow = `<tr class="trade-detail" id="detail-${symEsc}" style="display:none"><td colspan="6" style="background:var(--panel-tint);padding:10px 14px;border-top:1px solid var(--border);">${tradePlanDetailHTML(r.trade_plan)}</td></tr>`;
         return mainRow + detailRow;
@@ -1417,7 +1426,7 @@ function buildBuyPanel(dateStr){
           <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
           <td>${wrChip}</td>
           <td>${meterHTML(conf)}</td>
-          <td>${sigExplainCell(r)}</td>
+          <td>${actionForRow(r)}${sigExplainCell(r)}</td>
         </tr>`;
       }).join('');
       body = `<div class="table-scroll"><table class="hub-table">
@@ -1750,6 +1759,54 @@ function perfSymbolStats(symbol, sysKey){
   }
   return perfSymCache[symbol + '|' + sysKey] || null;
 }
+// Lịch sử mã gộp mọi hệ (cho panel Mua chuẩn conviction).
+function perfSymbolStatsAll(symbol){
+  if (!perfData || !perfData.recent) return null;
+  let n = 0, p5 = 0, r1 = 0;
+  perfData.recent.forEach(o => {
+    if (o.symbol !== symbol) return;
+    if (!o.pm5_matured && !o.plan_real_matured) return;
+    n++;
+    if (o.pm5_outcome === 'hit_p5_first') p5++;
+    if (o.plan_real_outcome === 'r1_first') r1++;
+  });
+  return n ? {n, p5, r1} : null;
+}
+function perfKeyFromSourceBadge(b){
+  const k = String(b || '').toLowerCase().replace(/-/g, '_').replace(/_(buy|sell)$/, '');
+  const map = {momentum:'momentum', ensemble:'ensemble', luc_mach:'luc_mach', khung4_tplus:'khung4_tplus', khung4:'khung4_tplus', mama:'mama_positional', mama_positional:'mama_positional', ats:'advanced_trailstop', advanced_trailstop:'advanced_trailstop', strategy:'strategy'};
+  return map[k] || null;
+}
+// Khối hành động cho dòng Conviction (panel Mua chuẩn): verdict + fit theo
+// hệ đóng góp + chip Mua/Cắt/Chốt/R:R từ trade plan + lịch sử mã.
+function buyConvictionAction(r){
+  if (!perfData || !perfData.per_system || !r) return '';
+  const verdict = `Báo mua rõ — Conviction hạng ${r.tier}${r.conviction != null ? ` (${r.conviction}đ)` : ''}`;
+  const seen = new Set(), bits = [];
+  (r.confirm_sources || []).forEach(b => {
+    const k = perfKeyFromSourceBadge(b);
+    if (!k || seen.has(k)) return;
+    seen.add(k);
+    const s = perfData.per_system[k];
+    if (!s) return;
+    const pm5 = s.pm5 || {}, pr = s.plan_real || {};
+    if ((pm5.n || 0) >= 15 && pm5.hit_p5_first_rate >= 0.5) bits.push(`${s.label} hợp lướt ${perfPct(pm5.hit_p5_first_rate)}`);
+    if ((pr.n || 0) >= 15 && pr.r1_first_rate >= 0.6) bits.push(`${s.label} gồng R1 được ${perfPct(pr.r1_first_rate)}`);
+  });
+  const fit = bits.slice(0, 2).join(' · ');
+  let planHTML = '';
+  const tp = r.trade_plan;
+  const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1, rr1 = tp?.rr?.rr1;
+  if (ez && stop != null && r1 != null) {
+    planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop">Cắt ${escapeHtml(String(fmtPrice(stop)))}</span><span class="sp-tp">Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}</span>${rr1 != null ? `<span class="sp-rr">R:R ${escapeHtml(String(rr1))}</span>` : ''}</div>`;
+  }
+  let hist = '';
+  const st = perfSymbolStatsAll(r.symbol);
+  if (st && st.n >= 2) hist = `<div class="sig-hist">${escapeHtml(r.symbol)} đã báo ${st.n} lần: ${st.p5} lần +5% trước, ${st.r1} lần R1 trước</div>`;
+  return `<div class="sig-action"><div class="sig-verdict">👉 ${escapeHtml(verdict)}</div>`
+    + (fit ? `<div class="sig-fit">${escapeHtml(fit)}</div>` : '')
+    + planHTML + hist + `</div>`;
+}
 function actionForRow(r){
   if (!perfData || !perfData.per_system) return '';
   const sysKey = PERF_SOURCE_MAP[r.source];
@@ -2055,6 +2112,7 @@ function selectFilter(value){
 }
 
 let perfSignalsRefreshDone = false;
+let perfHomeRefreshDone = false;
 function renderSignalTable(){
   buildHubTabs();
   const container = document.getElementById('signalTableContainer');
