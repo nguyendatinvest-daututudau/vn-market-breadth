@@ -90,6 +90,17 @@ def main() -> int:
     if 'vol_spike_ratio' not in text:
         ok = fail("Radar thiếu vol_spike_ratio") and False
 
+    # 5f. Tab Hiệu quả tín hiệu
+    if 'data-view="perf"' not in text:
+        ok = fail("thiếu nav tab Hiệu quả (data-view perf)") and False
+    if 'id="perfView"' not in text or 'id="perfContent"' not in text:
+        ok = fail("thiếu perfView/perfContent") and False
+    for fn in ("loadPerfData", "renderPerfContent", "perfVerdict"):
+        if fn not in text:
+            ok = fail(f"thiếu {fn}") and False
+    if 'EMBEDDED_SIGNAL_PERFORMANCE' not in text:
+        ok = fail("thiếu EMBEDDED_SIGNAL_PERFORMANCE") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
