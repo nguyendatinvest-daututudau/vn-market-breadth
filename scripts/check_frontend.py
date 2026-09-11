@@ -112,6 +112,14 @@ def main() -> int:
         if token not in text:
             ok = fail(f"thiếu {token} (dòng hành động bảng tín hiệu)") and False
 
+    # 5j. Mua chuẩn gồm momentum strong + ensemble strong + conviction A/B
+    if "r.source === 'ensemble' && r.signalType === 'strong') || r.convAB" not in text:
+        ok = fail("tab Mua chuẩn thiếu ensemble strong / conviction A/B") and False
+    if 'strongEmptyMsg' not in text:
+        ok = fail("thiếu strongEmptyMsg (gợi ý khi Mua chuẩn trống)") and False
+    if 'Báo mua rõ' not in text:
+        ok = fail("thiếu nhãn Báo mua rõ trong actionForRow") and False
+
     # 5h. Lịch sử tín hiệu dạng biểu đồ đường
     for token in ("sigHistChart", "renderSigHistChart", "sigHistPoints", "toggleSigHistSeries"):
         if token not in text:

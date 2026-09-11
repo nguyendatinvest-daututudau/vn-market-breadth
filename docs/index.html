@@ -1525,9 +1525,19 @@ function buildSignalHub(dateStr){
   let wrStrong = MOMENTUM_BT?.stats?.['action_T+10']?.win_rate;
   let wrHot = MOMENTUM_BT?.stats?.['hot_T+10']?.win_rate;
 
+  const todayDate = LATEST?.markets?.ALL?.date;
   rows = rows.map(r => {
     let repeat = prevSymbols.has(r.symbol) ? '<span class="badge-repeat">🔥 Lặp</span>' : '';
-    return { ...r, repeat };
+    // Conviction A/B hôm nay = mua chuẩn (chỉ áp cho phiên hôm nay, không áp lịch sử).
+    let convAB = false, convTier = null, convScore = null;
+    try {
+      const cv = (typeof getConviction === 'function') ? getConviction(r.symbol) : null;
+      const isToday = globalSearch ? (r.sigDate === todayDate) : !dateStr;
+      if (cv && (cv.tier === 'A' || cv.tier === 'B') && isToday) {
+        convAB = true; convTier = cv.tier; convScore = cv.conviction;
+      }
+    } catch(e) {}
+    return { ...r, repeat, convAB, convTier, convScore };
   });
 
   let filteredRows = applyFilters(rows, activeFilter, globalSearch ? '' : searchQuery);
@@ -1587,19 +1597,23 @@ function buildSignalHub(dateStr){
       : isEns ? `<span class="ens-strength"><i style="width:${Math.round((parseFloat(r.score) || 0))}%;"></i></span><span class="conf-num">${escapeHtml(r.score)}%</span>`
       : '';
     const srcNote = methodLabel(r.source);
+    const convTag = r.convAB ? tierChip(r.convTier, r.convScore) : '';
 
     return `<tr class="${rowCls}" title="${escapeHtml(srcNote)} · ${escapeHtml((r.strategies || []).join(', '))}">
       ${globalSearch ? `<td class="sub" style="white-space:nowrap;">${escapeHtml(r.sigDate || '')}</td>` : ''}
       <td class="mono" style="font-weight:700;cursor:pointer;" data-sym="${escapeHtml(r.symbol)}" title="Xem thẻ sức khỏe">${escapeHtml(r.symbol)}${r.repeat}</td>
       <td class="num mono">${escapeHtml(r.score)}</td>
-      <td>${typeTag}${winrateStr}</td>
+      <td>${typeTag}${convTag}${winrateStr}</td>
       <td>${conf}</td>
       <td>${actionForRow(r)}${sigExplainCell(r)}</td>
       <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
     </tr>`;
   }).join('');
 
-  if (!tbody) return `<div class="buy-empty">${globalSearch ? `Mã "<b>${escapeHtml(q)}</b>" có trong lịch sử nhưng không khớp bộ lọc <b>${escapeHtml(activeFilter)}</b>.` : (EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.')}</div>`;
+  if (!tbody) {
+    if (!globalSearch && activeFilter === 'strong') return `<div class="buy-empty">${strongEmptyMsg(rows)}</div>`;
+    return `<div class="buy-empty">${globalSearch ? `Mã "<b>${escapeHtml(q)}</b>" có trong lịch sử nhưng không khớp bộ lọc <b>${escapeHtml(activeFilter)}</b>.` : (EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.')}</div>`;
+  }
 
   const searchNote = globalSearch
     ? `<div class="sub" style="margin-bottom:8px;">Tìm "<b>${escapeHtml(q)}</b>" trong toàn bộ ${SIGNALS_HISTORY ? SIGNALS_HISTORY.length : 0} phiên · ${totalHits} kết quả${capped ? ` (hiển thị ${SEARCH_CAP} mới nhất)` : ''} · bấm mã để xem thẻ sức khỏe</div>`
@@ -1612,6 +1626,20 @@ function buildSignalHub(dateStr){
     </tr></thead>
     <tbody>${tbody}</tbody>
   </table></div>`;
+}
+
+// Gợi ý khi tab Mua chuẩn trống: ứng viên gần chuẩn nhất + lệnh Buy hệ khác.
+function strongEmptyMsg(rows){
+  const ensWeak = rows.filter(r => r.source === 'ensemble' && r.signalType === 'weak')
+    .sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0)).slice(0, 2);
+  const valids = rows.filter(r => r.signalType === 'valid' && ['luc-mach', 'khung4-tplus', 'mama', 'ats'].includes(r.source));
+  const parts = [];
+  ensWeak.forEach(r => parts.push(`${escapeHtml(r.symbol)} (Ens ${escapeHtml(r.score)}% — cần ≥65%)`));
+  if (valids.length) {
+    const syms = [...new Set(valids.map(r => r.symbol))].slice(0, 5).map(escapeHtml).join(', ');
+    parts.push(`${valids.length} lệnh Buy hệ khác ở tab Tham khảo (${syms})`);
+  }
+  return `Hôm nay không có mã đủ chuẩn mua.<br>Không có tín hiệu tốt hơn là một edge — kiên nhẫn.${parts.length ? `<br>Gần nhất: ${parts.join(' · ')}.` : ''}`;
 }
 
 // Tìm mã trong TOÀN BỘ lịch sử tín hiệu (mọi phiên), mới nhất trước.
@@ -1694,8 +1722,23 @@ function actionForRow(r){
   const isHot = r.source === 'momentum' && r.signalType === 'hot';
   const isWatch = !isSell && !isHot && (r.signalType === 'watch' || (r.source === 'ensemble' && r.signalType === 'weak'));
   if (isSell) segs.push('Giảm/thoát bớt');
-  else if (isHot) segs.push('Quá nóng — không mua đuổi');
-  else if (isWatch) segs.push('Chờ thêm xác nhận, chưa vào');
+  else if (isHot) {
+    segs.push('Quá nóng — không mua đuổi');
+    if (r.convAB) segs.push(`dù có Conviction hạng ${r.convTier} — ưu tiên giữ tiền`);
+  }
+  else if (r.convAB) segs.push(`Báo mua rõ — Conviction hạng ${r.convTier}${r.convScore != null ? ` (${r.convScore}đ)` : ''}`);
+  else if (r.source === 'ensemble' && r.signalType === 'strong') segs.push('Báo mua rõ — 4 hệ ensemble đồng thuận mạnh');
+  else if (r.signalType === 'valid' && ['luc-mach', 'khung4-tplus', 'mama', 'ats'].includes(r.source)) segs.push('Có lệnh Buy rõ của hệ — kiểm tra R:R rồi canh mua');
+  else if (r.source === 'momentum' && r.signalType === 'strong') segs.push('Báo mua rõ — momentum vùng thắng tốt nhất (30–59)');
+  else if (isWatch) {
+    if (r.source === 'ensemble') {
+      const pct = parseFloat(r.score) || 0;
+      segs.push(pct >= 50 ? `Gần đủ chuẩn Ens Strong (${escapeHtml(r.score)}% — cần ≥65%)` : 'Chưa đủ chuẩn Ens — quan sát');
+    }
+    else if (r.source === 'luc-mach' && r.watchDir === 'buy') segs.push('Phe mua đang thắng — chờ thêm 1 check để thành MUA');
+    else if (r.source === 'khung4-tplus') segs.push('Chờ chu kỳ Khung4 mới');
+    else segs.push('Chờ thêm xác nhận, chưa vào');
+  }
   else segs.push('Canh mua theo vùng');
   if (s) {
     const pm5 = s.pm5 || {}, pr = s.plan_real || {};
@@ -1925,7 +1968,7 @@ function applyFilters(rows, filter, query){
   return rows.filter(r => {
     if (filter !== 'all') {
       if (filter === 'buy' && (r.signalType === 'watch' || r.signalType === 'sell_warning')) return false;
-      if (filter === 'strong' && !(r.source === 'momentum' && r.signalType === 'strong')) return false;
+      if (filter === 'strong' && !((r.source === 'momentum' && r.signalType === 'strong') || (r.source === 'ensemble' && r.signalType === 'strong') || r.convAB)) return false;
       if (filter === 'hot' && !(r.source === 'momentum' && r.signalType === 'hot')) return false;
       if (filter === 'watch' && !((r.signalType === 'watch' && !(r.source === 'luc-mach' && r.watchDir === 'sell')) || (r.source === 'ensemble' && r.signalType === 'weak'))) return false;
       if (filter === 'reference') {
