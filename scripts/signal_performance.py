@@ -1,19 +1,19 @@
 """
 Signal Performance — do hieu qua tin hieu MUA that da phat trong signals_history.
 
-Pham vi v1 (backend truoc, UI sau):
 - Chi do tin hieu THAT trong data/signals_history.json (toi da 120 phien),
   khong tai hien logic sinh tin hieu.
-- Thang tinh CA HAI cach (theo lua chon user):
+- Cac cach do:
   (a) hit-rate gia dong T+5/10/20 dat +2% (hit2), kem hit0/hit7/median/mean;
-  (b) target cham truoc stop (proxy ATR: stop = entry - 2*ATR14,
-      target = entry + 2*ATR14, window 20 phien, dung High/Low).
+  (b) plan proxy ATR: stop = entry - 2*ATR14, target = entry + 2*ATR14,
+      first-touch window 20 phien (High/Low);
+  (c) pm5: cham entry*1.05 truoc entry*0.95 trong 20 phien (High/Low);
+  (d) plan_real: TAI TINH compute_trade_plan() tai dung ngay tin hieu tu
+      OHLC cache (SMA/ATR14/pivot classic/W52/High20 theo dung cong thuc
+      stock_health), do first-touch R1 (chinh) vs stop trong 20 phien,
+      R2 touch rate lam cot phu.
 - Decay/reversal: duong cong hit2 T+1..T+20, MFE/MAE, so phien trung vi toi
   +2% / -2% dau tien, va so phien toi sell dau tien cung-he (neu co).
-
-Proxy trade-plan duoc ghi ro trong output.caveats vi lich su hien tai
-(buy_conviction_history) khong luu stop/target tung lenh. Khi nao lich su
-luu san stop/target thi script se uu tien dung gia tri that.
 
 Cach chay:
     cd scripts && python signal_performance.py [--limit-days N]
@@ -37,6 +37,8 @@ from _shared import (
     vn_now,
 )
 from cache_utils import load_cache as _load_cache
+from buy_conviction import compute_trade_plan
+from stock_health import _atr14 as _sh_atr14, _pivots as _sh_pivots, _sma as _sh_sma
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -48,6 +50,8 @@ DOCS_OUTPUT_JSON = DOCS_DATA_DIR / "signal_performance.json"
 HORIZONS = (5, 10, 20)
 DECAY_MAX = 20
 PLAN_BARS = 20
+PM5_BARS = 20
+PLAN_REAL_BARS = 20
 RECENT_CAP = 300
 
 SYSTEMS = {
@@ -142,6 +146,81 @@ def _find_idx(frame: pd.DataFrame, sig_date) -> int | None:
     return pos
 
 
+def _first_touch(highs, lows, n: int, idx: int, up: float, down: float,
+                 window: int) -> tuple[str, int | None]:
+    """First-touch up vs down trong `window` phien forward (dung High/Low).
+
+    Tra ve (outcome, bars) voi outcome trong
+    {"up_first", "down_first", "tie", "timeout"}.
+    """
+    outcome, bars = "timeout", None
+    if not (math.isfinite(up) and math.isfinite(down)) or up <= down:
+        return outcome, bars
+    for k in range(1, window + 1):
+        j = idx + k
+        if j >= n:
+            break
+        hi, lo = highs[j], lows[j]
+        if not (math.isfinite(hi) and math.isfinite(lo)):
+            continue
+        hit_up = hi >= up
+        hit_dn = lo <= down
+        if hit_up and hit_dn:
+            return "tie", k
+        if hit_up:
+            return "up_first", k
+        if hit_dn:
+            return "down_first", k
+    return outcome, bars
+
+
+def _recompute_trade_plan(frame: pd.DataFrame, idx: int) -> dict | None:
+    """Tai tinh trade plan that tai dung ngay tin hieu.
+
+    Mirror dung cong thuc stock_health (SMA/ATR14/pivot classic/W52/High20)
+    tren lich su den het phien tin hieu, roi goi compute_trade_plan() hien tai.
+    """
+    try:
+        hist = frame.iloc[:idx + 1]
+        if len(hist) < 15:
+            return None
+        close = float(hist["Close"].iloc[-1])
+        if not math.isfinite(close) or close <= 0:
+            return None
+        closes = hist["Close"]
+        sma10 = _sh_sma(closes, 10)
+        sma20 = _sh_sma(closes, 20)
+        sma50 = _sh_sma(closes, 50)
+        sma200 = _sh_sma(closes, 200)
+        atr14 = _sh_atr14(hist)
+        dist_ma20 = (close / sma20 - 1.0) * 100.0 if sma20 else None
+        pivots = _sh_pivots(hist)
+        win = hist.tail(252)
+        try:
+            w52_high = float(win["High"].max())
+            w52_low = float(win["Low"].min())
+        except (ValueError, TypeError):
+            w52_high = w52_low = None
+        if w52_high is not None and not math.isfinite(w52_high):
+            w52_high = None
+        if w52_low is not None and not math.isfinite(w52_low):
+            w52_low = None
+        try:
+            high20 = float(hist["High"].tail(20).max()) if len(hist) >= 20 else None
+        except (ValueError, TypeError):
+            high20 = None
+        if high20 is not None and not math.isfinite(high20):
+            high20 = None
+        return compute_trade_plan(
+            close=close, sma10=sma10, sma20=sma20, sma50=sma50,
+            sma200=sma200, atr14=atr14, dist_ma20=dist_ma20,
+            pivots=pivots, w52_high=w52_high, w52_low=w52_low,
+            high20=high20,
+        )
+    except Exception:
+        return None
+
+
 def evaluate_signal(frame: pd.DataFrame, idx: int, entry: float) -> dict | None:
     n = len(frame)
     closes = frame["Close"].astype(float).to_numpy()
@@ -149,7 +228,7 @@ def evaluate_signal(frame: pd.DataFrame, idx: int, entry: float) -> dict | None:
     lows = frame["Low"].astype(float).to_numpy()
     out: dict = {"matured": {}, "fwd": {}, "mfe": None, "mae": None,
                  "bars_to_p2": None, "bars_to_m2": None,
-                 "plan": None, "decay": {}}
+                 "plan": None, "decay": {}, "pm5": None, "plan_real": None}
     any_matured = False
     for h in HORIZONS:
         j = idx + h
@@ -189,40 +268,68 @@ def evaluate_signal(frame: pd.DataFrame, idx: int, entry: float) -> dict | None:
     out["mae"] = float(mae) if mae is not None and mae < 1e8 else None
     out["bars_to_p2"] = b_p2
     out["bars_to_m2"] = b_m2
-    # plan proxy ATR
+    # plan proxy ATR (giu nguyen ngu nghia cu)
     atr = _atr14(frame, idx)
     if atr is None or not math.isfinite(atr) or atr <= 0:
         atr = entry * 0.02
     stop = entry - 2 * atr
     target = entry + 2 * atr
-    outcome = "timeout"
-    bars = None
-    for k in range(1, PLAN_BARS + 1):
-        j = idx + k
-        if j >= n:
-            break
-        hi, lo = highs[j], lows[j]
-        if not (math.isfinite(hi) and math.isfinite(lo)):
-            continue
-        hit_t = hi >= target
-        hit_s = lo <= stop
-        if hit_t and hit_s:
-            outcome = "tie"
-            bars = k
-            break
-        if hit_t:
-            outcome = "target_first"
-            bars = k
-            break
-        if hit_s:
-            outcome = "stop_first"
-            bars = k
-            break
+    raw_outcome, bars = _first_touch(highs, lows, n, idx, target, stop, PLAN_BARS)
+    outcome = {"up_first": "target_first", "down_first": "stop_first"}.get(raw_outcome, raw_outcome)
     matured_plan = (idx + 1) < n  # co it nhat 1 forward bar
     out["plan"] = {"stop": round(stop, 2), "target": round(target, 2),
                    "atr": round(float(atr), 2), "outcome": outcome,
                    "bars": bars, "matured": bool(matured_plan)}
-    out["any_matured"] = bool(any_matured or matured_plan)
+    # (c) pm5: cham +5% truoc -5% trong 20 phien
+    pm5_raw, pm5_bars = _first_touch(highs, lows, n, idx, entry * 1.05,
+                                     entry * 0.95, PM5_BARS)
+    pm5_outcome = {"up_first": "hit_p5_first",
+                   "down_first": "hit_m5_first"}.get(pm5_raw, pm5_raw)
+    full_window = (idx + PM5_BARS) < n
+    pm5_matured = bool(pm5_raw in ("up_first", "down_first", "tie") or full_window)
+    out["pm5"] = {"outcome": pm5_outcome, "bars": pm5_bars,
+                  "matured": pm5_matured}
+    # (d) plan_real: tai tinh trade plan that + first-touch R1 vs stop
+    plan_real = {"outcome": None, "bars": None, "matured": False,
+                 "r1": None, "r2": None, "stop": None,
+                 "entry_mid": None, "entry_type": None, "r2_hit": None}
+    rp = _recompute_trade_plan(frame, idx)
+    if rp:
+        r1 = (rp.get("targets") or {}).get("r1")
+        r2 = (rp.get("targets") or {}).get("r2")
+        rstop = rp.get("stop")
+        entry_mid = (rp.get("entry_zone") or {}).get("mid")
+        if (r1 is not None and math.isfinite(r1)
+                and rstop is not None and math.isfinite(rstop) and r1 > rstop):
+            rr_raw, rr_bars = _first_touch(highs, lows, n, idx, r1, rstop,
+                                           PLAN_REAL_BARS)
+            rr_outcome = {"up_first": "r1_first",
+                          "down_first": "stop_first"}.get(rr_raw, rr_raw)
+            full_real = (idx + PLAN_REAL_BARS) < n
+            matured_real = bool(rr_raw in ("up_first", "down_first", "tie")
+                                or full_real)
+            r2_hit = None
+            if r2 is not None and math.isfinite(r2):
+                r2_hit = False
+                for k in range(1, PLAN_REAL_BARS + 1):
+                    j = idx + k
+                    if j >= n:
+                        break
+                    hi = highs[j]
+                    if math.isfinite(hi) and hi >= r2:
+                        r2_hit = True
+                        break
+            plan_real = {"outcome": rr_outcome, "bars": rr_bars,
+                         "matured": bool(matured_real),
+                         "r1": round(float(r1), 2),
+                         "r2": round(float(r2), 2) if r2 is not None and math.isfinite(r2) else None,
+                         "stop": round(float(rstop), 2),
+                         "entry_mid": round(float(entry_mid), 2) if entry_mid is not None and math.isfinite(entry_mid) else None,
+                         "entry_type": rp.get("entry_type"),
+                         "r2_hit": r2_hit}
+    out["plan_real"] = plan_real
+    out["any_matured"] = bool(any_matured or matured_plan
+                              or pm5_matured or plan_real["matured"])
     return out
 
 
@@ -332,6 +439,14 @@ def main() -> int:
                     "plan_outcome": ev["plan"]["outcome"] if ev.get("plan") else None,
                     "plan_bars": ev["plan"]["bars"] if ev.get("plan") else None,
                     "plan_matured": ev["plan"]["matured"] if ev.get("plan") else False,
+                    "pm5_outcome": ev["pm5"]["outcome"] if ev.get("pm5") else None,
+                    "pm5_bars": ev["pm5"]["bars"] if ev.get("pm5") else None,
+                    "pm5_matured": ev["pm5"]["matured"] if ev.get("pm5") else False,
+                    "plan_real_outcome": ev["plan_real"]["outcome"] if ev.get("plan_real") else None,
+                    "plan_real_bars": ev["plan_real"]["bars"] if ev.get("plan_real") else None,
+                    "plan_real_matured": ev["plan_real"]["matured"] if ev.get("plan_real") else False,
+                    "plan_real_r2_hit": ev["plan_real"]["r2_hit"] if ev.get("plan_real") else None,
+                    "plan_real_entry_type": ev["plan_real"]["entry_type"] if ev.get("plan_real") else None,
                     "decay": ev["decay"],
                     "bars_to_sell": bars_to_sell,
                 })
@@ -361,6 +476,45 @@ def main() -> int:
         b2 = [r["bars_to_p2"] for r in rows if r["bars_to_p2"] is not None]
         bm2 = [r["bars_to_m2"] for r in rows if r["bars_to_m2"] is not None]
         bsell = [r["bars_to_sell"] for r in rows if r["bars_to_sell"] is not None]
+        # (c) pm5 aggregate
+        pm5_rows = [r for r in rows if r["pm5_matured"]]
+        pm5_out = {"hit_p5_first": 0, "hit_m5_first": 0, "tie": 0, "timeout": 0}
+        for r in pm5_rows:
+            pm5_out[r["pm5_outcome"]] = pm5_out.get(r["pm5_outcome"], 0) + 1
+        n_pm5 = len(pm5_rows) or 1
+        pm5_bars = [r["pm5_bars"] for r in pm5_rows
+                    if r["pm5_bars"] is not None
+                    and r["pm5_outcome"] in ("hit_p5_first", "hit_m5_first", "tie")]
+        pm5 = {
+            "n": len(pm5_rows),
+            "hit_p5_first_rate": round(pm5_out["hit_p5_first"] / n_pm5, 4),
+            "hit_m5_first_rate": round(pm5_out["hit_m5_first"] / n_pm5, 4),
+            "tie_rate": round(pm5_out["tie"] / n_pm5, 4),
+            "timeout_rate": round(pm5_out["timeout"] / n_pm5, 4),
+            "outcomes": pm5_out,
+            "median_bars": round(float(np.median(pm5_bars)), 1) if pm5_bars else None,
+        }
+        # (d) plan_real aggregate
+        pr_rows = [r for r in rows if r["plan_real_matured"]]
+        pr_out = {"r1_first": 0, "stop_first": 0, "tie": 0, "timeout": 0}
+        for r in pr_rows:
+            pr_out[r["plan_real_outcome"]] = pr_out.get(r["plan_real_outcome"], 0) + 1
+        n_pr = len(pr_rows) or 1
+        pr_bars = [r["plan_real_bars"] for r in pr_rows
+                   if r["plan_real_bars"] is not None
+                   and r["plan_real_outcome"] in ("r1_first", "stop_first", "tie")]
+        r2_hits = [r for r in pr_rows if r["plan_real_r2_hit"] is True]
+        r2_known = [r for r in pr_rows if r["plan_real_r2_hit"] is not None]
+        plan_real = {
+            "n": len(pr_rows),
+            "r1_first_rate": round(pr_out["r1_first"] / n_pr, 4),
+            "stop_first_rate": round(pr_out["stop_first"] / n_pr, 4),
+            "tie_rate": round(pr_out["tie"] / n_pr, 4),
+            "timeout_rate": round(pr_out["timeout"] / n_pr, 4),
+            "outcomes": pr_out,
+            "r2_touch_rate": round(len(r2_hits) / len(r2_known), 4) if r2_known else None,
+            "median_bars": round(float(np.median(pr_bars)), 1) if pr_bars else None,
+        }
         decay = {}
         for h in range(1, DECAY_MAX + 1):
             vals = [r["decay"].get(h) for r in rows if r["decay"].get(h) is not None]
@@ -371,6 +525,8 @@ def main() -> int:
             "n_total": len(rows),
             "horizons": horizons,
             "plan": plan,
+            "pm5": pm5,
+            "plan_real": plan_real,
             "mfe_median": mfe["median"] if mfe else None,
             "mae_median": mae["median"] if mae else None,
             "median_bars_to_p2": round(float(np.median(b2)), 1) if b2 else None,
@@ -384,7 +540,11 @@ def main() -> int:
         ({"system": k, "label": v["label"],
           "n": (v["horizons"].get("T10") or {}).get("n", 0),
           "hit2_T10": (v["horizons"].get("T10") or {}).get("hit2"),
-          "target_first_rate": v["plan"]["target_first_rate"]}
+          "target_first_rate": v["plan"]["target_first_rate"],
+          "hit_p5_first_rate": v["pm5"]["hit_p5_first_rate"],
+          "pm5_n": v["pm5"]["n"],
+          "r1_first_rate": v["plan_real"]["r1_first_rate"],
+          "plan_real_n": v["plan_real"]["n"]}
          for k, v in per_system.items()),
         key=lambda x: (x["hit2_T10"] is not None, x["hit2_T10"] or -1),
         reverse=True,
@@ -402,16 +562,20 @@ def main() -> int:
         "skipped_no_cache": skipped_no_cache,
         "horizons": [f"T{h}" for h in HORIZONS],
         "win_definition": {
-            "hit2": "close T+N / entry - 1 >= +2%",
-            "plan_proxy": "stop = entry - 2*ATR14, target = entry + 2*ATR14, window 20 phien (High/Low)",
+            "hit2": "close T+N / entry - 1 >= +2% (snapshot, khong phai first-touch)",
+            "plan_proxy": "stop = entry - 2*ATR14, target = entry + 2*ATR14, first-touch window 20 phien (High/Low)",
+            "pm5": "cham entry*1.05 truoc entry*0.95 trong 20 phien (High/Low); cung phien = tie",
+            "plan_real": "tai tinh compute_trade_plan() tai ngay tin hieu; R1 (chinh) vs stop first-touch 20 phien; R2 touch rate phu",
         },
         "per_system": per_system,
         "leaderboard": leaderboard,
         "recent": recent,
         "caveats": [
             "Chi do tin hieu THAT trong signals_history (toi da 120 phien); phien gan nhat chua du T+5/10/20 thi tu dong loai khoi mau tuong ung.",
-            "Plan la PROXY ATR (lich su chua luu stop/target that) — dung de so he voi nhau, khong phai khuyen nghi giao dich.",
-            "Survivorship bias: cache chi con ma dang niem yet; overlapping T+10 khong phai mau doc lap.",
+            "pm5/plan_real chi tinh khi du 20 phien forward hoac da cham 1 ben; timeout non-window khong dem.",
+            "plan_real TAI TINH tu OHLC cache theo logic compute_trade_plan hien tai — co the lech plan da hien live neu logic tung thay doi giua cac phien.",
+            "Plan proxy ATR giu lai de so sanh dai han; dung de so he voi nhau, khong phai khuyen nghi giao dich.",
+            "Survivorship bias: cache chi con ma dang niem yet; overlapping windows khong phai mau doc lap.",
             "Gia adjusted + corporate action co the lech entry/forward o ma chia tach.",
         ],
     }
@@ -422,9 +586,11 @@ def main() -> int:
     DOCS_OUTPUT_JSON.write_bytes(OUTPUT_JSON.read_bytes())
 
     print(f"Sessions: {len(history)} | buy matured: {len(records)} | skip no-cache: {skipped_no_cache}")
-    print("--- Leaderboard T+10 hit2 ---")
+    print("--- Leaderboard: hit2 T+10 | +5% truoc -5% | R1 that truoc stop ---")
     for row in leaderboard:
-        print(f"  {row['label']:14s} n={row['n']:5d} hit2={row['hit2_T10']} target_first={row['target_first_rate']}")
+        print(f"  {row['label']:14s} n={row['n']:5d} hit2={row['hit2_T10']} "
+              f"pm5={row['hit_p5_first_rate']}(n={row['pm5_n']}) "
+              f"r1={row['r1_first_rate']}(n={row['plan_real_n']})")
     print(f"Saved: {OUTPUT_JSON}")
     return 0
 
