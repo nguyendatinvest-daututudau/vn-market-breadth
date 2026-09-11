@@ -856,6 +856,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
   // Re-draw visible charts after every re-render (canvas is rebuilt each time)
   if (currentView === 'chart' || currentView === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
   else if (currentView === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
+  requestAnimationFrame(() => renderSigHistChart());
 }
 
 function adRatioNote(r){
@@ -2305,80 +2306,136 @@ function renderRsiPulseChart(){
   });
 }
 
-// --- History viewer ---
+// --- History viewer: line chart ---
+const SIG_HIST_SERIES = [
+  {k:'total', l:'Tổng', c:'#F0F3F7'},
+  {k:'strong', l:'Mạnh', c:'#22C55E'},
+  {k:'MOM', l:'MOM', c:'#FF4D2E'},
+  {k:'PB', l:'Pre-BO', c:'#22D3EE'},
+  {k:'ENS', l:'ENS', c:'#A78BFA'},
+  {k:'LM', l:'Lục Mạch', c:'#FBBF24'},
+  {k:'MAMA', l:'MAMA', c:'#F472B6'},
+  {k:'ATS', l:'ATS', c:'#94A3B8'},
+  {k:'K4', l:'K4', c:'#FB923C'},
+];
+let sigHistActive = new Set(['total', 'strong']);
+
+function sigHistPoints(){
+  if (!SIGNALS_HISTORY || !SIGNALS_HISTORY.length) return [];
+  return SIGNALS_HISTORY.map(day => {
+    const c = {MOM:0, PB:0, ENS:0, LM:0, MAMA:0, ATS:0, K4:0};
+    const add = (src, key) => { if (src && src.all_signals) c[key] += src.all_signals.length; };
+    add(day.momentum, 'MOM'); add(day.strategy, 'PB'); add(day.ensemble, 'ENS');
+    add(day.luc_mach, 'LM'); add(day.mama_positional, 'MAMA');
+    add(day.advanced_trailstop, 'ATS'); add(day.khung4_tplus, 'K4');
+    let strong = 0;
+    (day.momentum?.all_signals || []).forEach(s => { if (s.signal_type === 'strong') strong++; });
+    (day.strategy?.all_signals || []).forEach(s => { if (s.composite_score >= 75) strong++; });
+    (day.ensemble?.all_signals || []).forEach(s => { if (s.total_score >= 0.65) strong++; });
+    (day.luc_mach?.all_signals || []).forEach(s => { if (s.status === 'STRONG_BUY' || s.status === 'VALID_BUY') strong++; });
+    return {date: day.date, total: c.MOM + c.PB + c.ENS + c.LM + c.MAMA + c.ATS + c.K4, strong, ...c};
+  }).filter(p => parseViDate(p.date)).sort((a, b) => parseViDate(a.date) - parseViDate(b.date));
+}
+
 function buildHistorySection(){
-  if (!SIGNALS_HISTORY || !SIGNALS_HISTORY.length) return '';
-  let rows = [];
-  SIGNALS_HISTORY.slice().reverse().forEach(day => {
-    let signals = [];
-    if (day.momentum && day.momentum.all_signals) {
-      day.momentum.all_signals.forEach(s => { signals.push({symbol:s.symbol, source:'MOM', type:s.signal_type==='strong'?'Strong':'Watch', score:s.score}); });
-    }
-    if (day.strategy && day.strategy.all_signals) {
-      day.strategy.all_signals.forEach(s => { signals.push({symbol:s.symbol, source:'PB', type:s.composite_score>=75?'Manh':'TB', score:s.composite_score}); });
-    }
-    if (day.ensemble && day.ensemble.all_signals) {
-      day.ensemble.all_signals.forEach(s => { signals.push({symbol:s.symbol, source:'ENS', type:s.total_score>=0.65?'Strong':'Weak', score:Math.round(s.total_score*100)}); });
-    }
-    if (day.luc_mach && day.luc_mach.all_signals) {
-      day.luc_mach.all_signals.forEach(s => {
-        const type = s.status === 'STRONG_BUY' ? 'Strong' : s.status === 'VALID_BUY' ? 'Valid' : s.status === 'WATCHLIST' ? 'Watch' : 'Sell';
-        signals.push({symbol:s.symbol, source:'LM', type:type, score:s.score});
-      });
-    }
-    if (day.mama_positional && day.mama_positional.all_signals) {
-      day.mama_positional.all_signals.forEach(s => {
-        signals.push({symbol:s.symbol, source:'MAMA', type:s.mama_buy ? 'Buy' : 'Sell', score:s.score});
-      });
-    }
-    if (day.advanced_trailstop && day.advanced_trailstop.all_signals) {
-      day.advanced_trailstop.all_signals.forEach(s => {
-        signals.push({symbol:s.symbol, source:'ATS', type:s.ats_buy ? 'Buy' : 'Sell', score:s.score});
-      });
-    }
-    if (day.khung4_tplus && day.khung4_tplus.all_signals) {
-      day.khung4_tplus.all_signals.forEach(s => {
-        signals.push({symbol:s.symbol, source:'K4', type:s.khung4_tplus_buy ? 'Buy' : s.khung4_tplus_sell ? 'Sell' : 'Watch', score:s.score});
-      });
-    }
-    rows.push({date: day.date, signals});
-  });
-  if (!rows.length) return '';
-  const fmt = (d) => { const p = d.split('/'); return p[0]+'/'+p[1]; };
-  let tbody = rows.map(r => {
-    let total = r.signals.length;
-    let strong = r.signals.filter(s => s.type==='Strong'||s.type==='Manh').length;
-    let detail = r.signals.map(s => `<tr><td>${escapeHtml(s.symbol)}</td><td>${escapeHtml(s.source)}</td><td>${escapeHtml(s.type)}</td><td>${escapeHtml(s.score)}</td></tr>`).join('');
-    return `<tr onclick="toggleHistoryDetail(this)" style="cursor:pointer;">
-      <td style="font-weight:600;">${escapeHtml(fmt(r.date))}</td>
-      <td>${total}</td>
-      <td>${strong}</td>
-      <td style="color:var(--muted);font-size:10px;">▼</td>
-    </tr>
-    <tr class="hist-detail" style="display:none;">
-      <td colspan="4" style="padding:0;">
-        <table style="margin:4px 0;font-size:11px;">
-          <thead><tr><th>Mã</th><th>Nguồn</th><th>Loại</th><th>Score</th></tr></thead>
-          <tbody>${detail || '<tr><td colspan="4" style="text-align:center;color:var(--faint);">Không có</td></tr>'}</tbody>
-        </table>
-      </td>
-    </tr>`;
-  }).join('');
+  const pts = sigHistPoints();
+  if (!pts.length) return '';
+  const chips = SIG_HIST_SERIES.map(s => `<button type="button" class="chart-range-chip${sigHistActive.has(s.k) ? ' active' : ''}" data-sig="${s.k}" onclick="toggleSigHistSeries('${s.k}')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.c};margin-right:6px;"></span>${s.l}</button>`).join('');
   return `<div class="panel">
     <h2 class="accordion collapsed" onclick="toggleAccordion(this)">Lịch sử tín hiệu</h2>
     <div class="accordion-body collapsed">
-      <table>
-        <thead><tr><th>Ngày</th><th>Tổng</th><th>Mạnh</th><th></th></tr></thead>
-        <tbody>${tbody}</tbody>
-      </table>
+      <div class="sub" style="margin-bottom:8px;">Số mã có tín hiệu mỗi phiên · bấm chip để bật/tắt đường · di chuột vào chart để xem chi tiết từng phiên</div>
+      <div class="chart-range-chips" id="sigHistChips" style="margin-bottom:8px;">${chips}</div>
+      <div class="chart-wrap" id="sigHistWrap" style="position:relative;">
+        <canvas id="sigHistChart" height="240"></canvas>
+        <div class="chart-tooltip" id="sigHistTooltip"></div>
+      </div>
     </div>
   </div>`;
 }
-function toggleHistoryDetail(tr){
-  let detail = tr.nextElementSibling;
-  if (detail && detail.classList.contains('hist-detail')) {
-    detail.style.display = detail.style.display === 'none' ? '' : 'none';
+
+function toggleSigHistSeries(k){
+  if (sigHistActive.has(k)) { if (sigHistActive.size > 1) sigHistActive.delete(k); }
+  else sigHistActive.add(k);
+  document.querySelectorAll('#sigHistChips button').forEach(b => b.classList.toggle('active', sigHistActive.has(b.dataset.sig)));
+  renderSigHistChart();
+}
+
+function renderSigHistChart(){
+  const cv = document.getElementById('sigHistChart'), tt = document.getElementById('sigHistTooltip'), wr = document.getElementById('sigHistWrap');
+  if (!cv || !wr) return;
+  const pts = sigHistPoints();
+  if (pts.length < 2) return;
+  const series = SIG_HIST_SERIES.filter(s => sigHistActive.has(s.k));
+  if (!series.length) return;
+  const dpr = window.devicePixelRatio || 1, w = wr.clientWidth || 600, h = 240;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const P = {t: 12, r: 44, b: 24, l: 36}, cw = w - P.l - P.r, ch = h - P.t - P.b;
+  const xp = i => P.l + (i / (pts.length - 1)) * cw;
+  let maxV = 1;
+  pts.forEach(p => series.forEach(s => { const v = Number(p[s.k]) || 0; if (v > maxV) maxV = v; }));
+  maxV = Math.ceil(maxV * 1.1);
+  const yp = v => P.t + ch - (v / maxV) * ch;
+  const gridSteps = maxV <= 10 ? maxV : 5;
+  const maxTicks = Math.max(2, Math.floor(cw / 70)), months = [];
+  let lastKey = null;
+  pts.forEach((p, i) => { const d = parseViDate(p.date), key = d ? `${d.getFullYear()}-${d.getMonth()}` : ''; if (key !== lastKey) { lastKey = key; months.push({i, d: p.date}); } });
+  const mStep = Math.max(1, Math.ceil(months.length / maxTicks));
+  let hi = -1;
+  function draw(idx){
+    renderSigHistLines(idx);
+    if (idx >= 0 && idx < pts.length && tt) {
+      const p = pts[idx];
+      tt.style.display = 'block';
+      tt.innerHTML = `<div style="font-weight:700;margin-bottom:3px;">${escapeHtml(p.date)}</div>`
+        + series.map(s => `<div><span style="color:${s.c}">●</span> ${escapeHtml(s.l)}: <strong>${p[s.k]}</strong></div>`).join('');
+      const x = xp(idx), tw = tt.offsetWidth;
+      let tx = Math.round(x - tw / 2); tx = Math.max(4, Math.min(w - tw - 4, tx));
+      tt.style.left = tx + 'px'; tt.style.top = '8px';
+    } else if (tt) tt.style.display = 'none';
   }
+  function renderSigHistLines(idx){
+    ctx.clearRect(0, 0, w, h);
+    for (let g = 0; g <= gridSteps; g++) {
+      const v = Math.round(maxV * g / gridSteps), y = yp(v);
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(w - P.r, y); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = '#9CA3AF'; ctx.font = '9.5px Inter,sans-serif';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(String(v), P.l - 6, y);
+    }
+    series.forEach(s => {
+      ctx.save(); ctx.strokeStyle = s.c; ctx.lineWidth = s.k === 'total' || s.k === 'strong' ? 2.4 : 1.6;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath(); pts.forEach((p, i) => { const x = xp(i), y = yp(Number(p[s.k]) || 0); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.stroke(); ctx.restore();
+      const lx = xp(pts.length - 1), ly = yp(Number(pts[pts.length - 1][s.k]) || 0);
+      ctx.fillStyle = s.c; ctx.font = 'bold 9px Inter,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(pts[pts.length - 1][s.k] ?? ''), lx + 5, ly);
+    });
+    ctx.fillStyle = '#9CA3AF'; ctx.font = '9px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    months.forEach((mo, mi) => { if (mi % mStep === 0) { const d = mo.d.split('/'); ctx.fillText(d[0] + '/' + d[1], xp(mo.i), h - P.b + 8); } });
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(P.l, h - P.b); ctx.lineTo(w - P.r, h - P.b); ctx.stroke();
+    if (idx >= 0 && idx < pts.length) {
+      const x = xp(idx);
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ch); ctx.stroke(); ctx.restore();
+      series.forEach(s => {
+        const dy = yp(Number(pts[idx][s.k]) || 0);
+        ctx.fillStyle = '#141920'; ctx.strokeStyle = s.c; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(x, dy, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      });
+    }
+  }
+  draw(-1);
+  cv.onpointermove = e => {
+    const cr = cv.getBoundingClientRect(), mx = e.clientX - cr.left;
+    const idx = Math.max(0, Math.min(pts.length - 1, Math.round(((mx - P.l) / cw) * (pts.length - 1))));
+    if (idx !== hi) { hi = idx; draw(idx); }
+  };
+  cv.onpointerleave = () => { if (hi !== -1) { hi = -1; draw(-1); } };
 }
 
 // --- Appendix ---
@@ -2457,6 +2514,7 @@ function switchView(view){
     if (view === 'market') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
     if (view === 'chart') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
     if (view === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
+    if (view === 'signals') requestAnimationFrame(() => renderSigHistChart());
   }
   if (window.location.hash !== `#${view}`) history.pushState(null, '', `#${view}`);
 }

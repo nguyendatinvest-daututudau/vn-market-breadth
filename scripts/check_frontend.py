@@ -107,6 +107,13 @@ def main() -> int:
     if 'sigDate' not in text:
         ok = fail("thiếu cột Ngày (sigDate) cho tìm kiếm toàn lịch sử") and False
 
+    # 5h. Lịch sử tín hiệu dạng biểu đồ đường
+    for token in ("sigHistChart", "renderSigHistChart", "sigHistPoints", "toggleSigHistSeries"):
+        if token not in text:
+            ok = fail(f"thiếu {token} (lịch sử tín hiệu chart)") and False
+    if 'toggleHistoryDetail' in text or 'hist-detail' in text:
+        ok = fail("còn bảng lịch sử cũ (toggleHistoryDetail/hist-detail)") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
