@@ -107,6 +107,11 @@ def main() -> int:
     if 'sigDate' not in text:
         ok = fail("thiếu cột Ngày (sigDate) cho tìm kiếm toàn lịch sử") and False
 
+    # 5i. Dòng hành động trong ô Chi tiết
+    for token in ("ensurePerfData", "actionForRow", "sig-action", "perfSymCache"):
+        if token not in text:
+            ok = fail(f"thiếu {token} (dòng hành động bảng tín hiệu)") and False
+
     # 5h. Lịch sử tín hiệu dạng biểu đồ đường
     for token in ("sigHistChart", "renderSigHistChart", "sigHistPoints", "toggleSigHistSeries"):
         if token not in text:

@@ -143,6 +143,7 @@
 
   .sig-expl{font-size:12.5px;color:var(--text);line-height:1.45;max-width:340px;}
 .sig-why{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:340px;border-left:2px solid rgba(255,77,46,0.45);padding-left:8px;}
+.sig-action{font-size:12.5px;color:var(--text);line-height:1.55;margin-bottom:5px;max-width:360px;border-left:2px solid var(--up);padding-left:8px;}
   .sig-source{display:flex;gap:3px;flex-wrap:wrap;}
   .src-tag{font-family:var(--font-all);font-size:10.5px;padding:2px 8px;border-radius:4px;background:var(--panel-tint);border:1px solid var(--border);color:var(--muted);}
   .src-tag.hy{color:#d946ef;border-color:rgba(217,70,239,0.25);background:rgba(217,70,239,0.06);}
@@ -1593,7 +1594,7 @@ function buildSignalHub(dateStr){
       <td class="num mono">${escapeHtml(r.score)}</td>
       <td>${typeTag}${winrateStr}</td>
       <td>${conf}</td>
-      <td>${sigExplainCell(r)}</td>
+      <td>${actionForRow(r)}${sigExplainCell(r)}</td>
       <td class="num mono">${escapeHtml(r.price ?? '\u2014')}</td>
     </tr>`;
   }).join('');
@@ -1664,6 +1665,65 @@ function sigExplainCell(r){
   const e = escapeHtml(r.expl || '');
   const w = r.why ? `<div class="sig-why">${escapeHtml(r.why)}</div>` : '';
   return `<div class="sig-expl">${e}</div>${w}`;
+}
+
+// --- Dòng hành động: gộp tầng + phong độ hệ + kế hoạch lệnh + lịch sử mã ---
+const PERF_SOURCE_MAP = {momentum:'momentum', ensemble:'ensemble', 'luc-mach':'luc_mach', mama:'mama_positional', ats:'advanced_trailstop', 'khung4-tplus':'khung4_tplus', strategy:'strategy'};
+let perfSymCache = null;
+function perfSymbolStats(symbol, sysKey){
+  if (!perfData || !perfData.recent || !sysKey) return null;
+  if (!perfSymCache) {
+    perfSymCache = {};
+    perfData.recent.forEach(o => {
+      if (!o.pm5_matured && !o.plan_real_matured) return;
+      const k = o.symbol + '|' + o.system;
+      const e = perfSymCache[k] || (perfSymCache[k] = {n:0, p5:0, r1:0});
+      e.n++;
+      if (o.pm5_outcome === 'hit_p5_first') e.p5++;
+      if (o.plan_real_outcome === 'r1_first') e.r1++;
+    });
+  }
+  return perfSymCache[symbol + '|' + sysKey] || null;
+}
+function actionForRow(r){
+  if (!perfData || !perfData.per_system) return '';
+  const sysKey = PERF_SOURCE_MAP[r.source];
+  const s = sysKey ? perfData.per_system[sysKey] : null;
+  const segs = [];
+  const isSell = r.signalType === 'sell_warning' || (r.source === 'luc-mach' && r.signalType === 'watch' && r.watchDir === 'sell');
+  const isHot = r.source === 'momentum' && r.signalType === 'hot';
+  const isWatch = !isSell && !isHot && (r.signalType === 'watch' || (r.source === 'ensemble' && r.signalType === 'weak'));
+  if (isSell) segs.push('Giảm/thoát bớt');
+  else if (isHot) segs.push('Quá nóng — không mua đuổi');
+  else if (isWatch) segs.push('Chờ thêm xác nhận, chưa vào');
+  else segs.push('Canh mua theo vùng');
+  if (s) {
+    const pm5 = s.pm5 || {}, pr = s.plan_real || {};
+    const bits = [];
+    if ((pm5.n || 0) >= 15) {
+      if (pm5.hit_p5_first_rate >= 0.5) bits.push(`hệ này hợp lướt (${perfPct(pm5.hit_p5_first_rate)} bật +5% trước)`);
+      else if (pm5.hit_p5_first_rate < 0.35) bits.push(`hệ này lướt yếu (${perfPct(pm5.hit_p5_first_rate)})`);
+    }
+    if ((pr.n || 0) >= 15) {
+      if (pr.r1_first_rate >= 0.6) bits.push(`gồng tới R1 được (${perfPct(pr.r1_first_rate)})`);
+      else if (pr.r1_first_rate < 0.45) bits.push(`đừng gồng R1 (${perfPct(pr.r1_first_rate)})`);
+    }
+    if ((pm5.n || 0) < 15 && (pr.n || 0) < 15) bits.push('hệ này mẫu mỏng — đi nhẹ');
+    if (bits.length) segs.push(bits.join('; '));
+  }
+  try {
+    const syms = (typeof STOCK_HEALTH !== 'undefined' && STOCK_HEALTH) ? STOCK_HEALTH.symbols : null;
+    const h = syms ? syms[r.symbol] : null;
+    const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (h ? fallbackTradePlan(h) : null);
+    const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1;
+    if (ez && stop != null && r1 != null) segs.push(`Mua ~${fmtPrice(ez.low)}–${fmtPrice(ez.high)} · cắt ${fmtPrice(stop)} · chốt R1 ${fmtPrice(r1)}`);
+  } catch(e) {}
+  if (sysKey) {
+    const st = perfSymbolStats(r.symbol, sysKey);
+    if (st && st.n >= 2) segs.push(`${r.symbol} đã báo ${st.n} lần: ${st.p5} lần +5% trước, ${st.r1} lần R1 trước`);
+  }
+  if (!segs.length) return '';
+  return `<div class="sig-action">👉 ${escapeHtml(segs.join(' · '))}</div>`;
 }
 
 // --- Giai thich tin hieu: tai sao co tin hieu + y nghia giao dich ---
@@ -1904,11 +1964,21 @@ function selectFilter(value){
   renderSignalTable();
 }
 
+let perfSignalsRefreshDone = false;
 function renderSignalTable(){
   buildHubTabs();
   const container = document.getElementById('signalTableContainer');
   if (!container) return;
   container.innerHTML = buildSignalHub(activeSignalDate);
+  // Nền: có số hiệu quả thì vẽ thêm dòng hành động (1 lần, không loop).
+  if (!perfData && !perfSignalsRefreshDone && currentView === 'signals') {
+    ensurePerfData().then(() => {
+      perfSignalsRefreshDone = true;
+      if (currentView !== 'signals') return;
+      const c2 = document.getElementById('signalTableContainer');
+      if (c2) c2.innerHTML = buildSignalHub(activeSignalDate);
+    }).catch(() => {});
+  }
 }
 
 function populateSignalDateSelector(){
@@ -2912,18 +2982,33 @@ function drawRegimeGauge(){
 let perfDataLoaded = false;
 let perfData = null;
 
+// Loader dùng chung file hiệu quả (tab Hiệu quả + bảng Tín hiệu), fetch 1 lần.
+let perfDataPromise = null;
+function ensurePerfData(){
+  if (perfData) return Promise.resolve(perfData);
+  if (!perfDataPromise) {
+    perfDataPromise = (async () => {
+      try {
+        if (typeof EMBEDDED_SIGNAL_PERFORMANCE !== 'undefined' && EMBEDDED_SIGNAL_PERFORMANCE) {
+          perfData = EMBEDDED_SIGNAL_PERFORMANCE;
+        } else {
+          const res = await fetch('./data/signal_performance.json', {cache: 'no-store'});
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          perfData = await res.json();
+        }
+        perfDataLoaded = true;
+      } catch(e) { perfDataPromise = null; throw e; }
+      return perfData;
+    })();
+  }
+  return perfDataPromise;
+}
+
 async function loadPerfData(){
   const el = document.getElementById('perfContent');
   el.innerHTML = '<div class="loading">Đang tải kết quả đo hiệu quả tín hiệu...</div>';
   try {
-    if (typeof EMBEDDED_SIGNAL_PERFORMANCE !== 'undefined' && EMBEDDED_SIGNAL_PERFORMANCE) {
-      perfData = EMBEDDED_SIGNAL_PERFORMANCE;
-    } else {
-      const res = await fetch('./data/signal_performance.json', {cache: 'no-store'});
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      perfData = await res.json();
-    }
-    perfDataLoaded = true;
+    await ensurePerfData();
     renderPerfContent();
   } catch(e) {
     el.innerHTML = `<div class="err">Chưa có dữ liệu hiệu quả (pipeline sẽ tự tạo sau phiên mới nhất).<br><small>${escapeHtml(e.message)}</small></div>`;
