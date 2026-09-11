@@ -108,7 +108,8 @@ def main() -> int:
         ok = fail("thiếu cột Ngày (sigDate) cho tìm kiếm toàn lịch sử") and False
 
     # 5i. Dòng hành động trong ô Chi tiết
-    for token in ("ensurePerfData", "actionForRow", "sig-action", "perfSymCache"):
+    for token in ("ensurePerfData", "actionForRow", "sig-action", "perfSymCache",
+                  "sig-plan", "sp-buy", "sp-stop", "sp-tp", "sig-verdict"):
         if token not in text:
             ok = fail(f"thiếu {token} (dòng hành động bảng tín hiệu)") and False
 

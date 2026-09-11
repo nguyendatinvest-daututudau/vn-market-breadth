@@ -144,6 +144,14 @@
   .sig-expl{font-size:12.5px;color:var(--text);line-height:1.45;max-width:340px;}
 .sig-why{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px;max-width:340px;border-left:2px solid rgba(255,77,46,0.45);padding-left:8px;}
 .sig-action{font-size:12.5px;color:var(--text);line-height:1.55;margin-bottom:5px;max-width:360px;border-left:2px solid var(--up);padding-left:8px;}
+.sig-verdict{font-weight:800;margin-bottom:2px;}
+.sig-fit{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.sig-plan{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;}
+.sig-plan span{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+.sp-buy{background:rgba(59,130,246,.12);color:#7fb0ff;border:1px solid rgba(59,130,246,.35);}
+.sp-stop{background:rgba(248,113,113,.12);color:#ff9c9c;border:1px solid rgba(248,113,113,.35);}
+.sp-tp{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.35);}
+.sig-hist{font-size:11px;color:var(--faint);}
 .sig-why-toggle{font-size:11px;color:var(--faint);cursor:pointer;margin-top:2px;user-select:none;}
 .sig-why-toggle:hover{color:var(--accent);}
   .sig-source{display:flex;gap:3px;flex-wrap:wrap;}
@@ -1746,56 +1754,65 @@ function actionForRow(r){
   if (!perfData || !perfData.per_system) return '';
   const sysKey = PERF_SOURCE_MAP[r.source];
   const s = sysKey ? perfData.per_system[sysKey] : null;
-  const segs = [];
   const isSell = r.signalType === 'sell_warning' || (r.source === 'luc-mach' && r.signalType === 'watch' && r.watchDir === 'sell');
   const isHot = r.source === 'momentum' && r.signalType === 'hot';
   const isWatch = !isSell && !isHot && (r.signalType === 'watch' || (r.source === 'ensemble' && r.signalType === 'weak'));
-  if (isSell) segs.push('Giảm/thoát bớt');
-  else if (isHot) {
-    segs.push('Quá nóng — không mua đuổi');
-    if (r.convAB) segs.push(`dù có Conviction hạng ${r.convTier} — ưu tiên giữ tiền`);
-  }
-  else if (r.convAB) segs.push(`Báo mua rõ — Conviction hạng ${r.convTier}${r.convScore != null ? ` (${r.convScore}đ)` : ''}`);
-  else if (r.source === 'ensemble' && r.signalType === 'strong') segs.push('Báo mua rõ — 4 hệ ensemble đồng thuận mạnh');
-  else if (r.signalType === 'valid' && ['luc-mach', 'khung4-tplus', 'mama', 'ats'].includes(r.source)) segs.push('Có lệnh Buy rõ của hệ — kiểm tra R:R rồi canh mua');
-  else if (r.source === 'momentum' && r.signalType === 'strong') segs.push('Báo mua rõ — momentum vùng thắng tốt nhất (30–59)');
+  // Tầng 1: kết luận.
+  let verdict = '';
+  if (isSell) verdict = 'Giảm/thoát bớt';
+  else if (isHot) verdict = 'Quá nóng — không mua đuổi' + (r.convAB ? ` · dù có Conviction hạng ${r.convTier}` : '');
+  else if (r.convAB) verdict = `Báo mua rõ — Conviction hạng ${r.convTier}${r.convScore != null ? ` (${r.convScore}đ)` : ''}`;
+  else if (r.source === 'ensemble' && r.signalType === 'strong') verdict = 'Báo mua rõ — ensemble đồng thuận mạnh';
+  else if (r.signalType === 'valid' && ['luc-mach', 'khung4-tplus', 'mama', 'ats'].includes(r.source)) verdict = 'Có lệnh Buy rõ của hệ';
+  else if (r.source === 'momentum' && r.signalType === 'strong') verdict = 'Báo mua rõ — momentum vùng thắng tốt nhất';
   else if (isWatch) {
     if (r.source === 'ensemble') {
       const pct = parseFloat(r.score) || 0;
-      segs.push(pct >= 50 ? `Gần đủ chuẩn Ens Strong (${escapeHtml(r.score)}% — cần ≥65%)` : 'Chưa đủ chuẩn Ens — quan sát');
+      verdict = pct >= 50 ? `Gần đủ chuẩn Ens Strong (${r.score}% — cần ≥65%)` : 'Chưa đủ chuẩn Ens — quan sát';
     }
-    else if (r.source === 'luc-mach' && r.watchDir === 'buy') segs.push('Phe mua đang thắng — chờ thêm 1 check để thành MUA');
-    else if (r.source === 'khung4-tplus') segs.push('Chờ chu kỳ Khung4 mới');
-    else segs.push('Chờ thêm xác nhận, chưa vào');
+    else if (r.source === 'luc-mach' && r.watchDir === 'buy') verdict = 'Phe mua đang thắng — chờ thêm 1 check';
+    else if (r.source === 'khung4-tplus') verdict = 'Chờ chu kỳ Khung4 mới';
+    else verdict = 'Chờ thêm xác nhận, chưa vào';
   }
-  else segs.push('Canh mua theo vùng');
+  else verdict = 'Canh mua theo vùng';
+  // Tầng 2: phong độ hệ (ngắn).
+  let fit = '';
   if (s) {
     const pm5 = s.pm5 || {}, pr = s.plan_real || {};
     const bits = [];
     if ((pm5.n || 0) >= 15) {
-      if (pm5.hit_p5_first_rate >= 0.5) bits.push(`hệ này hợp lướt (${perfPct(pm5.hit_p5_first_rate)} bật +5% trước)`);
-      else if (pm5.hit_p5_first_rate < 0.35) bits.push(`hệ này lướt yếu (${perfPct(pm5.hit_p5_first_rate)})`);
+      if (pm5.hit_p5_first_rate >= 0.5) bits.push(`hợp lướt ${perfPct(pm5.hit_p5_first_rate)}`);
+      else if (pm5.hit_p5_first_rate < 0.35) bits.push(`lướt yếu ${perfPct(pm5.hit_p5_first_rate)}`);
     }
     if ((pr.n || 0) >= 15) {
-      if (pr.r1_first_rate >= 0.6) bits.push(`gồng tới R1 được (${perfPct(pr.r1_first_rate)})`);
-      else if (pr.r1_first_rate < 0.45) bits.push(`đừng gồng R1 (${perfPct(pr.r1_first_rate)})`);
+      if (pr.r1_first_rate >= 0.6) bits.push(`gồng R1 được ${perfPct(pr.r1_first_rate)}`);
+      else if (pr.r1_first_rate < 0.45) bits.push(`đừng gồng R1 ${perfPct(pr.r1_first_rate)}`);
     }
-    if ((pm5.n || 0) < 15 && (pr.n || 0) < 15) bits.push('hệ này mẫu mỏng — đi nhẹ');
-    if (bits.length) segs.push(bits.join('; '));
+    if ((pm5.n || 0) < 15 && (pr.n || 0) < 15) bits.push('hệ mẫu mỏng — đi nhẹ');
+    fit = bits.join(' · ');
   }
-  try {
-    const syms = (typeof STOCK_HEALTH !== 'undefined' && STOCK_HEALTH) ? STOCK_HEALTH.symbols : null;
-    const h = syms ? syms[r.symbol] : null;
-    const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (h ? fallbackTradePlan(h) : null);
-    const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1;
-    if (ez && stop != null && r1 != null) segs.push(`Mua ~${fmtPrice(ez.low)}–${fmtPrice(ez.high)} · cắt ${fmtPrice(stop)} · chốt R1 ${fmtPrice(r1)}`);
-  } catch(e) {}
+  // Tầng 3: 3 chip Mua / Cắt / Chốt (bỏ qua với lệnh bán).
+  let planHTML = '';
+  if (!isSell) {
+    try {
+      const syms = (typeof STOCK_HEALTH !== 'undefined' && STOCK_HEALTH) ? STOCK_HEALTH.symbols : null;
+      const h = syms ? syms[r.symbol] : null;
+      const tp = (typeof getConviction === 'function' ? (getConviction(r.symbol)?.trade_plan) : null) || (h ? fallbackTradePlan(h) : null);
+      const ez = tp?.entry_zone, stop = tp?.stop, r1 = tp?.targets?.r1;
+      if (ez && stop != null && r1 != null) {
+        planHTML = `<div class="sig-plan"><span class="sp-buy">Mua ${escapeHtml(String(fmtPrice(ez.low)))}–${escapeHtml(String(fmtPrice(ez.high)))}</span><span class="sp-stop">Cắt ${escapeHtml(String(fmtPrice(stop)))}</span><span class="sp-tp">Chốt R1 ${escapeHtml(String(fmtPrice(r1)))}</span></div>`;
+      }
+    } catch(e) {}
+  }
+  // Tầng 4: lịch sử riêng mã (từ lần báo thứ 2).
+  let hist = '';
   if (sysKey) {
     const st = perfSymbolStats(r.symbol, sysKey);
-    if (st && st.n >= 2) segs.push(`${r.symbol} đã báo ${st.n} lần: ${st.p5} lần +5% trước, ${st.r1} lần R1 trước`);
+    if (st && st.n >= 2) hist = `<div class="sig-hist">${escapeHtml(r.symbol)} đã báo ${st.n} lần: ${st.p5} lần +5% trước, ${st.r1} lần R1 trước</div>`;
   }
-  if (!segs.length) return '';
-  return `<div class="sig-action">👉 ${escapeHtml(segs.join(' · '))}</div>`;
+  return `<div class="sig-action"><div class="sig-verdict">👉 ${escapeHtml(verdict)}</div>`
+    + (fit ? `<div class="sig-fit">${escapeHtml(fit)}</div>` : '')
+    + planHTML + hist + `</div>`;
 }
 
 // --- Giai thich tin hieu: tai sao co tin hieu + y nghia giao dich ---
