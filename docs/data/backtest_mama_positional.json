@@ -1,7 +1,7 @@
 {
   "mode": "mama_positional_buy_t10_7pct",
-  "generated_at": "2026-09-14T22:09:56.758313+07:00",
-  "date": "14/09/2026",
+  "generated_at": "2026-09-15T20:40:17.447772+07:00",
+  "date": "15/09/2026",
   "lookforward_days": 10,
   "success_threshold_pct": 7.000000000000001,
   "min_history": 90,
@@ -9,18 +9,18 @@
   "num_symbols_tested": 659,
   "stats_all": {
     "wins": 435,
-    "total": 3282,
+    "total": 3284,
     "win_rate": 0.1325,
-    "avg_return_pct": 0.26,
+    "avg_return_pct": 0.23,
     "median_return_pct": -0.76,
     "best_return_pct": 250.0,
-    "worst_return_pct": -34.95
+    "worst_return_pct": -73.89
   },
   "stats_liquid_300k": {
     "wins": 122,
-    "total": 893,
-    "win_rate": 0.1366,
-    "avg_return_pct": -0.24,
+    "total": 894,
+    "win_rate": 0.1365,
+    "avg_return_pct": -0.26,
     "median_return_pct": -1.0,
     "best_return_pct": 51.32,
     "worst_return_pct": -23.25
@@ -127,12 +127,12 @@
     },
     "2026": {
       "wins": 57,
-      "total": 709,
-      "win_rate": 0.0804,
-      "avg_return_pct": -2.68,
-      "median_return_pct": -2.4,
+      "total": 711,
+      "win_rate": 0.0802,
+      "avg_return_pct": -2.81,
+      "median_return_pct": -2.42,
       "best_return_pct": 73.92,
-      "worst_return_pct": -34.95
+      "worst_return_pct": -73.89
     }
   },
   "top_winners": [
@@ -459,6 +459,22 @@
   ],
   "worst_trades": [
     {
+      "symbol": "TRC",
+      "date": "12/08/2026",
+      "exit_date": "26/08/2026",
+      "entry_price": 83300.0,
+      "exit_price_t10": 21750.0,
+      "return_pct": -73.89,
+      "win_7pct": false,
+      "volume": 168200.0,
+      "avg_volume20": 69980.0,
+      "liquid_300k": false,
+      "mama": 77106.03,
+      "fama": 76244.93,
+      "period": 22.8,
+      "buy_setup_value": 79700.0
+    },
+    {
       "symbol": "VDP",
       "date": "29/06/2026",
       "exit_date": "21/07/2026",
@@ -761,22 +777,6 @@
       "fama": 8318.2,
       "period": 22.46,
       "buy_setup_value": 8450.0
-    },
-    {
-      "symbol": "AMV",
-      "date": "12/02/2026",
-      "exit_date": "05/03/2026",
-      "entry_price": 2600.0,
-      "exit_price_t10": 2000.0,
-      "return_pct": -23.08,
-      "win_7pct": false,
-      "volume": 5571500.0,
-      "avg_volume20": 1946685.0,
-      "liquid_300k": true,
-      "mama": 1988.02,
-      "fama": 1917.67,
-      "period": 27.05,
-      "buy_setup_value": 2200.0
     }
   ]
 }
