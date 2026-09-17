@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-16T20:42:31.784330+07:00",
-  "date": "16/09/2026",
+  "generated_at": "2026-09-17T20:35:59.533673+07:00",
+  "date": "17/09/2026",
   "regime": {
-    "label": null,
+    "label": "Risk-On",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -11,10 +11,166 @@
   },
   "cap_a": 12,
   "counts": {
-    "A": 0,
-    "B": 0,
+    "A": 2,
+    "B": 1,
     "C": 0,
-    "in_panel": 0
+    "in_panel": 2
   },
-  "signals": []
+  "signals": [
+    {
+      "symbol": "NAB",
+      "base_score": 80,
+      "conviction": 90,
+      "tier": "B",
+      "eligible_for_a": false,
+      "in_panel": false,
+      "components": {
+        "base_score": 80,
+        "vol_bonus": false,
+        "adx_bonus": true,
+        "extension_penalty": true
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 2.2,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 6.09,
+      "vol_ratio": 1.97,
+      "adx14": 31.1,
+      "last_price": 12200.0,
+      "confirm_sources": [
+        "ensemble"
+      ],
+      "trade_plan": {
+        "entry_type": "pullback",
+        "entry_zone": {
+          "low": 11300.85,
+          "high": 11615.0,
+          "mid": 11457.92
+        },
+        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
+        "resistance": 14416.0,
+        "support": 12041.0,
+        "stop": 10758.63,
+        "stop_pct": -6.1,
+        "targets": {
+          "r1": 11859.83,
+          "r2": 11900.0,
+          "r1_pct": 3.51,
+          "r2_pct": 3.86
+        },
+        "rr": {
+          "rr1": 0.57,
+          "rr2": 0.63
+        }
+      },
+      "rank_in_day": 1
+    },
+    {
+      "symbol": "HII",
+      "base_score": 50,
+      "conviction": 60,
+      "tier": "A",
+      "eligible_for_a": true,
+      "in_panel": true,
+      "components": {
+        "base_score": 50,
+        "vol_bonus": false,
+        "adx_bonus": true,
+        "extension_penalty": true
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 4.8,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 8.36,
+      "vol_ratio": 1.47,
+      "adx14": 46.5,
+      "last_price": 10300.0,
+      "confirm_sources": [],
+      "trade_plan": {
+        "entry_type": "pullback",
+        "entry_zone": {
+          "low": 9410.44,
+          "high": 10235.34,
+          "mid": 9822.89
+        },
+        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
+        "resistance": 11150.0,
+        "support": 9505.5,
+        "stop": 7969.4,
+        "stop_pct": -18.87,
+        "targets": {
+          "r1": 11150.0,
+          "r2": 11500.0,
+          "r1_pct": 13.51,
+          "r2_pct": 17.07
+        },
+        "rr": {
+          "rr1": 0.72,
+          "rr2": 0.9
+        }
+      },
+      "rank_in_day": 2
+    },
+    {
+      "symbol": "PVT",
+      "base_score": 50,
+      "conviction": 60,
+      "tier": "A",
+      "eligible_for_a": true,
+      "in_panel": true,
+      "components": {
+        "base_score": 50,
+        "vol_bonus": false,
+        "adx_bonus": true,
+        "extension_penalty": true
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 3.6,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 7.33,
+      "vol_ratio": 1.47,
+      "adx14": 35.7,
+      "last_price": 22600.0,
+      "confirm_sources": [],
+      "trade_plan": {
+        "entry_type": "pullback",
+        "entry_zone": {
+          "low": 20846.92,
+          "high": 21977.6,
+          "mid": 21412.26
+        },
+        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
+        "resistance": 23683.33,
+        "support": 22266.67,
+        "stop": 19218.34,
+        "stop_pct": -10.25,
+        "targets": {
+          "r1": 23683.33,
+          "r2": 29728.0,
+          "r1_pct": 10.61,
+          "r2_pct": 38.84
+        },
+        "rr": {
+          "rr1": 1.04,
+          "rr2": 3.79
+        }
+      },
+      "rank_in_day": 3
+    }
+  ]
 }
