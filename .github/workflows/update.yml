@@ -60,9 +60,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/ohlc_cache
-          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}-${{ github.run_id }}
+          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}
           restore-keys: |
-            ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}-
             ohlc-cache-v2-
 
       - name: Validate SSI secrets
@@ -87,8 +86,10 @@ jobs:
           SSI_TOKEN_CACHE: ${{ secrets.SSI_TOKEN_CACHE }}
 
       - name: Run fetch + compute
-        run: python scripts/fetch_and_compute.py
+        timeout-minutes: 45
+        run: python -u scripts/fetch_and_compute.py
         env:
+          PYTHONUNBUFFERED: "1"
           SSI_CLIENT_ID: ${{ secrets.SSI_CLIENT_ID }}
           SSI_API_KEY: ${{ secrets.SSI_API_KEY }}
           SSI_API_SECRET: ${{ secrets.SSI_API_SECRET }}

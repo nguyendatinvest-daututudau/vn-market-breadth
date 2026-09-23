@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import time
 import warnings
 from datetime import datetime, timedelta
@@ -324,9 +325,14 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         ncols=80,
         bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
         dynamic_ncols=False,
+        mininterval=2,
+        file=sys.stdout,
     )
 
-    for sym in bar:
+    for idx, sym in enumerate(bar):
+        if (idx + 1) % 50 == 0:
+            tqdm.write(f"[{market}] progress {idx+1}/{len(symbols)}")
+            sys.stdout.flush()
         bar.set_postfix_str(sym, refresh=True)
 
         try:
