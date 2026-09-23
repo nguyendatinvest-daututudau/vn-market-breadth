@@ -1,6 +1,6 @@
 {
   "mode": "diep_original",
-  "generated_at": "2026-09-23T20:16:12.118218+07:00",
+  "generated_at": "2026-09-23T20:33:23.420833+07:00",
   "date": "23/09/2026",
   "threshold": 3,
   "min_volume": 20000,
@@ -1389,31 +1389,30 @@
       "symbol": "GAS",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
-      "score": 83,
+      "score": 67,
       "buy_score": 0,
-      "sell_score": 5,
+      "sell_score": 4,
       "luc_mach_buy": false,
       "luc_mach_sell": true,
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
       "tplus_buy": false,
-      "tplus_sell": true,
-      "tplus_state": 0,
+      "tplus_sell": false,
+      "tplus_state": 1,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
+        13,
         20,
         35,
-        55,
-        65
+        55
       ],
       "strategies": [
         "luc_mach_sell",
-        "tplus_sell",
+        "vudd13_sell",
         "vudd20_sell",
         "vudd35_sell",
-        "vudd55_sell",
-        "vudd65_sell"
+        "vudd55_sell"
       ],
       "last_price": 84800.0,
       "last_volume": 1174600.0
@@ -2969,31 +2968,30 @@
       "symbol": "GAS",
       "status": "SELL_WARNING",
       "signal_type": "sell_warning",
-      "score": 83,
+      "score": 67,
       "buy_score": 0,
-      "sell_score": 5,
+      "sell_score": 4,
       "luc_mach_buy": false,
       "luc_mach_sell": true,
       "diep_filter": true,
       "min_volume": 20000,
       "threshold": 3,
       "tplus_buy": false,
-      "tplus_sell": true,
-      "tplus_state": 0,
+      "tplus_sell": false,
+      "tplus_state": 1,
       "vudd_buy_periods": [],
       "vudd_sell_periods": [
+        13,
         20,
         35,
-        55,
-        65
+        55
       ],
       "strategies": [
         "luc_mach_sell",
-        "tplus_sell",
+        "vudd13_sell",
         "vudd20_sell",
         "vudd35_sell",
-        "vudd55_sell",
-        "vudd65_sell"
+        "vudd55_sell"
       ],
       "last_price": 84800.0,
       "last_volume": 1174600.0
