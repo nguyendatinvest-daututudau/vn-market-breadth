@@ -136,6 +136,11 @@ def main() -> int:
     if 'toggleHistoryDetail' in text or 'hist-detail' in text:
         ok = fail("còn bảng lịch sử cũ (toggleHistoryDetail/hist-detail)") and False
 
+    # 5l. RSI pulse bấm số sổ mã
+    for token in ("toggleRsiPulse", "rsiPulseDetail", "renderRsiPulseDetail", 'data-rsi="under30"'):
+        if token not in text:
+            ok = fail(f"thiếu {token} (RSI pulse bấm số)") and False
+
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):
         print(f"WARN: {{ {text.count('{')} != }} {text.count('}')} - kiểm tra thủ công")
