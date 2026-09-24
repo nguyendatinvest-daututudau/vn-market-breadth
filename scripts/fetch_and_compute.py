@@ -312,6 +312,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     down_volume = 0.0
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
     trend_distribution = _empty_trend_distribution()
+    trend_symbols = {k: [] for k in TREND_KEYS}
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
@@ -419,6 +420,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
             if trend:
                 trend_distribution[trend] += 1
                 trend_distribution["total"] += 1
+                trend_symbols[trend].append(sym)
 
     bar.close()
 
@@ -434,6 +436,10 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     return {
         "ma_total_symbols":   total_valid,
         "ma_eligible_symbols": {str(w): eligible[w] for w in MA_WINDOWS},
+        "trend_uptrend_symbols": sorted(trend_symbols["uptrend"]),
+        "trend_weak_symbols": sorted(trend_symbols["weak"]),
+        "trend_neutral_symbols": sorted(trend_symbols["neutral"]),
+        "trend_downtrend_symbols": sorted(trend_symbols["downtrend"]),
         "above_ma10_count":   counts[10],
         "above_ma20_count":   counts[20],
         "above_ma50_count":   counts[50],
@@ -465,6 +471,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
         "up_down_volume_ratio": round(up_volume / down_volume, 3) if down_volume > 0 else None,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
+        "trend_symbols": {k: sorted(v) for k, v in trend_symbols.items()},
         "latest_ohlc_date": format_market_date(max(latest_dates)) if latest_dates else "",
     }
 
@@ -737,6 +744,7 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "ad_distribution_total": ad_distribution_total,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
+        "trend_symbols": {k: merge(f"trend_{k}_symbols") for k in TREND_KEYS},
     }
 
 
