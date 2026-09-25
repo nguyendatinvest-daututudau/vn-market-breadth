@@ -63,7 +63,7 @@ MARKET_INDEX_ID = {
     "HOSE": "VNINDEX",
     "HNX": "HNXIndex",
 }
-MA_WINDOWS = [10, 20, 50, 200]
+MA_WINDOWS = [10, 20, 50, 150, 200]
 INDEX_HISTORY_SYMBOLS = ("VNI", "HNXINDEX")
 HISTORY_DAYS_LOOKBACK = 4200  # du tu ~giua 2015 (MA200 co the tinh tu 01/01/2016) cho chart lich su 10 nam
 INCREMENTAL_LOOKBACK = 21     # lay 21 ngay gan nhat neu da co cache (tranh thieu sau ky nghi dai)
@@ -92,19 +92,35 @@ def _empty_ad_distribution() -> list[dict]:
     return [{"bucket": label, "count": 0, "side": side} for label, _lo, _hi, side in AD_BUCKETS]
 
 
-TREND_KEYS = ("uptrend", "weak", "neutral", "downtrend")
+TREND_KEYS = ("uptrend_3of3", "uptrend_2of3", "weak", "neutral", "downtrend")
 
 
 def _empty_trend_distribution() -> dict:
     return {**{key: 0 for key in TREND_KEYS}, "total": 0}
 
 
-def classify_trend_ma_stack(last: float, ma20: float, ma50: float, ma200: float) -> str | None:
-    """Classify a symbol by Close > MA20 > MA50 > MA200 alignment."""
-    if any(pd.isna(value) for value in (last, ma20, ma50, ma200)):
+def classify_trend_ma_stack(last: float, ma50: float, ma150: float, ma200: float) -> dict | None:
+    """Classify a symbol by Close > MA50 > MA150 > MA200 alignment.
+    Returns dict with:
+      - trend: 'uptrend_3of3' (Close > MA50 > MA150 > MA200), 'uptrend_2of3' (2/3 conditions met), 'weak', 'neutral', 'downtrend'
+      - bullish_count: number of bullish conditions met (0-3)
+    """
+    if any(pd.isna(value) for value in (last, ma50, ma150, ma200)):
         return None
-    bullish_conditions = sum((last > ma20, ma20 > ma50, ma50 > ma200))
-    return {3: "uptrend", 2: "weak", 1: "neutral", 0: "downtrend"}[bullish_conditions]
+    # 3 conditions: Close > MA50, MA50 > MA150, MA150 > MA200
+    c1 = last > ma50
+    c2 = ma50 > ma150
+    c3 = ma150 > ma200
+    bullish_count = sum((c1, c2, c3))
+    if bullish_count == 3:
+        trend = "uptrend_3of3"
+    elif bullish_count == 2:
+        trend = "uptrend_2of3"
+    elif bullish_count == 1:
+        trend = "weak"
+    else:
+        trend = "downtrend"
+    return {"trend": trend, "bullish_count": bullish_count, "c1": c1, "c2": c2, "c3": c3}
 
 
 def _ad_bucket_index(pct_change: float) -> int:
@@ -411,13 +427,12 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                         newly_below[w].append(sym)
 
         if len(close) >= 200:
-            trend = classify_trend_ma_stack(
-                last_close,
-                float(pd.Series(close[-20:]).mean()),
-                float(pd.Series(close[-50:]).mean()),
-                float(pd.Series(close[-200:]).mean()),
-            )
-            if trend:
+            ma50_val = float(pd.Series(close[-50:]).mean())
+            ma150_val = float(pd.Series(close[-150:]).mean())
+            ma200_val = float(pd.Series(close[-200:]).mean())
+            trend_info = classify_trend_ma_stack(last_close, ma50_val, ma150_val, ma200_val)
+            if trend_info:
+                trend = trend_info["trend"]
                 trend_distribution[trend] += 1
                 trend_distribution["total"] += 1
                 trend_symbols[trend].append(sym)
@@ -436,9 +451,9 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     return {
         "ma_total_symbols":   total_valid,
         "ma_eligible_symbols": {str(w): eligible[w] for w in MA_WINDOWS},
-        "trend_uptrend_symbols": sorted(trend_symbols["uptrend"]),
+        "trend_uptrend_3of3_symbols": sorted(trend_symbols["uptrend_3of3"]),
+        "trend_uptrend_2of3_symbols": sorted(trend_symbols["uptrend_2of3"]),
         "trend_weak_symbols": sorted(trend_symbols["weak"]),
-        "trend_neutral_symbols": sorted(trend_symbols["neutral"]),
         "trend_downtrend_symbols": sorted(trend_symbols["downtrend"]),
         "above_ma10_count":   counts[10],
         "above_ma20_count":   counts[20],

@@ -1072,6 +1072,13 @@ function getTrendSymbols(m, key){
   if (Array.isArray(flat)) return flat;
   return [];
 }
+function getPrevTrendSymbols(m, key){
+  if (!m) return new Set();
+  if (m.trend_symbols && Array.isArray(m.trend_symbols[key])) return new Set(m.trend_symbols[key]);
+  const flat = m[`trend_${key}_symbols`];
+  if (Array.isArray(flat)) return new Set(flat);
+  return new Set();
+}
 let trendActive = null;
 function toggleTrendHub(key){
   trendActive = trendActive === key ? null : key;
@@ -1081,31 +1088,40 @@ function toggleTrendHub(key){
   if (!trendActive) { detail.style.display = 'none'; detail.innerHTML = ''; return; }
   renderTrendHubDetail(trendActive);
 }
+function getPrevTrendSymbols(m, key){
+  if (!m) return new Set();
+  if (m.trend_symbols && Array.isArray(m.trend_symbols[key])) return new Set(m.trend_symbols[key]);
+  const flat = m[`trend_${key}_symbols`];
+  if (Array.isArray(flat)) return new Set(flat);
+  return new Set();
+}
 function renderTrendHubDetail(key){
   const el = document.getElementById('trendHubDetail');
   const m = LATEST?.markets?.[activeMarket];
   if (!el || !m) return;
   const list = getTrendSymbols(m, key);
-  const labels = {uptrend:'Xu hướng tăng rõ ràng — ưu tiên mua thả theo vùng hỗ trợ', weak:'Xu hướng yếu — 2/3 điều kiện', neutral:'Trung lập', downtrend:'Xu hướng giảm'};
+  const prevSet = getPrevTrendSymbols(m, key);
+  const labels = {uptrend_3of3:'Xu hướng tăng 3/3 (Close > MA50 > MA150 > MA200) — mạnh nhất, ưu tiên mua thả', uptrend_2of3:'Xu hướng tăng 2/3 (2/3 điều kiện) — xu hướng tăng, pullback', weak:'Xu hướng yếu — 1/3 điều kiện', neutral:'Trung lập', downtrend:'Xu hướng giảm'};
   const cap = 80;
   const shown = list.slice(0, cap);
-  const chips = shown.length ? shown.map(s => `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;" title="Xem thẻ sức khỏe">${escapeHtml(s)}</span>`).join('') : '<span class="empty-note">Không có mã</span>';
+  const chips = shown.length ? shown.map(s => `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;" title="Xem thẻ sức khỏe">${escapeHtml(s)}${prevSet.has(s) ? '' : ' <span style="color:var(--up);font-size:9px;">NEW</span>'}</span>`).join('') : '<span class="empty-note">Không có mã</span>';
   const more = list.length > cap ? `<div style="font-size:11px;color:var(--faint);margin-top:6px;">Hiển thị ${cap}/${list.length} mã · gõ mã ở thanh tìm kiếm để xem thêm thẻ sức khỏe.</div>` : '';
   const signalCount = (()=>{ try { return collectAllSignals(null).filter(r=>list.includes(r.symbol)).length; } catch(e){ return 0; } })();
-  const hubBtn = (key==='uptrend' && list.length) ? `<button type="button" onclick="switchView('signals'); setTimeout(()=>{activeFilter='all'; searchQuery=''; const el=document.getElementById('searchInput'); if(el) el.value=''; renderSignalTable(); const hub=document.getElementById('hubTabs'); if(hub) [...hub.querySelectorAll('.hub-tab')].forEach(b=>b.classList.remove('active'));},50)" style="margin-left:8px;border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;">Xem trong Tín hiệu (${signalCount})</button>` : '';
+  const hubBtn = (key==='uptrend_3of3' || key==='uptrend_2of3') && list.length ? `<button type="button" onclick="switchView('signals'); setTimeout(()=>{activeFilter='trend-up'; searchQuery=''; const el=document.getElementById('searchInput'); if(el) el.value=''; renderSignalTable(); const hub=document.getElementById('hubTabs'); if(hub) [...hub.querySelectorAll('.hub-tab')].forEach(b=>b.classList.remove('active'));},50)" style="margin-left:8px;border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;">Xem trong Tín hiệu (${signalCount})</button>` : '';
   el.style.display = '';
-  el.innerHTML = `<div class="rsi-detail"><div class="rsi-detail-head"><b>${labels[key] || key} — ${list.length.toLocaleString('vi-VN')} mã</b><span><button type="button" onclick="navigator.clipboard.writeText('${list.join(', ')}').then(()=>{const b=document.getElementById('trendCopyBtn'); if(b){b.textContent='Đã copy'; setTimeout(()=>b.textContent='Copy DS',1500);}})" id="trendCopyBtn" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-right:4px;">Copy DS</button><button type="button" onclick="toggleTrendHub('${key}')" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">Đóng ✕</button></span></div><div class="chip-wrap" style="max-height:160px;overflow-y:auto;">${chips}</div>${more}<div style="margin-top:6px;font-size:11px;color:var(--muted);">Gợi ý: thả mua theo vùng hỗ trợ (MA20/MA50) khi mã giữ trên MA stack. ${hubBtn}</div></div>`;
+  el.innerHTML = `<div class="rsi-detail"><div class="rsi-detail-head"><b>${labels[key] || key} — ${list.length.toLocaleString('vi-VN')} mã</b><span><button type="button" onclick="navigator.clipboard.writeText('${list.join(', ')}').then(()=>{const b=document.getElementById('trendCopyBtn'); if(b){b.textContent='Đã copy'; setTimeout(()=>b.textContent='Copy DS',1500);}})" id="trendCopyBtn" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-right:4px;">Copy DS</button><button type="button" onclick="toggleTrendHub('${key}')" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">Đóng ✕</button></span></div><div class="chip-wrap" style="max-height:160px;overflow-y:auto;">${chips}</div>${more}<div style="margin-top:6px;font-size:11px;color:var(--muted);">Gợi ý: thả mua theo vùng hỗ trợ (MA50/MA150) khi mã giữ trên MA stack. ${hubBtn}</div></div>`;
 }
 function buildTrendDistributionPanel(m){
   const d = m?.trend_distribution;
   const keys = [
-    {key:'uptrend', label:'XH tăng', note:'3/3: Close > MA20 > MA50 > MA200 — mua thả hỗ trợ', color:'#16A34A'},
-    {key:'weak', label:'XH yếu', note:'2/3 điều kiện MA tích cực', color:'#D6A84F'},
+    {key:'uptrend_3of3', label:'XH tăng 3/3', note:'Close > MA50 > MA150 > MA200 — mạnh nhất, ưu tiên mua thả', color:'#16A34A'},
+    {key:'uptrend_2of3', label:'XH tăng 2/3', note:'2/3: Close > MA50, MA50>MA150 hoặc MA150>MA200 — xu hướng tăng, pullback', color:'#22C55E'},
+    {key:'weak', label:'XH yếu', note:'1/3 điều kiện MA tích cực', color:'#D6A84F'},
     {key:'neutral', label:'Trung lập', note:'1/3 điều kiện MA tích cực', color:'#8A8172'},
-    {key:'downtrend', label:'XH giảm', note:'0/3: Close < MA20 < MA50 < MA200', color:'#C2413B'},
+    {key:'downtrend', label:'XH giảm', note:'0/3: Close < MA50 < MA150 < MA200', color:'#C2413B'},
   ];
   const total = Number(d?.total) || 0;
-  if (!total) return `<div class="note" style="margin:0;">Phân bổ xu hướng theo MA stack: đang chờ dữ liệu MA200.</div>`;
+  if (!total) return `<div class="note" style="margin:0;">Phân bổ xu hướng theo MA50/MA150/MA200: đang chờ dữ liệu.</div>`;
   let cursor = 0;
   const segments = keys.map(item => {
     const pct = Number(d[item.key] || 0) / total * 100;
@@ -1117,10 +1133,10 @@ function buildTrendDistributionPanel(m){
     const count = Number(d[item.key] || 0);
     const pct = count / total * 100;
     const isActive = trendActive === item.key;
-    const extra = item.key==='uptrend' ? ' · <span style="color:var(--up);font-weight:700;">Hub mua thả</span>' : '';
+    const extra = (item.key==='uptrend_3of3' || item.key==='uptrend_2of3') ? ' · <span style="color:var(--up);font-weight:700;">Hub pullback</span>' : '';
     return `<button type="button" class="trend-item${isActive?' active':''}" data-trend="${item.key}" onclick="toggleTrendHub('${item.key}')" style="text-align:left;cursor:pointer;width:100%;"><div class="trend-item-top"><span><i class="trend-dot" style="background:${item.color}"></i>${item.label}</span><span class="trend-item-pct">${pct.toFixed(1)}%</span></div><div class="trend-item-note">${count.toLocaleString('vi-VN')} mã · ${item.note}${extra}</div></button>`;
   }).join('');
-  return `<div><div class="ctx-title">Phân bổ xu hướng theo MA stack · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div><div id="trendHubDetail" style="display:${trendActive?'':'none'};margin-top:10px;"></div></div>`;
+  return `<div><div class="ctx-title">Phân bổ xu hướng theo MA50/MA150/MA200 · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div><div id="trendHubDetail" style="display:${trendActive?'':'none'};margin-top:10px;"></div></div>`;
 }
 
 function buildUdVolumePanel(m){
@@ -2189,7 +2205,9 @@ function applyFilters(rows, filter, query, marketData){
       if (filter === 'k4-sell' && !(r.source === 'khung4-tplus' && r.signalType === 'sell_warning')) return false;
       if (filter === 'trend-up') {
         const m = marketData || LATEST?.markets?.[activeMarket];
-        const upList = getTrendSymbols(m, 'uptrend');
+        const upList3 = getTrendSymbols(m, 'uptrend_3of3');
+        const upList2 = getTrendSymbols(m, 'uptrend_2of3');
+        const upList = upList3.concat(upList2);
         if (!upList.includes(r.symbol)) return false;
       }
       if (filter === 'rr') {
