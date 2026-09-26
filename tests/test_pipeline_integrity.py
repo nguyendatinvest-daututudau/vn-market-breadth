@@ -176,3 +176,33 @@ def test_compact_history_keeps_ma_denominators():
     })
     assert compact["HOSE"]["above_ma20_count"] == 84
     assert compact["HOSE"]["ma_eligible_symbols"]["20"] == 140
+
+
+def _mini_snapshot(tag):
+    elig = {str(w): 10 for w in pipeline.MA_WINDOWS}
+    return {
+        "advances": 6, "declines": 3, "unchanged": 1,
+        "above_ma10_count": 5, "above_ma20_count": 4,
+        "above_ma50_count": 3, "above_ma200_count": 2,
+        "ma_total_symbols": 10,
+        "ma_eligible_symbols": elig,
+        "ad_distribution": [{"bucket": "x", "count": 10, "side": "up"}],
+        "rsi_pulse": {"under_30": 1, "over_70": 0, "over_50": 5, "total": 10},
+        "trend_distribution": {"uptrend_3of3": 1, "uptrend_2of3": 2, "weak": 3,
+                               "neutral": 0, "downtrend": 4, "total": 10},
+        "above_ma10_symbols": [tag], "above_ma20_symbols": [tag],
+        "above_ma50_symbols": [tag], "above_ma200_symbols": [tag],
+        "trend_uptrend_3of3_symbols": [tag],
+        "trend_uptrend_2of3_symbols": [],
+        "trend_weak_symbols": [],
+        "trend_downtrend_symbols": [],
+    }
+
+
+def test_combine_all_covers_every_ma_window():
+    # Hoi quy KeyError: 150 khi MA_WINDOWS co them 150 (MA150 cho trend stack)
+    combined = pipeline.combine_all([_mini_snapshot("AAA"), _mini_snapshot("BBB")])
+    for w in pipeline.MA_WINDOWS:
+        assert combined["ma_eligible_symbols"][str(w)] == 20
+    assert combined["trend_distribution"]["total"] == 20
+    assert "AAA" in combined["trend_symbols"]["uptrend_3of3"]

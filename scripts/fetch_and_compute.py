@@ -688,10 +688,8 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
     ma200 = sum(s["above_ma200_count"] for s in snapshots)
     ma_tot = sum(s["ma_total_symbols"] for s in snapshots)
     ma_eligible = {
-        10: sum(int(s.get("ma_eligible_symbols", {}).get("10", s["ma_total_symbols"]) or 0) for s in snapshots),
-        20: sum(int(s.get("ma_eligible_symbols", {}).get("20", s["ma_total_symbols"]) or 0) for s in snapshots),
-        50: sum(int(s.get("ma_eligible_symbols", {}).get("50", s["ma_total_symbols"]) or 0) for s in snapshots),
-        200: sum(int(s.get("ma_eligible_symbols", {}).get("200", s["ma_total_symbols"]) or 0) for s in snapshots),
+        w: sum(int(s.get("ma_eligible_symbols", {}).get(str(w), s["ma_total_symbols"]) or 0) for s in snapshots)
+        for w in MA_WINDOWS
     }
 
     def merge(key):
