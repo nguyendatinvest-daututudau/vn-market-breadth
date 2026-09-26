@@ -102867,33 +102867,6 @@
           "last_volume": 851500.0
         },
         {
-          "symbol": "VPB",
-          "status": "WATCHLIST",
-          "signal_type": "watch",
-          "score": 33,
-          "buy_score": 0,
-          "sell_score": 2,
-          "luc_mach_buy": false,
-          "luc_mach_sell": false,
-          "diep_filter": true,
-          "min_volume": 20000,
-          "threshold": 3,
-          "tplus_buy": false,
-          "tplus_sell": false,
-          "tplus_state": 1,
-          "vudd_buy_periods": [],
-          "vudd_sell_periods": [
-            13,
-            65
-          ],
-          "strategies": [
-            "vudd13_sell",
-            "vudd65_sell"
-          ],
-          "last_price": 23000.0,
-          "last_volume": 46844000.0
-        },
-        {
           "symbol": "VTP",
           "status": "WATCHLIST",
           "signal_type": "watch",
@@ -103375,6 +103348,36 @@
           ],
           "last_price": 2900.0,
           "last_volume": 31000.0
+        },
+        {
+          "symbol": "VPB",
+          "status": "SELL_WARNING",
+          "signal_type": "sell_warning",
+          "score": 50,
+          "buy_score": 0,
+          "sell_score": 3,
+          "luc_mach_buy": false,
+          "luc_mach_sell": true,
+          "diep_filter": true,
+          "min_volume": 20000,
+          "threshold": 3,
+          "tplus_buy": false,
+          "tplus_sell": false,
+          "tplus_state": 1,
+          "vudd_buy_periods": [],
+          "vudd_sell_periods": [
+            20,
+            55,
+            65
+          ],
+          "strategies": [
+            "luc_mach_sell",
+            "vudd20_sell",
+            "vudd55_sell",
+            "vudd65_sell"
+          ],
+          "last_price": 23000.0,
+          "last_volume": 46844000.0
         }
       ]
     },
@@ -103618,30 +103621,6 @@
     "advanced_trailstop": {
       "date": "25/09/2026",
       "all_signals": [
-        {
-          "symbol": "VPB",
-          "status": "BUY",
-          "signal_type": "advanced_trailstop_buy",
-          "score": 100,
-          "ats_buy": true,
-          "ats_sell": false,
-          "ats_cover": true,
-          "ats_short": false,
-          "ats_long": true,
-          "ats_shrt": false,
-          "bs": 22453.24,
-          "atr": 2817.18,
-          "atrvalue": 5634.36,
-          "buy_price": 23000.0,
-          "sell_price": null,
-          "last_buy_price": 23000.0,
-          "last_sell_price": 22100.0,
-          "last_price": 23000.0,
-          "last_volume": 46844000.0,
-          "strategies": [
-            "advanced_trailstop_buy"
-          ]
-        },
         {
           "symbol": "TTF",
           "status": "BUY",
