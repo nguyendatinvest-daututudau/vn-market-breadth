@@ -313,6 +313,70 @@
   .rsi-detail-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;color:var(--muted);}
   @media (max-width:700px){.rsi-pulse-grid,.sentiment-gauge{grid-template-columns:1fr;}.gauge-face{height:128px;}}
 
+  /* Trend Hub Detail Panel */
+  .trend-hub-detail{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .trend-hub-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--panel-tint);}
+  .trend-hub-header h4{margin:0;font-size:13px;font-weight:700;color:var(--text);}
+  .trend-hub-actions{display:flex;gap:8px;}
+  .btn-ghost{border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .btn-ghost:hover{background:var(--panel-tint);border-color:var(--accent-border);color:var(--text);}
+  .trend-hub-body{padding:12px 16px;}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+  .trend-hub-detail .chip-wrap{max-height:200px;overflow-y:auto;}
+  .trend-hub-detail .chip{position:relative;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--panel-tint);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;}
+  .trend-hub-detail .chip:hover{background:var(--panel);border-color:var(--accent-border);transform:translateY(-1px);}
+  .trend-hub-detail .chip[data-sym]{cursor:pointer;}
+  .trend-hub-detail .new-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:16px;padding:0 4px;background:var(--up);color:#fff;border-radius:999px;font-size:8px;font-weight:800;line-height:1;white-space:nowrap;animation:pulse-new 1.5s ease-in-out infinite;}
+  @keyframes pulse-new{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .trend-more{font-size:11px;color:var(--faint);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+  .trend-hub-detail .chip{position:relative;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--panel-tint);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;}
+  .trend-hub-detail .chip:hover{background:var(--panel);border-color:var(--accent-border);transform:translateY(-1px);}
+  .trend-hub-detail .chip[data-sym]{cursor:pointer;}
+  .trend-hub-detail .new-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:16px;padding:0 4px;background:var(--up);color:#fff;border-radius:999px;font-size:8px;font-weight:800;line-height:1;white-space:nowrap;animation:pulse-new 1.5s ease-in-out infinite;}
+  @keyframes pulse-new{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .trend-more{font-size:11px;color:var(--faint);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+  .trend-hub-detail .chip{position:relative;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--panel-tint);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;}
+  .trend-hub-detail .chip:hover{background:var(--panel);border-color:var(--accent-border);transform:translateY(-1px);}
+  .trend-hub-detail .chip[data-sym]{cursor:pointer;}
+  .trend-hub-detail .new-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:16px;padding:0 4px;background:var(--up);color:#fff;border-radius:999px;font-size:8px;font-weight:800;line-height:1;white-space:nowrap;animation:pulse-new 1.5s ease-in-out infinite;}
+  @keyframes pulse-new{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .trend-more{font-size:11px;color:var(--faint);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+  .trend-hub-detail .chip{position:relative;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--panel-tint);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;}
+  .trend-hub-detail .chip:hover{background:var(--panel);border-color:var(--accent-border);transform:translateY(-1px);}
+  .trend-hub-detail .chip[data-sym]{cursor:pointer;}
+  .trend-hub-detail .new-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:16px;padding:0 4px;background:var(--up);color:#fff;border-radius:999px;font-size:8px;font-weight:800;line-height:1;white-space:nowrap;animation:pulse-new 1.5s ease-in-out infinite;}
+  @keyframes pulse-new{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .trend-more{font-size:11px;color:var(--faint);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+  .trend-hub-detail .chip{position:relative;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--panel-tint);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;}
+  .trend-hub-detail .chip:hover{background:var(--panel);border-color:var(--accent-border);transform:translateY(-1px);}
+  .trend-hub-detail .chip[data-sym]{cursor:pointer;}
+  .trend-hub-detail .new-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:16px;padding:0 4px;background:var(--up);color:#fff;border-radius:999px;font-size:8px;font-weight:800;line-height:1;white-space:nowrap;animation:pulse-new 1.5s ease-in-out infinite;}
+  @keyframes pulse-new{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .trend-more{font-size:11px;color:var(--faint);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .trend-hub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);background:var(--panel-tint);font-size:11px;color:var(--muted);}
+  .trend-hint{flex:1;}
+  .trend-hub-btn{border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;}
+  .trend-hub-btn:hover{background:rgba(34,197,94,.12);border-color:var(--up);}
+
   .trend-layout{display:grid;grid-template-columns:190px 1fr;gap:24px;align-items:center;}
   .trend-donut{width:174px;height:174px;border-radius:50%;display:grid;place-items:center;margin:auto;box-shadow:inset 0 0 0 1px rgba(16,24,32,.08),0 12px 28px rgba(16,24,32,.10);}
   .trend-donut-center{width:104px;height:104px;border-radius:50%;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 0 0 1px var(--border);}
@@ -1107,12 +1171,15 @@ function renderTrendHubDetail(key){
   const labels = {uptrend_3of3:'Xu hướng tăng 3/3 (Close > MA50 > MA150 > MA200) — mạnh nhất, ưu tiên mua thả', uptrend_2of3:'Xu hướng tăng 2/3 (2/3 điều kiện) — xu hướng tăng, pullback', weak:'Xu hướng yếu — 1/3 điều kiện', neutral:'Trung lập', downtrend:'Xu hướng giảm'};
   const cap = 80;
   const shown = list.slice(0, cap);
-  const chips = shown.length ? shown.map(s => `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;" title="Xem thẻ sức khỏe">${escapeHtml(s)}${prevSet.has(s) ? '' : ' <span style="color:var(--up);font-size:9px;">NEW</span>'}</span>`).join('') : '<span class="empty-note">Không có mã</span>';
-  const more = list.length > cap ? `<div style="font-size:11px;color:var(--faint);margin-top:6px;">Hiển thị ${cap}/${list.length} mã · gõ mã ở thanh tìm kiếm để xem thêm thẻ sức khỏe.</div>` : '';
+  const chips = shown.length ? shown.map(s => {
+    const isNew = !prevSet.has(s);
+    return `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;position:relative;" title="Xem thẻ sức khỏe">${escapeHtml(s)}${isNew ? '<span class="new-badge">NEW</span>' : ''}</span>`;
+  }).join('') : '<span class="empty-note">Không có mã</span>';
+  const more = list.length > cap ? `<div class="trend-more">Hiển thị ${cap}/${list.length} mã · gõ mã ở thanh tìm kiếm để xem thêm thẻ sức khỏe.</div>` : '';
   const signalCount = (()=>{ try { return collectAllSignals(null).filter(r=>list.includes(r.symbol)).length; } catch(e){ return 0; } })();
-  const hubBtn = (key==='uptrend_3of3' || key==='uptrend_2of3') && list.length ? `<button type="button" onclick="switchView('signals'); setTimeout(()=>{activeFilter='trend-up'; searchQuery=''; const el=document.getElementById('searchInput'); if(el) el.value=''; renderSignalTable(); const hub=document.getElementById('hubTabs'); if(hub) [...hub.querySelectorAll('.hub-tab')].forEach(b=>b.classList.remove('active'));},50)" style="margin-left:8px;border:1px solid var(--border);background:var(--panel);color:var(--up);border-radius:999px;padding:3px 10px;font-size:11px;cursor:pointer;">Xem trong Tín hiệu (${signalCount})</button>` : '';
+  const hubBtn = (key==='uptrend_3of3' || key==='uptrend_2of3') && list.length ? `<button type="button" class="trend-hub-btn" onclick="switchView('signals'); setTimeout(()=>{activeFilter='trend-up'; searchQuery=''; const el=document.getElementById('searchInput'); if(el) el.value=''; renderSignalTable(); const hub=document.getElementById('hubTabs'); if(hub) [...hub.querySelectorAll('.hub-tab')].forEach(b=>b.classList.remove('active'));},50)">Xem trong Tín hiệu (${signalCount})</button>` : '';
   el.style.display = '';
-  el.innerHTML = `<div class="rsi-detail"><div class="rsi-detail-head"><b>${labels[key] || key} — ${list.length.toLocaleString('vi-VN')} mã</b><span><button type="button" onclick="navigator.clipboard.writeText('${list.join(', ')}').then(()=>{const b=document.getElementById('trendCopyBtn'); if(b){b.textContent='Đã copy'; setTimeout(()=>b.textContent='Copy DS',1500);}})" id="trendCopyBtn" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-right:4px;">Copy DS</button><button type="button" onclick="toggleTrendHub('${key}')" style="border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">Đóng ✕</button></span></div><div class="chip-wrap" style="max-height:160px;overflow-y:auto;">${chips}</div>${more}<div style="margin-top:6px;font-size:11px;color:var(--muted);">Gợi ý: thả mua theo vùng hỗ trợ (MA50/MA150) khi mã giữ trên MA stack. ${hubBtn}</div></div>`;
+  el.innerHTML = `<div class="trend-hub-detail"><div class="trend-hub-header"><h4>${labels[key] || key} — ${list.length.toLocaleString('vi-VN')} mã</h4><div class="trend-hub-actions"><button type="button" class="btn-ghost" onclick="navigator.clipboard.writeText('${list.join(', ')}').then(()=>{const b=document.getElementById('trendCopyBtn'); if(b){b.textContent='Đã copy'; setTimeout(()=>b.textContent='Copy DS',1500);}})" id="trendCopyBtn">Copy DS</button><button type="button" class="btn-ghost" onclick="toggleTrendHub('${key}')">Đóng ✕</button></div></div><div class="trend-hub-body"><div class="chip-wrap">${chips}</div>${more}</div><div class="trend-hub-footer"><span class="trend-hint">Gợi ý: thả mua theo vùng hỗ trợ (MA50/MA150) khi mã giữ trên MA stack.</span>${hubBtn}</div></div>`;
 }
 function buildTrendDistributionPanel(m){
   const d = m?.trend_distribution;
