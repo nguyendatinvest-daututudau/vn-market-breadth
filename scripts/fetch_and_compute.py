@@ -828,6 +828,7 @@ def _compact_history_markets(markets_dict: dict) -> dict:
             "up_down_volume_ratio": snap.get("up_down_volume_ratio"),
             "total_symbols": snap.get("total_symbols"),
             "ma_total_symbols": snap.get("ma_total_symbols"),
+            "trend_symbols": snap.get("trend_symbols"),
         }
     return compact
 
