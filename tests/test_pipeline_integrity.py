@@ -106,6 +106,10 @@ def test_trend_hubs_are_disjoint_and_prioritized():
     assert cls(106, 105, None, None, 100)["hub"] == "hub3"
     assert cls(106, 105, None, None, 106) is None
     assert cls(100, 105, None, None, 100) is None
+    # HUB3 nhanh MA20>MA50 (kieu GEL: MA50 chua ngoc 14 phien nhung MA20 da vuot)
+    assert cls(106, 105, 110, 115, 106, ma20=107)["hub"] == "hub3"
+    assert cls(106, 105, None, None, 106, ma20=107)["hub"] == "hub3"
+    assert cls(106, 105, 110, 115, 106, ma20=104) is None
 
 
 def test_close_pipeline_does_not_publish_intraday_data(monkeypatch):

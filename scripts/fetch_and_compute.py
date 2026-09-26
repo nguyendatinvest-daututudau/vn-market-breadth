@@ -106,7 +106,7 @@ def _empty_trend_distribution() -> dict:
 
 
 def classify_trend_hub(last: float, ma50: float, ma150: float | None, ma200: float | None,
-                        ma50_prev: float | None) -> dict | None:
+                        ma50_prev: float | None, ma20: float | None = None) -> dict | None:
     """Phan loai 1 ma vao hub1/hub2/hub3 (roi nhau) hoac None (ngoai watchlist).
     ma50_prev: MA50 cach day MA_SLOPE_LOOKBACK phien (None neu khong du du lieu).
     Ma moi thieu MA150/MA200 (None): bo qua hub1/hub2, chi xet hub3.
@@ -131,16 +131,18 @@ def classify_trend_hub(last: float, ma50: float, ma150: float | None, ma200: flo
         stack_c2 = stack_c3 = False
         above_count_nb = None
     ma50_rising = bool(ma50_prev is not None and not pd.isna(ma50_prev) and ma50 > ma50_prev)
-    if stack_c1 and ma50_rising:
+    short_flip = bool(ma20 is not None and not pd.isna(ma20) and ma20 > ma50)
+    if stack_c1 and (ma50_rising or short_flip):
         return {"hub": "hub3", "stack_c1": stack_c1, "stack_c2": stack_c2,
-                "stack_c3": stack_c3, "above_count": above_count_nb, "ma50_rising": True}
+                "stack_c3": stack_c3, "above_count": above_count_nb,
+                "ma50_rising": ma50_rising, "short_flip": short_flip}
     return None
 
 
 def classify_trend_ma_stack(last: float, ma50: float, ma150: float, ma200: float,
-                             ma50_prev: float | None = None) -> dict | None:
+                             ma50_prev: float | None = None, ma20: float | None = None) -> dict | None:
     """Wrapper tuong thich: tra ve {'trend': hub, ...} (trend = hub1/hub2/hub3)."""
-    info = classify_trend_hub(last, ma50, ma150, ma200, ma50_prev)
+    info = classify_trend_hub(last, ma50, ma150, ma200, ma50_prev, ma20)
     if info is None:
         return None
     return {"trend": info["hub"], **{k: v for k, v in info.items() if k != "hub"}}
@@ -468,7 +470,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                 # Ma moi chua du 200 phien (thieu MA150/MA200): chi xet hub3
                 ma150_val = None
                 ma200_val = None
-            trend_info = classify_trend_hub(last_close, ma50_val, ma150_val, ma200_val, ma50_prev)
+            ma20_val = float(pd.Series(close[-20:]).mean())
+            trend_info = classify_trend_hub(last_close, ma50_val, ma150_val, ma200_val, ma50_prev, ma20_val)
             if trend_info:
                 hub = trend_info["hub"]
                 trend_distribution[hub] += 1
