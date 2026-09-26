@@ -1072,7 +1072,17 @@ function getTrendSymbols(m, key){
   if (Array.isArray(flat)) return flat;
   return [];
 }
-function getPrevTrendSymbols(m, key){
+function getPrevTrendSymbols(currentMarket, key){
+  if (!HISTORY || !HISTORY.length) return new Set();
+  const todayDate = LATEST?.markets?.ALL?.date;
+  if (!todayDate) return new Set();
+  // Find today's entry in HISTORY, then get the previous one
+  const todayIdx = HISTORY.findIndex(h => h.date === todayDate);
+  const prevIdx = todayIdx - 1;
+  if (prevIdx < 0) return new Set();
+  const prevEntry = HISTORY[prevIdx];
+  if (!prevEntry?.markets?.[currentMarket]) return new Set();
+  const m = prevEntry.markets[currentMarket];
   if (!m) return new Set();
   if (m.trend_symbols && Array.isArray(m.trend_symbols[key])) return new Set(m.trend_symbols[key]);
   const flat = m[`trend_${key}_symbols`];
@@ -1088,19 +1098,12 @@ function toggleTrendHub(key){
   if (!trendActive) { detail.style.display = 'none'; detail.innerHTML = ''; return; }
   renderTrendHubDetail(trendActive);
 }
-function getPrevTrendSymbols(m, key){
-  if (!m) return new Set();
-  if (m.trend_symbols && Array.isArray(m.trend_symbols[key])) return new Set(m.trend_symbols[key]);
-  const flat = m[`trend_${key}_symbols`];
-  if (Array.isArray(flat)) return new Set(flat);
-  return new Set();
-}
 function renderTrendHubDetail(key){
   const el = document.getElementById('trendHubDetail');
   const m = LATEST?.markets?.[activeMarket];
   if (!el || !m) return;
   const list = getTrendSymbols(m, key);
-  const prevSet = getPrevTrendSymbols(m, key);
+  const prevSet = getPrevTrendSymbols(activeMarket, key);
   const labels = {uptrend_3of3:'Xu hướng tăng 3/3 (Close > MA50 > MA150 > MA200) — mạnh nhất, ưu tiên mua thả', uptrend_2of3:'Xu hướng tăng 2/3 (2/3 điều kiện) — xu hướng tăng, pullback', weak:'Xu hướng yếu — 1/3 điều kiện', neutral:'Trung lập', downtrend:'Xu hướng giảm'};
   const cap = 80;
   const shown = list.slice(0, cap);
