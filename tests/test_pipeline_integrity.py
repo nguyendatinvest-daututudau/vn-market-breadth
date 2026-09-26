@@ -87,10 +87,11 @@ def test_ad_distribution_keeps_exact_limit_moves_in_outer_buckets():
 
 
 def test_ma_stack_trend_categories_are_exhaustive():
-    assert pipeline.classify_trend_ma_stack(110, 105, 100, 95) == "uptrend"
-    assert pipeline.classify_trend_ma_stack(110, 105, 100, 105) == "weak"
-    assert pipeline.classify_trend_ma_stack(100, 105, 100, 105) == "neutral"
-    assert pipeline.classify_trend_ma_stack(90, 95, 100, 105) == "downtrend"
+    # New signature: classify_trend_ma_stack(last, ma50, ma150, ma200) -> dict
+    assert pipeline.classify_trend_ma_stack(110, 105, 100, 95)["trend"] == "uptrend_3of3"
+    assert pipeline.classify_trend_ma_stack(110, 105, 100, 105)["trend"] == "uptrend_2of3"
+    assert pipeline.classify_trend_ma_stack(100, 105, 100, 105)["trend"] == "weak"
+    assert pipeline.classify_trend_ma_stack(90, 95, 100, 105)["trend"] == "downtrend"
 
 
 def test_close_pipeline_does_not_publish_intraday_data(monkeypatch):

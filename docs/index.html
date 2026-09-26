@@ -1137,21 +1137,21 @@ function getTrendSymbols(m, key){
   return [];
 }
 function getPrevTrendSymbols(currentMarket, key){
-  if (!HISTORY || !HISTORY.length) return new Set();
+  if (!HISTORY || !HISTORY.length) return null;
   const todayDate = LATEST?.markets?.ALL?.date;
-  if (!todayDate) return new Set();
-  // Find today's entry in HISTORY, then get the previous one
+  if (!todayDate) return null;
+  // Find today entry in HISTORY, then get the previous one
   const todayIdx = HISTORY.findIndex(h => h.date === todayDate);
   const prevIdx = todayIdx - 1;
-  if (prevIdx < 0) return new Set();
+  if (prevIdx < 0) return null;
   const prevEntry = HISTORY[prevIdx];
-  if (!prevEntry?.markets?.[currentMarket]) return new Set();
+  if (!prevEntry?.markets?.[currentMarket]) return null;
   const m = prevEntry.markets[currentMarket];
-  if (!m) return new Set();
+  if (!m) return null;
   if (m.trend_symbols && Array.isArray(m.trend_symbols[key])) return new Set(m.trend_symbols[key]);
   const flat = m[`trend_${key}_symbols`];
   if (Array.isArray(flat)) return new Set(flat);
-  return new Set();
+  return null;
 }
 let trendActive = null;
 function toggleTrendHub(key){
@@ -1172,7 +1172,7 @@ function renderTrendHubDetail(key){
   const cap = 80;
   const shown = list.slice(0, cap);
   const chips = shown.length ? shown.map(s => {
-    const isNew = !prevSet.has(s);
+    const isNew = prevSet ? !prevSet.has(s) : false;
     return `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;position:relative;" title="Xem thẻ sức khỏe">${escapeHtml(s)}${isNew ? '<span class="new-badge">NEW</span>' : ''}</span>`;
   }).join('') : '<span class="empty-note">Không có mã</span>';
   const more = list.length > cap ? `<div class="trend-more">Hiển thị ${cap}/${list.length} mã · gõ mã ở thanh tìm kiếm để xem thêm thẻ sức khỏe.</div>` : '';
