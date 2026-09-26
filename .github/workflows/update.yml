@@ -8,6 +8,13 @@ on:
       - 'docs/**'
       - 'tests/**'
       - '.github/**'
+      # Script chi dung de kiem tra/nghien cuu thu cong, khong sinh du lieu pipeline:
+      - 'scripts/check_frontend.py'
+      - 'scripts/backfill_history.py'
+      - 'scripts/calibrate_conviction.py'
+      - 'scripts/evaluate_filters.py'
+      - 'scripts/intraday_breadth.py'
+      - 'scripts/ssi_auth_bootstrap.py'
   schedule:
     # 08:10 UTC = 15:10 gio VN (sau gio dong cua)
     - cron: "10 8 * * 1-5"
@@ -56,12 +63,19 @@ jobs:
       - name: Run tests
         run: python -m pytest
 
+      - name: Resolve cache week
+        id: cache-week
+        run: echo "week=$(date -u +%Y-W%V)" >> "$GITHUB_OUTPUT"
+
       - name: Restore OHLC cache
         uses: actions/cache@v4
         with:
           path: data/ohlc_cache
-          key: ohlc-cache-v2-${{ hashFiles('scripts/**/*.py', 'scripts/requirements.txt') }}
+          # Key on dinh theo tuan: giu cache qua cac lan sua scripts, chi miss 1 lan/tuan.
+          # Miss tuan moi van restore tu tuan truoc (INCREMENTAL_LOOKBACK=21 ngay bu du lieu).
+          key: ohlc-cache-v3-${{ steps.cache-week.outputs.week }}
           restore-keys: |
+            ohlc-cache-v3-
             ohlc-cache-v2-
 
       - name: Validate SSI secrets
