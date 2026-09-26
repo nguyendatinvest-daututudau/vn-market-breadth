@@ -105,27 +105,35 @@ def _empty_trend_distribution() -> dict:
     return {**{key: 0 for key in HUB_KEYS}, "total": 0}
 
 
-def classify_trend_hub(last: float, ma50: float, ma150: float, ma200: float,
+def classify_trend_hub(last: float, ma50: float, ma150: float | None, ma200: float | None,
                         ma50_prev: float | None) -> dict | None:
     """Phan loai 1 ma vao hub1/hub2/hub3 (roi nhau) hoac None (ngoai watchlist).
     ma50_prev: MA50 cach day MA_SLOPE_LOOKBACK phien (None neu khong du du lieu).
+    Ma moi thieu MA150/MA200 (None): bo qua hub1/hub2, chi xet hub3.
     """
-    if any(pd.isna(value) for value in (last, ma50, ma150, ma200)):
+    if any(pd.isna(value) for value in (last, ma50)):
         return None
-    stack_c1 = last > ma50
-    stack_c2 = ma50 > ma150
-    stack_c3 = ma150 > ma200
-    if stack_c1 and stack_c2 and stack_c3:
-        return {"hub": "hub1", "stack_c1": True, "stack_c2": True, "stack_c3": True,
-                "above_count": 3, "ma50_rising": None}
-    above_count = sum((last > ma50, last > ma150, last > ma200))
-    if above_count >= 2:
-        return {"hub": "hub2", "stack_c1": stack_c1, "stack_c2": stack_c2,
-                "stack_c3": stack_c3, "above_count": above_count, "ma50_rising": None}
+    has_long = not any(v is None or pd.isna(v) for v in (ma150, ma200))
+    if has_long:
+        stack_c1 = last > ma50
+        stack_c2 = ma50 > ma150
+        stack_c3 = ma150 > ma200
+        if stack_c1 and stack_c2 and stack_c3:
+            return {"hub": "hub1", "stack_c1": True, "stack_c2": True, "stack_c3": True,
+                    "above_count": 3, "ma50_rising": None}
+        above_count = sum((last > ma50, last > ma150, last > ma200))
+        if above_count >= 2:
+            return {"hub": "hub2", "stack_c1": stack_c1, "stack_c2": stack_c2,
+                    "stack_c3": stack_c3, "above_count": above_count, "ma50_rising": None}
+        above_count_nb: int | None = above_count
+    else:
+        stack_c1 = last > ma50
+        stack_c2 = stack_c3 = False
+        above_count_nb = None
     ma50_rising = bool(ma50_prev is not None and not pd.isna(ma50_prev) and ma50 > ma50_prev)
     if stack_c1 and ma50_rising:
         return {"hub": "hub3", "stack_c1": stack_c1, "stack_c2": stack_c2,
-                "stack_c3": stack_c3, "above_count": above_count, "ma50_rising": True}
+                "stack_c3": stack_c3, "above_count": above_count_nb, "ma50_rising": True}
     return None
 
 
@@ -450,12 +458,16 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                     elif not is_above and was_above:
                         newly_below[w].append(sym)
 
-        if len(close) >= 200:
+        if len(close) >= 50 + MA_SLOPE_LOOKBACK:
             ma50_val = float(pd.Series(close[-50:]).mean())
-            ma150_val = float(pd.Series(close[-150:]).mean())
-            ma200_val = float(pd.Series(close[-200:]).mean())
-            ma50_prev = (float(pd.Series(close[-(50 + MA_SLOPE_LOOKBACK):-MA_SLOPE_LOOKBACK]).mean())
-                         if len(close) >= 50 + MA_SLOPE_LOOKBACK else None)
+            ma50_prev = float(pd.Series(close[-(50 + MA_SLOPE_LOOKBACK):-MA_SLOPE_LOOKBACK]).mean())
+            if len(close) >= 200:
+                ma150_val: float | None = float(pd.Series(close[-150:]).mean())
+                ma200_val: float | None = float(pd.Series(close[-200:]).mean())
+            else:
+                # Ma moi chua du 200 phien (thieu MA150/MA200): chi xet hub3
+                ma150_val = None
+                ma200_val = None
             trend_info = classify_trend_hub(last_close, ma50_val, ma150_val, ma200_val, ma50_prev)
             if trend_info:
                 hub = trend_info["hub"]
