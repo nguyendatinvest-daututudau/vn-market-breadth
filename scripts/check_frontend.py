@@ -144,7 +144,7 @@ def main() -> int:
     # 5m. Hub xu huưng 3/3 + 2/3, NEW badge, filter trend-up
     for token in ("uptrend_3of3", "uptrend_2of3", "buildTrendDistributionPanel",
                   "toggleTrendHub", "renderTrendHubDetail", "getPrevTrendSymbols",
-                  "new-badge", "trend-hub-detail"):
+                  "new-badge", "trend-hub-detail", "trendUpEmptyMsg", "trendListCount"):
         if token not in text:
             ok = fail(f"thiếu {token} (hub xu huưng 3/3 + 2/3)") and False
     if "filter === 'trend-up'" not in text and 'filter === "trend-up"' not in text:
