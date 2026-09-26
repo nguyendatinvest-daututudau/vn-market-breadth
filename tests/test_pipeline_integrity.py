@@ -86,12 +86,22 @@ def test_ad_distribution_keeps_exact_limit_moves_in_outer_buckets():
     assert pipeline._ad_bucket_index(7.0) == 10
 
 
-def test_ma_stack_trend_categories_are_exhaustive():
-    # New signature: classify_trend_ma_stack(last, ma50, ma150, ma200) -> dict
-    assert pipeline.classify_trend_ma_stack(110, 105, 100, 95)["trend"] == "uptrend_3of3"
-    assert pipeline.classify_trend_ma_stack(110, 105, 100, 105)["trend"] == "uptrend_2of3"
-    assert pipeline.classify_trend_ma_stack(100, 105, 100, 105)["trend"] == "weak"
-    assert pipeline.classify_trend_ma_stack(90, 95, 100, 105)["trend"] == "downtrend"
+def test_trend_hubs_are_disjoint_and_prioritized():
+    cls = pipeline.classify_trend_hub
+    # HUB1: Close > MA50 > MA150 > MA200
+    assert cls(110, 105, 100, 95, 100)["hub"] == "hub1"
+    # HUB2: gia tren >= 2/3 duong (o day tren MA50+MA150, duoi MA200... ma50>ma150 nhung ma150<ma200)
+    assert cls(110, 105, 100, 115, 100)["hub"] == "hub2"
+    # HUB2: tren MA150+MA200 nhung duoi MA50 (2/3 duong)
+    assert cls(112, 115, 100, 95, 110)["hub"] == "hub2"
+    # HUB3: Close > MA50 + MA50 ngoc len (ma50 > ma50_prev), nhung chua du hub1/hub2
+    assert cls(106, 105, 110, 115, 100)["hub"] == "hub3"
+    # Khong ngoc len -> ngoai watchlist
+    assert cls(106, 105, 110, 115, 106) is None
+    # Gia duoi MA50 -> ngoai watchlist du MA50 co len
+    assert cls(100, 105, 110, 115, 100) is None
+    # HUB1 uu tien ke ca khi ma50 dang giam
+    assert cls(110, 105, 100, 95, 106)["hub"] == "hub1"
 
 
 def test_close_pipeline_does_not_publish_intraday_data(monkeypatch):
@@ -188,14 +198,13 @@ def _mini_snapshot(tag):
         "ma_eligible_symbols": elig,
         "ad_distribution": [{"bucket": "x", "count": 10, "side": "up"}],
         "rsi_pulse": {"under_30": 1, "over_70": 0, "over_50": 5, "total": 10},
-        "trend_distribution": {"uptrend_3of3": 1, "uptrend_2of3": 2, "weak": 3,
-                               "neutral": 0, "downtrend": 4, "total": 10},
+        "trend_distribution": {"hub1": 1, "hub2": 2, "hub3": 3, "total": 10},
         "above_ma10_symbols": [tag], "above_ma20_symbols": [tag],
         "above_ma50_symbols": [tag], "above_ma200_symbols": [tag],
-        "trend_uptrend_3of3_symbols": [tag],
-        "trend_uptrend_2of3_symbols": [],
-        "trend_weak_symbols": [],
-        "trend_downtrend_symbols": [],
+        "trend_hub1_symbols": [tag],
+        "trend_hub2_symbols": [],
+        "trend_hub3_symbols": [],
+        "trend_ma200_falling_symbols": [],
     }
 
 
@@ -205,4 +214,6 @@ def test_combine_all_covers_every_ma_window():
     for w in pipeline.MA_WINDOWS:
         assert combined["ma_eligible_symbols"][str(w)] == 20
     assert combined["trend_distribution"]["total"] == 20
-    assert "AAA" in combined["trend_symbols"]["uptrend_3of3"]
+    assert "AAA" in combined["trend_symbols"]["hub1"]
+    assert combined["trend_hub1_symbols"] == ["AAA", "BBB"]
+    assert combined["trend_ma200_falling_symbols"] == []

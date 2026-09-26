@@ -92,35 +92,50 @@ def _empty_ad_distribution() -> list[dict]:
     return [{"bucket": label, "count": 0, "side": side} for label, _lo, _hi, side in AD_BUCKETS]
 
 
-TREND_KEYS = ("uptrend_3of3", "uptrend_2of3", "weak", "neutral", "downtrend")
+# 3 hub CP UPTREND (roi nhau, uu tien hub1 > hub2 > hub3):
+#   hub1: Close > MA50 > MA150 > MA200 (uptrend chuan)
+#   hub2: gia nam tren >= 2/3 duong MA50/150/200 (tru hub1)
+#   hub3: Close > MA50 + MA50(T) > MA50(T - MA_SLOPE_LOOKBACK) (sap uptrend, tru hub1/hub2)
+HUB_KEYS = ("hub1", "hub2", "hub3")
+MA_SLOPE_LOOKBACK = 14  # so phien so sanh do doc MA50/MA200
+TREND_KEYS = HUB_KEYS  # alias giu tuong thich noi dung trong file
 
 
 def _empty_trend_distribution() -> dict:
-    return {**{key: 0 for key in TREND_KEYS}, "total": 0}
+    return {**{key: 0 for key in HUB_KEYS}, "total": 0}
 
 
-def classify_trend_ma_stack(last: float, ma50: float, ma150: float, ma200: float) -> dict | None:
-    """Classify a symbol by Close > MA50 > MA150 > MA200 alignment.
-    Returns dict with:
-      - trend: 'uptrend_3of3' (Close > MA50 > MA150 > MA200), 'uptrend_2of3' (2/3 conditions met), 'weak', 'neutral', 'downtrend'
-      - bullish_count: number of bullish conditions met (0-3)
+def classify_trend_hub(last: float, ma50: float, ma150: float, ma200: float,
+                        ma50_prev: float | None) -> dict | None:
+    """Phan loai 1 ma vao hub1/hub2/hub3 (roi nhau) hoac None (ngoai watchlist).
+    ma50_prev: MA50 cach day MA_SLOPE_LOOKBACK phien (None neu khong du du lieu).
     """
     if any(pd.isna(value) for value in (last, ma50, ma150, ma200)):
         return None
-    # 3 conditions: Close > MA50, MA50 > MA150, MA150 > MA200
-    c1 = last > ma50
-    c2 = ma50 > ma150
-    c3 = ma150 > ma200
-    bullish_count = sum((c1, c2, c3))
-    if bullish_count == 3:
-        trend = "uptrend_3of3"
-    elif bullish_count == 2:
-        trend = "uptrend_2of3"
-    elif bullish_count == 1:
-        trend = "weak"
-    else:
-        trend = "downtrend"
-    return {"trend": trend, "bullish_count": bullish_count, "c1": c1, "c2": c2, "c3": c3}
+    stack_c1 = last > ma50
+    stack_c2 = ma50 > ma150
+    stack_c3 = ma150 > ma200
+    if stack_c1 and stack_c2 and stack_c3:
+        return {"hub": "hub1", "stack_c1": True, "stack_c2": True, "stack_c3": True,
+                "above_count": 3, "ma50_rising": None}
+    above_count = sum((last > ma50, last > ma150, last > ma200))
+    if above_count >= 2:
+        return {"hub": "hub2", "stack_c1": stack_c1, "stack_c2": stack_c2,
+                "stack_c3": stack_c3, "above_count": above_count, "ma50_rising": None}
+    ma50_rising = bool(ma50_prev is not None and not pd.isna(ma50_prev) and ma50 > ma50_prev)
+    if stack_c1 and ma50_rising:
+        return {"hub": "hub3", "stack_c1": stack_c1, "stack_c2": stack_c2,
+                "stack_c3": stack_c3, "above_count": above_count, "ma50_rising": True}
+    return None
+
+
+def classify_trend_ma_stack(last: float, ma50: float, ma150: float, ma200: float,
+                             ma50_prev: float | None = None) -> dict | None:
+    """Wrapper tuong thich: tra ve {'trend': hub, ...} (trend = hub1/hub2/hub3)."""
+    info = classify_trend_hub(last, ma50, ma150, ma200, ma50_prev)
+    if info is None:
+        return None
+    return {"trend": info["hub"], **{k: v for k, v in info.items() if k != "hub"}}
 
 
 def _ad_bucket_index(pct_change: float) -> int:
@@ -329,6 +344,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     rsi_pulse = {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}
     trend_distribution = _empty_trend_distribution()
     trend_symbols = {k: [] for k in TREND_KEYS}
+    trend_ma200_falling = []
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
@@ -430,12 +446,18 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
             ma50_val = float(pd.Series(close[-50:]).mean())
             ma150_val = float(pd.Series(close[-150:]).mean())
             ma200_val = float(pd.Series(close[-200:]).mean())
-            trend_info = classify_trend_ma_stack(last_close, ma50_val, ma150_val, ma200_val)
+            ma50_prev = (float(pd.Series(close[-(50 + MA_SLOPE_LOOKBACK):-MA_SLOPE_LOOKBACK]).mean())
+                         if len(close) >= 50 + MA_SLOPE_LOOKBACK else None)
+            trend_info = classify_trend_hub(last_close, ma50_val, ma150_val, ma200_val, ma50_prev)
             if trend_info:
-                trend = trend_info["trend"]
-                trend_distribution[trend] += 1
+                hub = trend_info["hub"]
+                trend_distribution[hub] += 1
                 trend_distribution["total"] += 1
-                trend_symbols[trend].append(sym)
+                trend_symbols[hub].append(sym)
+                if len(close) >= 200 + MA_SLOPE_LOOKBACK:
+                    ma200_prev = float(pd.Series(close[-(200 + MA_SLOPE_LOOKBACK):-MA_SLOPE_LOOKBACK]).mean())
+                    if ma200_val < ma200_prev:
+                        trend_ma200_falling.append(sym)
 
     bar.close()
 
@@ -451,10 +473,10 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     return {
         "ma_total_symbols":   total_valid,
         "ma_eligible_symbols": {str(w): eligible[w] for w in MA_WINDOWS},
-        "trend_uptrend_3of3_symbols": sorted(trend_symbols["uptrend_3of3"]),
-        "trend_uptrend_2of3_symbols": sorted(trend_symbols["uptrend_2of3"]),
-        "trend_weak_symbols": sorted(trend_symbols["weak"]),
-        "trend_downtrend_symbols": sorted(trend_symbols["downtrend"]),
+        "trend_hub1_symbols": sorted(trend_symbols["hub1"]),
+        "trend_hub2_symbols": sorted(trend_symbols["hub2"]),
+        "trend_hub3_symbols": sorted(trend_symbols["hub3"]),
+        "trend_ma200_falling_symbols": sorted(trend_ma200_falling),
         "above_ma10_count":   counts[10],
         "above_ma20_count":   counts[20],
         "above_ma50_count":   counts[50],
@@ -656,6 +678,11 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
         "ad_distribution_total": ma.get("ad_distribution_total", 0),
         "rsi_pulse": ma.get("rsi_pulse", {"under_30": 0, "over_70": 0, "over_50": 0, "total": 0, "period": 14}),
         "trend_distribution": ma.get("trend_distribution", _empty_trend_distribution()),
+        "trend_symbols": ma.get("trend_symbols", {k: [] for k in HUB_KEYS}),
+        "trend_hub1_symbols": ma.get("trend_hub1_symbols", []),
+        "trend_hub2_symbols": ma.get("trend_hub2_symbols", []),
+        "trend_hub3_symbols": ma.get("trend_hub3_symbols", []),
+        "trend_ma200_falling_symbols": ma.get("trend_ma200_falling_symbols", []),
     }
 
 
@@ -757,7 +784,11 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "ad_distribution_total": ad_distribution_total,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
-        "trend_symbols": {k: merge(f"trend_{k}_symbols") for k in TREND_KEYS},
+        "trend_hub1_symbols": merge("trend_hub1_symbols"),
+        "trend_hub2_symbols": merge("trend_hub2_symbols"),
+        "trend_hub3_symbols": merge("trend_hub3_symbols"),
+        "trend_ma200_falling_symbols": merge("trend_ma200_falling_symbols"),
+        "trend_symbols": {k: merge(f"trend_{k}_symbols") for k in HUB_KEYS},
     }
 
 

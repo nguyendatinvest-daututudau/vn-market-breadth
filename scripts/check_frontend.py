@@ -141,14 +141,23 @@ def main() -> int:
         if token not in text:
             ok = fail(f"thiếu {token} (RSI pulse bấm số)") and False
 
-    # 5m. Hub xu huưng 3/3 + 2/3, NEW badge, filter trend-up
-    for token in ("uptrend_3of3", "uptrend_2of3", "buildTrendDistributionPanel",
-                  "toggleTrendHub", "renderTrendHubDetail", "getPrevTrendSymbols",
-                  "new-badge", "trend-hub-detail", "trendUpEmptyMsg", "trendListCount"):
+    # 5m. Tab CP UPTREND: 3 hub roi nhau, NEW badge, MA200 flag
+    for token in ("hub1", "hub2", "hub3", "HUB_META", "HUB_KEYS",
+                  "renderUptrendView", "trendHubSection", "trendChipsHTML",
+                  "getMa200FallingSet", "ma200-flag", "trend_ma200_falling_symbols",
+                  "getPrevTrendSymbols", "new-badge", "view-uptrend", "trend-early",
+                  "trendUpEmptyMsg", "trendEarlyEmptyMsg", "trendListCount",
+                  "buildTrendDistributionPanel", "uptrendQuery", "uptrendSearch"):
         if token not in text:
-            ok = fail(f"thiếu {token} (hub xu huưng 3/3 + 2/3)") and False
+            ok = fail(f"thi\u1ebfu {token} (tab CP UPTREND)") and False
     if "filter === 'trend-up'" not in text and 'filter === "trend-up"' not in text:
-        ok = fail("applyFilters thiếu filter trend-up") and False
+        ok = fail("applyFilters thi\u1ebfu filter trend-up") and False
+    if "filter === 'trend-early'" not in text and 'filter === "trend-early"' not in text:
+        ok = fail("applyFilters thi\u1ebfu filter trend-early") and False
+    for dead in ("toggleTrendHub", "renderTrendHubDetail", "trendActive",
+                 "uptrend_3of3", "uptrend_2of3", "Hub pullback"):
+        if dead in text:
+            ok = fail(f"c\u00f2n s\u00f3t code hub c\u0169: {dead}") and False
 
     # 6. cú pháp cơ bản: ngoặc cân bằng
     if text.count("{") != text.count("}"):

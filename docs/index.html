@@ -450,6 +450,7 @@
   .regime-chip.risk_on{background:rgba(16,185,129,0.12);color:#059669;}
   .regime-chip.overheated{background:rgba(6,182,212,0.12);color:#0891b2;}
 
+  .ma200-flag{display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#f0b429;background:rgba(240,180,41,0.14);border:1px solid rgba(240,180,41,0.45);border-radius:4px;padding:0 4px;margin-left:4px;letter-spacing:.02em;}
   /* ===== Stock health card ===== */
   .nav-search{position:relative;}
   .nav-search input{background:var(--panel-tint);border:1px solid var(--border);border-radius:8px;padding:8px 12px 8px 30px;font-size:13px;color:var(--text);width:150px;outline:none;transition:border-color .15s,width .2s;}
@@ -514,6 +515,7 @@
       <a href="#chart" data-view="chart" onclick="switchView('chart')">Biểu đồ lịch sử MA</a>
       <a href="#rsi" data-view="rsi" onclick="switchView('rsi')">Biểu đồ lịch sử RSI</a>
       <a href="#signals" data-view="signals" onclick="switchView('signals')">Tín hiệu</a>
+      <a href="#uptrend" data-view="uptrend" onclick="switchView('uptrend')">CP Uptrend</a>
       <a href="#radar" data-view="radar" onclick="switchView('radar')">Radar</a>
       <a href="#perf" data-view="perf" onclick="switchView('perf')">Hiệu quả</a>
     </div>
@@ -534,6 +536,7 @@
         <div class="hero-ctas">
           <button class="btn-primary" onclick="switchView('signals')">Xem tín hiệu</button>
           <button class="btn-outline" onclick="switchView('market')">Độ rộng thị trường</button>
+          <button class="btn-outline" onclick="switchView('uptrend')">CP Uptrend</button>
         </div>
       </div>
       <div class="hero-side">
@@ -561,6 +564,7 @@
 <div id="view-chart" style="display:none;"></div>
 <div id="view-rsi" style="display:none;"></div>
     <div id="view-signals" style="display:none;"></div>
+<div id="view-uptrend" style="display:none;"></div>
   </div>
 
   <div id="radarView" style="display:none">
@@ -857,6 +861,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
     ${trendDistributionHTML}
   `;
   requestAnimationFrame(renderUdVolumeChart);
+  renderUptrendView();
 
   // ===== VIEW: BIỂU ĐỒ LỊCH SỬ =====
   document.getElementById('view-chart').innerHTML = `
@@ -926,7 +931,6 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
   else if (currentView === 'rsi') requestAnimationFrame(() => { renderRsiPulseChart(); if (rsiPulseActive) renderRsiPulseDetail(rsiPulseActive); });
   requestAnimationFrame(() => renderSigHistChart());
   if (rsiPulseActive) requestAnimationFrame(() => { const el = document.getElementById('rsiPulseDetail'); if (el && el.style.display !== 'none' && !el.innerHTML) renderRsiPulseDetail(rsiPulseActive); });
-  if (trendActive) requestAnimationFrame(() => { const el = document.getElementById('trendHubDetail'); if (el && el.style.display !== 'none' && !el.innerHTML) renderTrendHubDetail(trendActive); });
   // Nền: có số hiệu quả thì vẽ thêm khối hành động ở panel Mua chuẩn (1 lần).
   if (!perfData && !perfHomeRefreshDone && currentView === 'home') {
     ensurePerfData().then(() => {
@@ -1138,12 +1142,19 @@ function getTrendSymbols(m, key){
 }
 function trendListCount(m){
   if (!m) return 0;
-  return getTrendSymbols(m, 'uptrend_3of3').length + getTrendSymbols(m, 'uptrend_2of3').length;
+  return HUB_KEYS.reduce((a, k) => a + getTrendSymbols(m, k).length, 0);
 }
 function trendUpEmptyMsg(){
   const m = (typeof marketData !== 'undefined' && marketData) || (typeof LATEST !== 'undefined' && LATEST?.markets?.[activeMarket]);
-  if (!trendListCount(m)) return 'Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u xu h\u01b0\u1edbng 3/3-2/3 cho phi\u00ean n\u00e0y (pipeline ch\u01b0a ch\u1ea1y b\u1ea3n m\u1edbi).<br>H\u00e3y ch\u1ea1y workflow Update market breadth data r\u1ed3i t\u1ea3i l\u1ea1i trang.';
-  return 'Kh\u00f4ng c\u00f3 t\u00edn hi\u1ec7u n\u00e0o r\u01a1i v\u00e0o nh\u00f3m XH t\u0103ng 3/3-2/3 trong phi\u00ean n\u00e0y.';
+  const n = m ? (getTrendSymbols(m, 'hub1').length + getTrendSymbols(m, 'hub2').length) : 0;
+  if (!n) return 'Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u CP Uptrend (HUB 1-2) cho phi\u00ean n\u00e0y (pipeline ch\u01b0a ch\u1ea1y b\u1ea3n m\u1edbi).<br>H\u00e3y ch\u1ea1y workflow Update market breadth data r\u1ed3i t\u1ea3i l\u1ea1i trang.';
+  return 'Kh\u00f4ng c\u00f3 t\u00edn hi\u1ec7u n\u00e0o r\u01a1i v\u00e0o HUB 1-2 trong phi\u00ean n\u00e0y.';
+}
+function trendEarlyEmptyMsg(){
+  const m = (typeof marketData !== 'undefined' && marketData) || (typeof LATEST !== 'undefined' && LATEST?.markets?.[activeMarket]);
+  const n = m ? getTrendSymbols(m, 'hub3').length : 0;
+  if (!n) return 'Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u HUB 3 (S\u1eafp uptrend) cho phi\u00ean n\u00e0y (pipeline ch\u01b0a ch\u1ea1y b\u1ea3n m\u1edbi).<br>H\u00e3y ch\u1ea1y workflow Update market breadth data r\u1ed3i t\u1ea3i l\u1ea1i trang.';
+  return 'Kh\u00f4ng c\u00f3 t\u00edn hi\u1ec7u n\u00e0o r\u01a1i v\u00e0o HUB 3 trong phi\u00ean n\u00e0y.';
 }
 function getPrevTrendSymbols(currentMarket, key){
   if (!HISTORY || !HISTORY.length) return null;
@@ -1162,47 +1173,63 @@ function getPrevTrendSymbols(currentMarket, key){
   if (Array.isArray(flat)) return new Set(flat);
   return null;
 }
-let trendActive = null;
-function toggleTrendHub(key){
-  trendActive = trendActive === key ? null : key;
-  document.querySelectorAll('.trend-item').forEach(el => el.classList.toggle('active', el.dataset.trend === trendActive));
-  const detail = document.getElementById('trendHubDetail');
-  if (!detail) return;
-  if (!trendActive) { detail.style.display = 'none'; detail.innerHTML = ''; return; }
-  renderTrendHubDetail(trendActive);
+const HUB_META = {
+  hub1: {label: 'HUB 1 \u00b7 Uptrend chu\u1ea9n', note: 'Close > MA50 > MA150 > MA200', color: '#16A34A'},
+  hub2: {label: 'HUB 2 \u00b7 Tr\u00ean 2/3 \u0111\u01b0\u1eddng MA', note: 'Gi\u00e1 tr\u00ean \u22652/3 \u0111\u01b0\u1eddng MA50/150/200', color: '#22C55E'},
+  hub3: {label: 'HUB 3 \u00b7 S\u1eafp uptrend', note: 'Close > MA50 + MA50 ng\u00f3c l\u00ean (14 phi\u00ean)', color: '#D6A84F'},
+};
+const HUB_KEYS = ['hub1', 'hub2', 'hub3'];
+let uptrendQuery = '';
+function getMa200FallingSet(m){
+  if (!m) return new Set();
+  const flat = m.trend_ma200_falling_symbols;
+  if (Array.isArray(flat)) return new Set(flat);
+  return new Set();
 }
-function renderTrendHubDetail(key){
-  const el = document.getElementById('trendHubDetail');
-  const m = LATEST?.markets?.[activeMarket];
-  if (!el || !m) return;
-  const list = getTrendSymbols(m, key);
-  const prevSet = getPrevTrendSymbols(activeMarket, key);
-  const labels = {uptrend_3of3:'Xu hướng tăng 3/3 (Close > MA50 > MA150 > MA200) — mạnh nhất, ưu tiên mua thả', uptrend_2of3:'Xu hướng tăng 2/3 (2/3 điều kiện) — xu hướng tăng, pullback', weak:'Xu hướng yếu — 1/3 điều kiện', neutral:'Trung lập', downtrend:'Xu hướng giảm'};
-  const cap = 80;
-  const shown = list.slice(0, cap);
-  const chips = shown.length ? shown.map(s => {
+function trendChipsHTML(list, prevSet, fallSet){
+  const chips = list.length ? list.map(s => {
     const isNew = prevSet ? !prevSet.has(s) : false;
-    return `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;position:relative;" title="Xem thẻ sức khỏe">${escapeHtml(s)}${isNew ? '<span class="new-badge">NEW</span>' : ''}</span>`;
-  }).join('') : '<span class="empty-note">Không có mã</span>';
-  const more = list.length > cap ? `<div class="trend-more">Hiển thị ${cap}/${list.length} mã · gõ mã ở thanh tìm kiếm để xem thêm thẻ sức khỏe.</div>` : '';
-  const signalCount = (()=>{ try { return collectAllSignals(null).filter(r=>list.includes(r.symbol)).length; } catch(e){ return 0; } })();
-  const hubBtn = (key==='uptrend_3of3' || key==='uptrend_2of3') && list.length ? `<button type="button" class="trend-hub-btn" onclick="switchView('signals'); setTimeout(()=>{activeFilter='trend-up'; searchQuery=''; const el=document.getElementById('searchInput'); if(el) el.value=''; renderSignalTable(); const hub=document.getElementById('hubTabs'); if(hub) [...hub.querySelectorAll('.hub-tab')].forEach(b=>b.classList.remove('active'));},50)">Xem trong Tín hiệu (${signalCount})</button>` : '';
-  el.style.display = '';
-  el.innerHTML = `<div class="trend-hub-detail"><div class="trend-hub-header"><h4>${labels[key] || key} — ${list.length.toLocaleString('vi-VN')} mã</h4><div class="trend-hub-actions"><button type="button" class="btn-ghost" onclick="navigator.clipboard.writeText('${list.join(', ')}').then(()=>{const b=document.getElementById('trendCopyBtn'); if(b){b.textContent='Đã copy'; setTimeout(()=>b.textContent='Copy DS',1500);}})" id="trendCopyBtn">Copy DS</button><button type="button" class="btn-ghost" onclick="toggleTrendHub('${key}')">Đóng ✕</button></div></div><div class="trend-hub-body"><div class="chip-wrap">${chips}</div>${more}</div><div class="trend-hub-footer"><span class="trend-hint">Gợi ý: thả mua theo vùng hỗ trợ (MA50/MA150) khi mã giữ trên MA stack.</span>${hubBtn}</div></div>`;
+    const fall = fallSet.has(s);
+    return `<span class="chip" data-sym="${escapeHtml(s)}" style="cursor:pointer;position:relative;" title="B\u1ea5m \u0111\u1ec3 xem th\u1ebb s\u1ee9c kh\u1ecfe & k\u1ebf ho\u1ea1ch">${escapeHtml(s)}${isNew ? '<span class="new-badge">NEW</span>' : ''}${fall ? '<span class="ma200-flag" title="MA200 v\u1eabn d\u1ed1c xu\u1ed1ng">MA200\u2193</span>' : ''}</span>`;
+  }).join('') : '<span class="empty-note">Kh\u00f4ng c\u00f3 m\u00e3</span>';
+  return `<div class="chip-wrap" style="max-height:none;">${chips}</div>`;
+}
+function trendHubSection(key){
+  const m = LATEST?.markets?.[activeMarket];
+  if (!m) return '';
+  const meta = HUB_META[key];
+  const full = getTrendSymbols(m, key);
+  const q = (uptrendQuery || '').trim().toUpperCase();
+  const list = q ? full.filter(s => s.includes(q)) : full;
+  const prevSet = getPrevTrendSymbols(activeMarket, key);
+  const fallSet = getMa200FallingSet(m);
+  const newCount = prevSet ? full.filter(s => !prevSet.has(s)).length : 0;
+  return `<div class="trend-hub-detail"><div class="trend-hub-header"><h4><i class="trend-dot" style="background:${meta.color}"></i>${meta.label} \u2014 ${full.length.toLocaleString('vi-VN')} m\u00e3${newCount ? ` <span style="color:var(--up);font-size:11px;">(+${newCount} NEW)</span>` : ''}</h4><div class="trend-hub-actions"><button type="button" class="btn-ghost" onclick="navigator.clipboard.writeText('${full.join(', ')}').then(()=>{this.textContent='\u0110\u00e3 copy';setTimeout(()=>this.textContent='Copy DS',1500);})">Copy DS</button></div></div><div class="trend-hub-body"><div class="trend-item-note" style="margin-bottom:8px;">${meta.note}</div>${trendChipsHTML(list, prevSet, fallSet)}</div></div>`;
+}
+function renderUptrendView(){
+  const el = document.getElementById('view-uptrend');
+  if (!el) return;
+  if (!LATEST || !LATEST.markets) { el.innerHTML = '<div class="loading">\u0110ang t\u1ea3i d\u1eef li\u1ec7u...</div>'; return; }
+  const m = LATEST.markets[activeMarket];
+  if (!m) { el.innerHTML = '<div class="loading">Ch\u1ecdn th\u1ecb tr\u01b0\u1eddng</div>'; return; }
+  const d = m.trend_distribution;
+  if (!d || d.hub1 == null) {
+    el.innerHTML = `<div class="panel"><h2>CP Uptrend</h2><div class="note" style="margin:0;">D\u1eef li\u1ec7u hub ch\u01b0a c\u00f3 cho phi\u00ean n\u00e0y. H\u00e3y ch\u1ea1y workflow Update market breadth data b\u1ea3n m\u1edbi r\u1ed3i t\u1ea3i l\u1ea1i trang.</div></div>`;
+    return;
+  }
+  const total = HUB_KEYS.reduce((a, k) => a + Number(d[k] || 0), 0);
+  el.innerHTML = `<div class="panel"><h2>CP Uptrend <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${m.date} \u00b7 ${total.toLocaleString('vi-VN')} m\u00e3 trong 3 hub \u00b7 b\u1ea5m m\u00e3 \u0111\u1ec3 xem k\u1ebf ho\u1ea1ch</span></h2>
+    <div style="margin-bottom:12px;"><input id="uptrendSearch" type="text" value="${escapeHtml(uptrendQuery)}" placeholder="T\u00ecm m\u00e3 trong 3 hub..." oninput="uptrendQuery=this.value.toUpperCase();renderUptrendView();const si=document.getElementById('uptrendSearch');if(si){si.focus();si.setSelectionRange(si.value.length,si.value.length);}" style="width:100%;max-width:420px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-size:13px;"></div>
+    ${HUB_KEYS.map(trendHubSection).join('')}
+  </div>`;
 }
 function buildTrendDistributionPanel(m){
   const d = m?.trend_distribution;
-  const keys = [
-    {key:'uptrend_3of3', label:'XH tăng 3/3', note:'Close > MA50 > MA150 > MA200 — mạnh nhất, ưu tiên mua thả', color:'#16A34A'},
-    {key:'uptrend_2of3', label:'XH tăng 2/3', note:'2/3: Close > MA50, MA50>MA150 hoặc MA150>MA200 — xu hướng tăng, pullback', color:'#22C55E'},
-    {key:'weak', label:'XH yếu', note:'1/3 điều kiện MA tích cực', color:'#D6A84F'},
-    {key:'neutral', label:'Trung lập', note:'1/3 điều kiện MA tích cực', color:'#8A8172'},
-    {key:'downtrend', label:'XH giảm', note:'0/3: Close < MA50 < MA150 < MA200', color:'#C2413B'},
-  ];
-  const total = Number(d?.total) || 0;
-  if (d && d.uptrend_3of3 == null && d.uptrend != null) return `<div class="note" style="margin:0;">D\u1eef li\u1ec7u xu h\u01b0\u1edbng phi\u00ean n\u00e0y l\u00e0 b\u1ea3n c\u0169 (ch\u01b0a c\u00f3 nh\u00f3m 3/3-2/3). H\u00e3y ch\u1ea1y workflow Update market breadth data b\u1ea3n m\u1edbi r\u1ed3i t\u1ea3i l\u1ea1i trang.</div>`;
-  if (!total) return `<div class="note" style="margin:0;">Phân bổ xu hướng theo MA50/MA150/MA200: đang chờ dữ liệu.</div>`;
+  if (!d || d.hub1 == null) return `<div class="note" style="margin:0;">D\u1eef li\u1ec7u CP Uptrend ch\u01b0a c\u00f3 cho phi\u00ean n\u00e0y (c\u1ea7n pipeline b\u1ea3n m\u1edbi). H\u00e3y ch\u1ea1y workflow Update market breadth data r\u1ed3i t\u1ea3i l\u1ea1i trang.</div>`;
+  const total = HUB_KEYS.reduce((a, k) => a + Number(d[k] || 0), 0);
+  if (!total) return `<div class="note" style="margin:0;">Phi\u00ean n\u00e0y kh\u00f4ng c\u00f3 m\u00e3 n\u00e0o v\u00e0o hub uptrend.</div>`;
   let cursor = 0;
+  const keys = HUB_KEYS.map(k => ({key: k, ...HUB_META[k]}));
   const segments = keys.map(item => {
     const pct = Number(d[item.key] || 0) / total * 100;
     const start = cursor;
@@ -1212,13 +1239,10 @@ function buildTrendDistributionPanel(m){
   const items = keys.map(item => {
     const count = Number(d[item.key] || 0);
     const pct = count / total * 100;
-    const isActive = trendActive === item.key;
-    const extra = (item.key==='uptrend_3of3' || item.key==='uptrend_2of3') ? ' · <span style="color:var(--up);font-weight:700;">Hub pullback</span>' : '';
-    return `<button type="button" class="trend-item${isActive?' active':''}" data-trend="${item.key}" onclick="toggleTrendHub('${item.key}')" style="text-align:left;cursor:pointer;width:100%;"><div class="trend-item-top"><span><i class="trend-dot" style="background:${item.color}"></i>${item.label}</span><span class="trend-item-pct">${pct.toFixed(1)}%</span></div><div class="trend-item-note">${count.toLocaleString('vi-VN')} mã · ${item.note}${extra}</div></button>`;
+    return `<button type="button" class="trend-item" onclick="switchView('uptrend')" style="text-align:left;cursor:pointer;width:100%;"><div class="trend-item-top"><span><i class="trend-dot" style="background:${item.color}"></i>${item.label}</span><span class="trend-item-pct">${pct.toFixed(1)}%</span></div><div class="trend-item-note">${count.toLocaleString('vi-VN')} m\u00e3 \u00b7 ${item.note}</div></button>`;
   }).join('');
-  return `<div><div class="ctx-title">Phân bổ xu hướng theo MA50/MA150/MA200 · ${total.toLocaleString('vi-VN')} mã đủ MA200</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>Mã phân loại</span></div></div><div class="trend-legend">${items}</div></div><div id="trendHubDetail" style="display:${trendActive?'':'none'};margin-top:10px;"></div></div>`;
+  return `<div><div class="ctx-title">CP Uptrend \u00b7 ${total.toLocaleString('vi-VN')} m\u00e3 \u00b7 b\u1ea5m \u0111\u1ec3 m\u1edf tab chi ti\u1ebft</div><div class="trend-layout"><div class="trend-donut" style="background:conic-gradient(${segments})"><div class="trend-donut-center"><strong>${total}</strong><span>M\u00e3 uptrend</span></div></div><div class="trend-legend">${items}</div></div></div>`;
 }
-
 function buildUdVolumePanel(m){
   const ratio = m?.up_down_volume_ratio;
   const up = m?.up_volume, down = m?.down_volume;
@@ -1679,6 +1703,7 @@ const HUB_TABS = [
   { value:'strong', label:'⭐ Mua chuẩn' },
   { value:'watch', label:'👀 Theo dõi' },
   { value:'trend-up', label:'📈 XH tăng' },
+  { value:'trend-early', label:'🌱 Uptrend sớm' },
   { value:'sell-warning', label:'⚠ Cảnh báo' },
   { value:'reference', label:'📖 Tham khảo' },
   { value:'rr', label:'📈 R:R ≥1' },
@@ -1799,7 +1824,7 @@ function buildSignalHub(dateStr){
 
   if (!tbody) {
     if (!globalSearch && activeFilter === 'strong') return `<div class="buy-empty">${strongEmptyMsg(rows)}</div>`;
-    return `<div class="buy-empty">${globalSearch ? `Mã "<b>${escapeHtml(q)}</b>" có trong lịch sử nhưng không khớp bộ lọc <b>${escapeHtml(activeFilter)}</b>.` : (activeFilter === 'trend-up' && !globalSearch ? trendUpEmptyMsg() : (EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.'))}</div>`;
+    return `<div class="buy-empty">${globalSearch ? `Mã "<b>${escapeHtml(q)}</b>" có trong lịch sử nhưng không khớp bộ lọc <b>${escapeHtml(activeFilter)}</b>.` : (activeFilter === 'trend-up' && !globalSearch ? trendUpEmptyMsg() : (activeFilter === 'trend-early' && !globalSearch ? trendEarlyEmptyMsg() : (EMPTY_MSG[activeFilter] || 'Không có tín hiệu phù hợp.')))}</div>`;
   }
 
   const searchNote = globalSearch
@@ -2285,10 +2310,13 @@ function applyFilters(rows, filter, query, marketData){
       if (filter === 'k4-sell' && !(r.source === 'khung4-tplus' && r.signalType === 'sell_warning')) return false;
       if (filter === 'trend-up') {
         const m = marketData || LATEST?.markets?.[activeMarket];
-        const upList3 = getTrendSymbols(m, 'uptrend_3of3');
-        const upList2 = getTrendSymbols(m, 'uptrend_2of3');
-        const upList = upList3.concat(upList2);
+        const upList = getTrendSymbols(m, 'hub1').concat(getTrendSymbols(m, 'hub2'));
         if (!upList.includes(r.symbol)) return false;
+      }
+      if (filter === 'trend-early') {
+        const m = marketData || LATEST?.markets?.[activeMarket];
+        const earlyList = getTrendSymbols(m, 'hub3');
+        if (!earlyList.includes(r.symbol)) return false;
       }
       if (filter === 'rr') {
         const h = STOCK_HEALTH?.symbols?.[r.symbol];
@@ -2900,16 +2928,16 @@ let currentView = 'home';
 function switchView(view){
   currentView = view;
   document.querySelectorAll('.nav-links a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-  const dashViews = ['home', 'market', 'chart', 'rsi', 'signals'];
+  const dashViews = ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
   document.getElementById('perfView').style.display = view === 'perf' ? '' : 'none';
   const pgTitle = document.querySelector('#dashboardView header h1');
-  if (pgTitle) pgTitle.style.display = view === 'signals' ? 'none' : '';
+  if (pgTitle) pgTitle.style.display = (view === 'signals' || view === 'uptrend') ? 'none' : '';
   if (view === 'radar' && !radarDataLoaded) loadRadarData();
   if (view === 'perf' && !perfDataLoaded) loadPerfData();
   if (dashViews.includes(view)) {
-    ['home', 'market', 'chart', 'rsi', 'signals'].forEach(v => {
+    ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend'].forEach(v => {
       const el = document.getElementById('view-' + v);
       if (el) el.style.display = v === view ? '' : 'none';
     });
@@ -2917,13 +2945,14 @@ function switchView(view){
     if (view === 'chart') requestAnimationFrame(() => renderBreadthChart(LATEST?.markets?.[activeMarket]));
     if (view === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
     if (view === 'signals') requestAnimationFrame(() => renderSigHistChart());
+    if (view === 'uptrend') renderUptrendView();
   }
   if (window.location.hash !== `#${view}`) history.pushState(null, '', `#${view}`);
 }
 
 window.addEventListener('hashchange', () => {
   const v = window.location.hash.replace('#', '') || 'home';
-  if (['home', 'market', 'chart', 'rsi', 'signals', 'radar', 'perf'].includes(v)) switchView(v);
+  if (['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'radar', 'perf'].includes(v)) switchView(v);
 });
 
 let resizeTimer = null;
