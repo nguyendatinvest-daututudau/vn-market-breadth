@@ -327,6 +327,11 @@ def update_ohlc(client: SSIClient, symbol: str, today: datetime) -> pd.DataFrame
 
 
 # --- Tinh MA ------------------------------------------------------------------
+def _sort_by_liq(symbols: list[str], liq: dict) -> list[str]:
+    """Xep ma theo TB volume 5 phien giam dan (ma thieu so lieu xuong cuoi), ten A-Z khi hoa."""
+    return sorted(symbols, key=lambda s: (-liq.get(s, -1), s))
+
+
 def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, market: str) -> dict:
     counts = {w: 0 for w in MA_WINDOWS}
     eligible = {w: 0 for w in MA_WINDOWS}
@@ -345,6 +350,7 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     trend_distribution = _empty_trend_distribution()
     trend_symbols = {k: [] for k in TREND_KEYS}
     trend_ma200_falling = []
+    trend_liq5 = {}
     total_valid = 0
     skipped_volume = 0
     skipped_data = 0
@@ -382,10 +388,12 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
 
         avg_vol = None
         volume_today = None
+        avg_vol5 = None
         if "Volume" in df.columns:
             recent_vol = df["Volume"].iloc[-20:]
             avg_vol = recent_vol.dropna().mean()
             volume_today = df["Volume"].iloc[-1]
+            avg_vol5 = df["Volume"].iloc[-5:].dropna().mean()
             if pd.isna(avg_vol) or avg_vol < MIN_AVG_VOLUME:
                 skipped_volume += 1
                 continue
@@ -454,6 +462,8 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
                 trend_distribution[hub] += 1
                 trend_distribution["total"] += 1
                 trend_symbols[hub].append(sym)
+                liq5 = float(avg_vol5) if avg_vol5 is not None and not pd.isna(avg_vol5) else -1.0
+                trend_liq5[sym] = round(liq5)
                 if len(close) >= 200 + MA_SLOPE_LOOKBACK:
                     ma200_prev = float(pd.Series(close[-(200 + MA_SLOPE_LOOKBACK):-MA_SLOPE_LOOKBACK]).mean())
                     if ma200_val < ma200_prev:
@@ -473,10 +483,11 @@ def compute_ma_breadth(client: SSIClient, symbols: list[str], today: datetime, m
     return {
         "ma_total_symbols":   total_valid,
         "ma_eligible_symbols": {str(w): eligible[w] for w in MA_WINDOWS},
-        "trend_hub1_symbols": sorted(trend_symbols["hub1"]),
-        "trend_hub2_symbols": sorted(trend_symbols["hub2"]),
-        "trend_hub3_symbols": sorted(trend_symbols["hub3"]),
-        "trend_ma200_falling_symbols": sorted(trend_ma200_falling),
+        "trend_hub1_symbols": _sort_by_liq(trend_symbols["hub1"], trend_liq5),
+        "trend_hub2_symbols": _sort_by_liq(trend_symbols["hub2"], trend_liq5),
+        "trend_hub3_symbols": _sort_by_liq(trend_symbols["hub3"], trend_liq5),
+        "trend_ma200_falling_symbols": _sort_by_liq(trend_ma200_falling, trend_liq5),
+        "trend_liq5": {s: int(v) for s, v in trend_liq5.items()},
         "above_ma10_count":   counts[10],
         "above_ma20_count":   counts[20],
         "above_ma50_count":   counts[50],
@@ -683,6 +694,7 @@ def build_snapshot(client: SSIClient, market: str, today: datetime) -> dict:
         "trend_hub2_symbols": ma.get("trend_hub2_symbols", []),
         "trend_hub3_symbols": ma.get("trend_hub3_symbols", []),
         "trend_ma200_falling_symbols": ma.get("trend_ma200_falling_symbols", []),
+        "trend_liq5": ma.get("trend_liq5", {}),
     }
 
 
@@ -724,6 +736,16 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         for s in snapshots:
             out.extend(s.get(key, []))
         return sorted(out)
+
+    _merge_liq = {}
+    for s in snapshots:
+        _merge_liq.update(s.get("trend_liq5", {}) or {})
+
+    def merge_hub(key):
+        out = []
+        for s in snapshots:
+            out.extend(s.get(key, []))
+        return _sort_by_liq(sorted(set(out)), _merge_liq)
 
     volume_breakout = merge("volume_breakout_symbols")
     snapshot_dates = [parse_market_date(snapshot.get("date")) for snapshot in snapshots]
@@ -784,10 +806,11 @@ def combine_all(snapshots: list[dict], today: datetime | None = None) -> dict:
         "ad_distribution_total": ad_distribution_total,
         "rsi_pulse": rsi_pulse,
         "trend_distribution": trend_distribution,
-        "trend_hub1_symbols": merge("trend_hub1_symbols"),
-        "trend_hub2_symbols": merge("trend_hub2_symbols"),
-        "trend_hub3_symbols": merge("trend_hub3_symbols"),
-        "trend_ma200_falling_symbols": merge("trend_ma200_falling_symbols"),
+        "trend_hub1_symbols": merge_hub("trend_hub1_symbols"),
+        "trend_hub2_symbols": merge_hub("trend_hub2_symbols"),
+        "trend_hub3_symbols": merge_hub("trend_hub3_symbols"),
+        "trend_ma200_falling_symbols": merge_hub("trend_ma200_falling_symbols"),
+        "trend_liq5": _merge_liq,
         "trend_symbols": {k: merge(f"trend_{k}_symbols") for k in HUB_KEYS},
     }
 

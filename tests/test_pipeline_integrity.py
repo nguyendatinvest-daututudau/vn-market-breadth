@@ -188,7 +188,7 @@ def test_compact_history_keeps_ma_denominators():
     assert compact["HOSE"]["ma_eligible_symbols"]["20"] == 140
 
 
-def _mini_snapshot(tag):
+def _mini_snapshot(tag, liq=100):
     elig = {str(w): 10 for w in pipeline.MA_WINDOWS}
     return {
         "advances": 6, "declines": 3, "unchanged": 1,
@@ -205,15 +205,17 @@ def _mini_snapshot(tag):
         "trend_hub2_symbols": [],
         "trend_hub3_symbols": [],
         "trend_ma200_falling_symbols": [],
+        "trend_liq5": {tag: liq},
     }
 
 
 def test_combine_all_covers_every_ma_window():
     # Hoi quy KeyError: 150 khi MA_WINDOWS co them 150 (MA150 cho trend stack)
-    combined = pipeline.combine_all([_mini_snapshot("AAA"), _mini_snapshot("BBB")])
+    combined = pipeline.combine_all([_mini_snapshot("AAA", 100), _mini_snapshot("BBB", 900)])
     for w in pipeline.MA_WINDOWS:
         assert combined["ma_eligible_symbols"][str(w)] == 20
     assert combined["trend_distribution"]["total"] == 20
     assert "AAA" in combined["trend_symbols"]["hub1"]
-    assert combined["trend_hub1_symbols"] == ["AAA", "BBB"]
+    assert combined["trend_hub1_symbols"] == ["BBB", "AAA"]  # TB5 giam dan
+    assert combined["trend_liq5"] == {"AAA": 100, "BBB": 900}
     assert combined["trend_ma200_falling_symbols"] == []
