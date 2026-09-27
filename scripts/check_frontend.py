@@ -148,6 +148,9 @@ def main() -> int:
                   "getPrevTrendSymbols", "new-badge", "view-uptrend", "trend-early",
                   "trendUpEmptyMsg", "trendEarlyEmptyMsg", "trendListCount",
                   "buildTrendDistributionPanel", "uptrendQuery", "uptrendSearch"):
+    for token in ("RADAR_RENDER_CAP",):
+        if token not in text:
+            ok = fail(f"thi\u1ebfu {token} (radar cap 200 dong)") and False
         if token not in text:
             ok = fail(f"thi\u1ebfu {token} (tab CP UPTREND)") and False
     if "filter === 'trend-up'" not in text and 'filter === "trend-up"' not in text:
