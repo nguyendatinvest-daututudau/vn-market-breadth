@@ -34,7 +34,9 @@ permissions:
 
 concurrency:
   group: market-data
-  cancel-in-progress: false
+  # Run moi huy run cu dang chay do: 2 run song song cung sua data/*.json
+  # -> rebase conflict -> mat du lieu (nhu run #189). Run moi luon dung code moi nhat.
+  cancel-in-progress: true
 
 jobs:
   update-data:
