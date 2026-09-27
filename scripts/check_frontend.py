@@ -147,12 +147,10 @@ def main() -> int:
                   "getMa200FallingSet", "ma200-flag", "trend_ma200_falling_symbols",
                   "getPrevTrendSymbols", "new-badge", "view-uptrend", "trend-early",
                   "trendUpEmptyMsg", "trendEarlyEmptyMsg", "trendListCount",
-                  "buildTrendDistributionPanel", "uptrendQuery", "uptrendSearch"):
-    for token in ("RADAR_RENDER_CAP",):
+                  "buildTrendDistributionPanel", "uptrendQuery", "uptrendSearch",
+                  "RADAR_RENDER_CAP"):
         if token not in text:
-            ok = fail(f"thi\u1ebfu {token} (radar cap 200 dong)") and False
-        if token not in text:
-            ok = fail(f"thi\u1ebfu {token} (tab CP UPTREND)") and False
+            ok = fail(f"thieu {token} (tab CP UPTREND / radar cap)") and False
     if "filter === 'trend-up'" not in text and 'filter === "trend-up"' not in text:
         ok = fail("applyFilters thi\u1ebfu filter trend-up") and False
     if "filter === 'trend-early'" not in text and 'filter === "trend-early"' not in text:
