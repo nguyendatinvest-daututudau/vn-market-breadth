@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-14T20:53:46.667211+07:00",
-  "date": "14/10/2026",
+  "generated_at": "2026-10-15T20:36:57.777710+07:00",
+  "date": "15/10/2026",
   "regime": {
-    "label": "Trung lập",
+    "label": null,
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -11,115 +11,10 @@
   },
   "cap_a": 12,
   "counts": {
-    "A": 1,
-    "B": 1,
+    "A": 0,
+    "B": 0,
     "C": 0,
-    "in_panel": 1
+    "in_panel": 0
   },
-  "signals": [
-    {
-      "symbol": "HHP",
-      "base_score": 130,
-      "conviction": 155,
-      "tier": "B",
-      "eligible_for_a": false,
-      "in_panel": false,
-      "components": {
-        "base_score": 130,
-        "vol_bonus": true,
-        "adx_bonus": true,
-        "extension_penalty": false
-      },
-      "shadow": {
-        "consecutive_days": 1,
-        "streak_fatigue": false,
-        "atr_pct": 3.4,
-        "atr_band_over": false,
-        "w52_healthy": false,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 3.1,
-      "vol_ratio": 2.84,
-      "adx14": 37.0,
-      "last_price": 18150.0,
-      "confirm_sources": [
-        "ensemble"
-      ],
-      "trade_plan": {
-        "entry_type": "base",
-        "entry_zone": {
-          "low": 17968.5,
-          "high": 18331.5,
-          "mid": 18150.0
-        },
-        "entry_note": "Vùng mua quanh giá hiện tại ±1%",
-        "resistance": 19050.0,
-        "support": 17605.0,
-        "stop": 16726.68,
-        "stop_pct": -7.84,
-        "targets": {
-          "r1": 19050.0,
-          "r2": 19350.0,
-          "r1_pct": 4.96,
-          "r2_pct": 6.61
-        },
-        "rr": {
-          "rr1": 0.63,
-          "rr2": 0.84
-        }
-      },
-      "rank_in_day": 1
-    },
-    {
-      "symbol": "MSB",
-      "base_score": 40,
-      "conviction": 50,
-      "tier": "A",
-      "eligible_for_a": true,
-      "in_panel": true,
-      "components": {
-        "base_score": 40,
-        "vol_bonus": false,
-        "adx_bonus": true,
-        "extension_penalty": false
-      },
-      "shadow": {
-        "consecutive_days": 0,
-        "streak_fatigue": false,
-        "atr_pct": 2.5,
-        "atr_band_over": false,
-        "w52_healthy": false,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 4.12,
-      "vol_ratio": 1.48,
-      "adx14": 36.1,
-      "last_price": 14650.0,
-      "confirm_sources": [],
-      "trade_plan": {
-        "entry_type": "pullback",
-        "entry_zone": {
-          "low": 13929.3,
-          "high": 14564.2,
-          "mid": 14246.75
-        },
-        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
-        "resistance": 14700.0,
-        "support": 14350.0,
-        "stop": 13200.22,
-        "stop_pct": -7.35,
-        "targets": {
-          "r1": 14700.0,
-          "r2": 16450.0,
-          "r1_pct": 3.18,
-          "r2_pct": 15.46
-        },
-        "rr": {
-          "rr1": 0.43,
-          "rr2": 2.11
-        }
-      },
-      "rank_in_day": 2
-    }
-  ]
+  "signals": []
 }
