@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-21T20:58:42.984241+07:00",
-  "date": "21/10/2026",
+  "generated_at": "2026-10-22T20:59:21.178346+07:00",
+  "date": "22/10/2026",
   "regime": {
-    "label": null,
+    "label": "Risk-On",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -11,10 +11,64 @@
   },
   "cap_a": 12,
   "counts": {
-    "A": 0,
+    "A": 1,
     "B": 0,
     "C": 0,
-    "in_panel": 0
+    "in_panel": 1
   },
-  "signals": []
+  "signals": [
+    {
+      "symbol": "PET",
+      "base_score": 40,
+      "conviction": 50,
+      "tier": "A",
+      "eligible_for_a": true,
+      "in_panel": true,
+      "components": {
+        "base_score": 40,
+        "vol_bonus": false,
+        "adx_bonus": true,
+        "extension_penalty": true
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 4.2,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 4.62,
+      "vol_ratio": 1.45,
+      "adx14": 28.2,
+      "last_price": 53400.0,
+      "confirm_sources": [
+        "luc_mach"
+      ],
+      "trade_plan": {
+        "entry_type": "pullback",
+        "entry_zone": {
+          "low": 50034.6,
+          "high": 51550.4,
+          "mid": 50792.5
+        },
+        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
+        "resistance": 58500.0,
+        "support": 51040.0,
+        "stop": 45577.06,
+        "stop_pct": -10.27,
+        "targets": {
+          "r1": 54804.29,
+          "r2": 58500.0,
+          "r1_pct": 7.9,
+          "r2_pct": 15.17
+        },
+        "rr": {
+          "rr1": 0.77,
+          "rr2": 1.48
+        }
+      },
+      "rank_in_day": 1
+    }
+  ]
 }
