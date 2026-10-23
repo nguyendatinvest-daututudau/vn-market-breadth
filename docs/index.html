@@ -468,6 +468,7 @@
       <a href="#rsi" data-view="rsi" onclick="switchView('rsi')">Biểu đồ lịch sử RSI</a>
       <a href="#signals" data-view="signals" onclick="switchView('signals')">Tín hiệu</a>
       <a href="#uptrend" data-view="uptrend" onclick="switchView('uptrend')">CP Uptrend</a>
+      <a href="#rs" data-view="rs" onclick="switchView('rs')">RS Mạnh</a>
       <a href="#radar" data-view="radar" onclick="switchView('radar')">Radar</a>
       <a href="#perf" data-view="perf" onclick="switchView('perf')">Hiệu quả</a>
     </div>
@@ -517,6 +518,7 @@
 <div id="view-rsi" style="display:none;"></div>
     <div id="view-signals" style="display:none;"></div>
 <div id="view-uptrend" style="display:none;"></div>
+<div id="view-rs" style="display:none;"></div>
   </div>
 
   <div id="radarView" style="display:none">
@@ -555,6 +557,7 @@ let LATEST = null, HISTORY = null, COMMENTARY = null;
 let SIGNALS = null, ENSEMBLE = null, MOMENTUM = null, MOMENTUM_BT = null, MAMA_BT = null, ATS_BT = null, LUC_MACH = null, KHUNG4_TPLUS = null, MAMA_POSITIONAL = null, ADVANCED_TRAILSTOP = null;
 let ENSEMBLE_WEIGHTS = null, SIGNALS_HISTORY = null, LATEST_PRICES = null;
 let REGIME = null, INTRADAY = null, EVALUATION = null, BUY_CONVICTION = null;
+let RS_RANKING = null;
 
 async function loadData(){
   try {
@@ -579,12 +582,13 @@ async function loadData(){
       INTRADAY = typeof EMBEDDED_INTRADAY !== 'undefined' ? EMBEDDED_INTRADAY : null;
       EVALUATION = typeof EMBEDDED_EVALUATION !== 'undefined' ? EMBEDDED_EVALUATION : null;
       BUY_CONVICTION = typeof EMBEDDED_BUY_CONVICTION !== 'undefined' ? EMBEDDED_BUY_CONVICTION : null;
+      RS_RANKING = typeof EMBEDDED_RS_RANKING !== 'undefined' ? EMBEDDED_RS_RANKING : null;
     } else {
       const ts = Date.now();
       const res = await fetch(`./data/breadth_latest.json?t=${ts}`);
       if (!res.ok) throw new Error('No data');
       LATEST = await res.json();
-      const [h, c, s1, s2, s3, lm, k4, mama, ats, w, bt, mbt, abt, sh, lp, reg, intr, ev, cv] = await Promise.all([
+      const [h, c, s1, s2, s3, lm, k4, mama, ats, w, bt, mbt, abt, sh, lp, reg, intr, ev, cv, rsk] = await Promise.all([
         fetch(`./data/breadth_history.json?t=${ts}`), fetch(`./data/market_commentary.json?t=${ts}`),
         fetch(`./data/strategy_signals.json?t=${ts}`), fetch(`./data/ensemble_signals.json?t=${ts}`),
         fetch(`./data/momentum_signals.json?t=${ts}`), fetch(`./data/luc_mach_signals.json?t=${ts}`),
@@ -597,6 +601,7 @@ async function loadData(){
         fetch(`./data/intraday_breadth.json?t=${ts}`).catch(()=>null),
         fetch(`./data/evaluation_filters.json?t=${ts}`).catch(()=>null),
         fetch(`./data/buy_conviction.json?t=${ts}`).catch(()=>null),
+        fetch(`./data/rs_ranking.json?t=${ts}`).catch(()=>null),
       ]);
       HISTORY = h.ok ? await h.json() : [];
       COMMENTARY = c.ok ? await c.json() : null;
@@ -617,6 +622,7 @@ async function loadData(){
       INTRADAY = intr?.ok ? await intr.json() : null;
       EVALUATION = ev?.ok ? await ev.json() : null;
       BUY_CONVICTION = cv?.ok ? await cv.json() : null;
+      RS_RANKING = rsk?.ok ? await rsk.json() : null;
     }
 
     document.getElementById('metaLine').innerHTML =
@@ -814,6 +820,7 @@ let alertsHTML; try { alertsHTML = buildAlertsPanel(activeSignalDate); } catch(e
   `;
   requestAnimationFrame(renderUdVolumeChart);
   renderUptrendView();
+  renderRsView();
 
   // ===== VIEW: BIỂU ĐỒ LỊCH SỬ =====
   document.getElementById('view-chart').innerHTML = `
@@ -1173,6 +1180,47 @@ function renderUptrendView(){
   el.innerHTML = `<div class="panel"><h2>CP Uptrend <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${m.date} \u00b7 ${total.toLocaleString('vi-VN')} m\u00e3 trong 3 hub \u00b7 b\u1ea5m m\u00e3 \u0111\u1ec3 xem k\u1ebf ho\u1ea1ch</span></h2>
     <div style="margin-bottom:12px;"><input id="uptrendSearch" type="text" value="${escapeHtml(uptrendQuery)}" placeholder="T\u00ecm m\u00e3 trong 3 hub..." oninput="uptrendQuery=this.value.toUpperCase();renderUptrendView();const si=document.getElementById('uptrendSearch');if(si){si.focus();si.setSelectionRange(si.value.length,si.value.length);}" style="width:100%;max-width:420px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-tint);color:var(--text);font-size:13px;"></div>
     ${HUB_KEYS.map(trendHubSection).join('')}
+  </div>`;
+}
+function renderRsView(){
+  const el = document.getElementById('view-rs');
+  if (!el) return;
+  if (!RS_RANKING) {
+    el.innerHTML = `<div class="panel"><h2>RS M\u1ea1nh \u2014 S\u1ee9c m\u1ea1nh t\u01b0\u01a1ng \u0111\u1ed1i</h2><div class="note" style="margin:0;">Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u RS cho phi\u00ean n\u00e0y. Panel s\u1ebd t\u1ef1 c\u1eadp nh\u1eadt sau khi pipeline ch\u1ea1y (15:10 m\u1ed7i phi\u00ean).</div></div>`;
+    return;
+  }
+  const strong = RS_RANKING.strong || [];
+  const bench = RS_RANKING.benchmark || 'VNINDEX';
+  const br = RS_RANKING.benchmark_returns || {};
+  const date = RS_RANKING.date || '';
+  const crit = RS_RANKING.criteria || 'RS>=80 & Close>MA20 & Close>MA50';
+  const fmtR = v => (v === null || v === undefined) ? '\u2014' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+  const fmtP = v => (v === null || v === undefined) ? '\u2014' : Number(v).toLocaleString('vi-VN');
+  const ratingColor = r => r >= 90 ? '#C2413B' : (r >= 80 ? '#D97706' : '#64748B');
+  const rows = strong.map(s => {
+    const rs = Number(s.rs_rating) || 0;
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 6px;font-weight:800;" data-sym="${escapeHtml(s.symbol)}">${escapeHtml(s.symbol)}</td>
+      <td style="padding:8px 6px;"><span style="display:inline-block;min-width:34px;text-align:center;font-weight:900;color:#fff;background:${ratingColor(rs)};border-radius:6px;padding:2px 6px;">${rs}</span></td>
+      <td style="padding:8px 6px;font-weight:700;color:${(s.rel20 ?? 0) >= 0 ? 'var(--up)' : 'var(--down)'};">${fmtR(s.rel20)}</td>
+      <td style="padding:8px 6px;color:${(s.rel60 ?? 0) >= 0 ? 'var(--up)' : 'var(--down)'};">${fmtR(s.rel60)}</td>
+      <td style="padding:8px 6px;color:${(s.rel120 ?? 0) >= 0 ? 'var(--up)' : 'var(--down)'};">${fmtR(s.rel120)}</td>
+      <td style="padding:8px 6px;color:${(s.rel250 ?? 0) >= 0 ? 'var(--up)' : 'var(--down)'};">${fmtR(s.rel250)}</td>
+      <td style="padding:8px 6px;text-align:right;">${fmtP(s.close)}</td>
+      <td style="padding:8px 6px;text-align:right;">${fmtP(s.ma20)}</td>
+      <td style="padding:8px 6px;text-align:right;">${fmtP(s.ma50)}</td>
+      <td style="padding:8px 6px;text-align:right;color:${(s.pct_from_high ?? 0) >= -5 ? 'var(--up)' : 'var(--muted)'};">${fmtR(s.pct_from_high)}</td>
+    </tr>`;
+  }).join('');
+  const benchLine = `Benchmark ${escapeHtml(bench)}: rel20 ${fmtR(br['20'])} \u00b7 rel60 ${fmtR(br['60'])} \u00b7 rel120 ${fmtR(br['120'])} \u00b7 rel250 ${fmtR(br['250'])}`;
+  el.innerHTML = `<div class="panel">
+    <h2>RS M\u1ea1nh \u2014 S\u1ee9c m\u1ea1nh t\u01b0\u01a1ng \u0111\u1ed1i vs ${escapeHtml(bench)} <span style="font-size:10px;font-weight:400;color:var(--faint);text-transform:none;">${escapeHtml(date)} \u00b7 ${strong.length} m\u00e3 \u00b7 ${escapeHtml(crit)}</span></h2>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">RS Rating 1\u201399 = percentile s\u1ee9c m\u1ea1nh gi\u00e1 so v\u1edbi benchmark qua 20/60/120/250 phi\u00ean. relN = ch\u00eanh l\u1ec7ch % so v\u1edbi benchmark trong N phi\u00ean.</div>
+    <div style="font-size:11px;color:var(--faint);margin-bottom:12px;">${benchLine}</div>
+    ${strong.length ? `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="text-align:left;color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);">
+        <th style="padding:6px;">M\u00e3</th><th style="padding:6px;">RS</th><th style="padding:6px;">rel20</th><th style="padding:6px;">rel60</th><th style="padding:6px;">rel120</th><th style="padding:6px;">rel250</th><th style="padding:6px;text-align:right;">Gi\u00e1</th><th style="padding:6px;text-align:right;">MA20</th><th style="padding:6px;text-align:right;">MA50</th><th style="padding:6px;text-align:right;">% t\u1eeb \u0111\u1ec9nh 52w</th>
+      </tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="note" style="margin:0;">Kh\u00f4ng c\u00f3 m\u00e3 n\u00e0o \u0111\u1ea1t ti\u00eau ch\u00ed RS m\u1ea1nh phi\u00ean n\u00e0y.</div>`}
   </div>`;
 }
 function buildTrendDistributionPanel(m){
@@ -2880,16 +2928,16 @@ let currentView = 'home';
 function switchView(view){
   currentView = view;
   document.querySelectorAll('.nav-links a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-  const dashViews = ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend'];
+  const dashViews = ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'rs'];
   document.getElementById('dashboardView').style.display = dashViews.includes(view) ? '' : 'none';
   document.getElementById('radarView').style.display = view === 'radar' ? '' : 'none';
   document.getElementById('perfView').style.display = view === 'perf' ? '' : 'none';
   const pgTitle = document.querySelector('#dashboardView header h1');
-  if (pgTitle) pgTitle.style.display = (view === 'signals' || view === 'uptrend') ? 'none' : '';
+  if (pgTitle) pgTitle.style.display = (view === 'signals' || view === 'uptrend' || view === 'rs') ? 'none' : '';
   if (view === 'radar' && !radarDataLoaded) loadRadarData();
   if (view === 'perf' && !perfDataLoaded) loadPerfData();
   if (dashViews.includes(view)) {
-    ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend'].forEach(v => {
+    ['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'rs'].forEach(v => {
       const el = document.getElementById('view-' + v);
       if (el) el.style.display = v === view ? '' : 'none';
     });
@@ -2898,13 +2946,14 @@ function switchView(view){
     if (view === 'rsi') requestAnimationFrame(() => renderRsiPulseChart());
     if (view === 'signals') requestAnimationFrame(() => renderSigHistChart());
     if (view === 'uptrend') renderUptrendView();
+    if (view === 'rs') renderRsView();
   }
   if (window.location.hash !== `#${view}`) history.pushState(null, '', `#${view}`);
 }
 
 window.addEventListener('hashchange', () => {
   const v = window.location.hash.replace('#', '') || 'home';
-  if (['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'radar', 'perf'].includes(v)) switchView(v);
+  if (['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'rs', 'radar', 'perf'].includes(v)) switchView(v);
 });
 
 let resizeTimer = null;
@@ -3475,7 +3524,7 @@ loadData();
 // Initial hash routing
 (function(){
   const h = window.location.hash.replace('#', '') || 'home';
-  if (['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'radar', 'perf'].includes(h)) switchView(h);
+  if (['home', 'market', 'chart', 'rsi', 'signals', 'uptrend', 'rs', 'radar', 'perf'].includes(h)) switchView(h);
 })();
 
 // Pipeline chay theo phien close: du lieu tinh, khong poll. Tai lai trang de cap nhat.

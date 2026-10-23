@@ -43,6 +43,7 @@ from advanced_trailstop_signals import main as run_advanced_trailstop_signals
 from backtest_mama_positional import main as run_backtest_mama_positional
 from backtest_advanced_trailstop import main as run_backtest_advanced_trailstop
 from accumulation_radar import main as run_accumulation_radar
+from rs_ranking import main as run_rs_ranking
 from market_regime import main as run_market_regime
 from stock_health import main as run_stock_health
 from buy_conviction import main as run_buy_conviction
@@ -863,7 +864,7 @@ def _sync_docs_data(include_signal_outputs: bool = True):
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
     files = ["breadth_latest.json", "breadth_history.json", "market_commentary.json", "market_regime.json", "backtest_weights.json", "backtest_momentum.json", "backtest_mama_positional.json", "backtest_advanced_trailstop.json", "backtest_zweig.json", "latest_prices.json", "stock_health.json", "buy_conviction.json"]
     if include_signal_outputs:
-        files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "signals_history.json", "signal_performance.json"])
+        files.extend(["strategy_signals.json", "ensemble_signals.json", "momentum_signals.json", "luc_mach_signals.json", "khung4_tplus_signals.json", "mama_positional_signals.json", "advanced_trailstop_signals.json", "accumulation_radar.json", "rs_ranking.json", "signals_history.json", "signal_performance.json"])
     for f in files:
         src = DATA_DIR / f
         dst = DOCS_DATA_DIR / f
@@ -1233,6 +1234,7 @@ def main():
             ("MAMA Positional", run_mama_positional_signals),
             ("Advanced Trailstop", run_advanced_trailstop_signals),
             ("Accumulation Radar", run_accumulation_radar),
+            ("RS Ranking", run_rs_ranking),
         ):
             try:
                 generator()
