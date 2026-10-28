@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-27T21:38:07.815460+07:00",
-  "date": "27/10/2026",
+  "generated_at": "2026-10-28T22:17:17.157610+07:00",
+  "date": "28/10/2026",
   "regime": {
     "label": "Trung lập",
     "factor": 1.0
@@ -11,217 +11,64 @@
   },
   "cap_a": 12,
   "counts": {
-    "A": 3,
+    "A": 0,
     "B": 1,
     "C": 0,
-    "in_panel": 3
+    "in_panel": 0
   },
   "signals": [
     {
-      "symbol": "PET",
-      "base_score": 105,
-      "conviction": 115,
+      "symbol": "OCB",
+      "base_score": 120,
+      "conviction": 145,
       "tier": "B",
       "eligible_for_a": false,
       "in_panel": false,
       "components": {
-        "base_score": 105,
-        "vol_bonus": false,
+        "base_score": 120,
+        "vol_bonus": true,
         "adx_bonus": true,
-        "extension_penalty": false
+        "extension_penalty": true
       },
       "shadow": {
         "consecutive_days": 1,
-        "streak_fatigue": false,
-        "atr_pct": 4.8,
-        "atr_band_over": false,
-        "w52_healthy": false,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 2.85,
-      "vol_ratio": 1.53,
-      "adx14": 28.4,
-      "last_price": 53100.0,
-      "confirm_sources": [
-        "ensemble"
-      ],
-      "trade_plan": {
-        "entry_type": "base",
-        "entry_zone": {
-          "low": 52569.0,
-          "high": 53631.0,
-          "mid": 53100.0
-        },
-        "entry_note": "Vùng mua quanh giá hiện tại ±1%",
-        "resistance": 56500.0,
-        "support": 53000.0,
-        "stop": 47512.66,
-        "stop_pct": -10.52,
-        "targets": {
-          "r1": 56500.0,
-          "r2": 58000.0,
-          "r1_pct": 6.4,
-          "r2_pct": 9.23
-        },
-        "rr": {
-          "rr1": 0.61,
-          "rr2": 0.88
-        }
-      },
-      "rank_in_day": 1
-    },
-    {
-      "symbol": "HHP",
-      "base_score": 55,
-      "conviction": 70,
-      "tier": "A",
-      "eligible_for_a": true,
-      "in_panel": true,
-      "components": {
-        "base_score": 55,
-        "vol_bonus": true,
-        "adx_bonus": false,
-        "extension_penalty": false
-      },
-      "shadow": {
-        "consecutive_days": 0,
-        "streak_fatigue": false,
-        "atr_pct": 3.7,
-        "atr_band_over": false,
-        "w52_healthy": false,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 1.11,
-      "vol_ratio": 3.33,
-      "adx14": 26.8,
-      "last_price": 17700.0,
-      "confirm_sources": [],
-      "trade_plan": {
-        "entry_type": "base",
-        "entry_zone": {
-          "low": 17523.0,
-          "high": 17877.0,
-          "mid": 17700.0
-        },
-        "entry_note": "Vùng mua quanh giá hiện tại ±1%",
-        "resistance": 19350.0,
-        "support": 17505.0,
-        "stop": 16209.86,
-        "stop_pct": -8.42,
-        "targets": {
-          "r1": 19350.0,
-          "r2": 19940.91,
-          "r1_pct": 9.32,
-          "r2_pct": 12.66
-        },
-        "rr": {
-          "rr1": 1.11,
-          "rr2": 1.5
-        }
-      },
-      "rank_in_day": 2
-    },
-    {
-      "symbol": "ORS",
-      "base_score": 55,
-      "conviction": 70,
-      "tier": "A",
-      "eligible_for_a": true,
-      "in_panel": true,
-      "components": {
-        "base_score": 55,
-        "vol_bonus": true,
-        "adx_bonus": false,
-        "extension_penalty": true
-      },
-      "shadow": {
-        "consecutive_days": 0,
-        "streak_fatigue": false,
-        "atr_pct": 3.3,
-        "atr_band_over": false,
-        "w52_healthy": false,
-        "rs_vs_vni": null
-      },
-      "dist_ma20": 9.13,
-      "vol_ratio": 2.1,
-      "adx14": 27.1,
-      "last_price": 15150.0,
-      "confirm_sources": [],
-      "trade_plan": {
-        "entry_type": "pullback",
-        "entry_zone": {
-          "low": 13743.67,
-          "high": 14574.3,
-          "mid": 14158.99
-        },
-        "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
-        "resistance": 15950.0,
-        "support": 15100.0,
-        "stop": 12754.57,
-        "stop_pct": -9.92,
-        "targets": {
-          "r1": 15950.0,
-          "r2": 16300.0,
-          "r1_pct": 12.65,
-          "r2_pct": 15.12
-        },
-        "rr": {
-          "rr1": 1.28,
-          "rr2": 1.52
-        }
-      },
-      "rank_in_day": 3
-    },
-    {
-      "symbol": "OCB",
-      "base_score": 40,
-      "conviction": 65,
-      "tier": "A",
-      "eligible_for_a": true,
-      "in_panel": true,
-      "components": {
-        "base_score": 40,
-        "vol_bonus": true,
-        "adx_bonus": true,
-        "extension_penalty": true
-      },
-      "shadow": {
-        "consecutive_days": 0,
         "streak_fatigue": false,
         "atr_pct": 1.8,
         "atr_band_over": false,
         "w52_healthy": false,
         "rs_vs_vni": null
       },
-      "dist_ma20": 6.51,
-      "vol_ratio": 3.24,
-      "adx14": 33.0,
-      "last_price": 10850.0,
-      "confirm_sources": [],
+      "dist_ma20": 4.73,
+      "vol_ratio": 2.38,
+      "adx14": 33.7,
+      "last_price": 10700.0,
+      "confirm_sources": [
+        "ensemble"
+      ],
       "trade_plan": {
         "entry_type": "pullback",
         "entry_zone": {
-          "low": 10084.64,
-          "high": 10442.39,
-          "mid": 10263.51
+          "low": 10114.33,
+          "high": 10514.1,
+          "mid": 10314.22
         },
         "entry_note": "Duỗi >4% trên MA20 — chờ pullback về MA10-20 ±1% (không mua đuổi)",
-        "resistance": 11133.33,
-        "support": 10733.33,
+        "resistance": 11016.67,
+        "support": 10583.33,
         "stop": 9044.0,
-        "stop_pct": -11.88,
+        "stop_pct": -12.32,
         "targets": {
-          "r1": 11133.33,
+          "r1": 11016.67,
           "r2": 11957.0,
-          "r1_pct": 8.47,
-          "r2_pct": 16.5
+          "r1_pct": 6.81,
+          "r2_pct": 15.93
         },
         "rr": {
-          "rr1": 0.71,
-          "rr2": 1.39
+          "rr1": 0.55,
+          "rr2": 1.29
         }
       },
-      "rank_in_day": 4
+      "rank_in_day": 1
     }
   ]
 }
