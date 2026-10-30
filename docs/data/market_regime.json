@@ -1,50 +1,50 @@
 {
-  "generated_at": "2026-10-29T22:20:56.857537+07:00",
-  "date": "29/10/2026",
+  "generated_at": "2026-10-30T22:10:26.922933+07:00",
+  "date": "30/10/2026",
   "regime": {
-    "score": 44.0,
+    "score": 34.9,
     "label": "Trung lập",
     "tone": "neutral",
     "components": {
       "ad_ratio": {
-        "value": 0.43,
+        "value": 0.26,
         "points": 10.0
       },
       "pct_above_ma20": {
-        "value": 48.8,
-        "points": 68.8
+        "value": 27.5,
+        "points": 45.0
       },
       "pct_above_ma50": {
-        "value": 33.3,
-        "points": 53.3
+        "value": 22.2,
+        "points": 34.4
       },
       "index_position": {
         "value": {
-          "close": 1755.61,
-          "ma20": 1736.5,
+          "close": 1741.62,
+          "ma20": 1736.69,
           "above_ma20": true,
-          "ma50": 1772.87,
+          "ma50": 1773.06,
           "above_ma50": false,
-          "ma200": 1795.63,
+          "ma200": 1795.06,
           "above_ma200": false,
-          "rsi": 51.3,
-          "macd_hist": 7.27,
+          "rsi": 47.1,
+          "macd_hist": 5.59,
           "macd_up": true
         },
         "points": 54.0
       },
       "rsi_pulse": {
         "value": {
-          "under_30": 13,
-          "over_70": 5,
-          "over_50": 65,
-          "total": 168,
+          "under_30": 18,
+          "over_70": 3,
+          "over_50": 27,
+          "total": 167,
           "period": 14
         },
-        "points": 47.1
+        "points": 44.6
       },
       "volume_ud": {
-        "value": 0.386,
+        "value": 0.315,
         "points": 15.0
       }
     },
@@ -62,34 +62,34 @@
     "note": "Giá ở vùng đỉnh nhưng độ rộng (% trên MA20) không xác nhận — rủi ro đảo chiều giảm.",
     "detail": {
       "sessions": 21,
-      "last_close": 1755.61,
-      "price_high": 1777.73,
+      "last_close": 1741.62,
+      "price_high": 1774.15,
       "price_low": 1689.84,
-      "last_pct_above_ma20": 48.8,
+      "last_pct_above_ma20": 27.5,
       "pct_high": 71.1,
       "pct_low": 24.4
     }
   },
   "breadth_momentum": {
     "available": true,
-    "oscillator": 4.97,
-    "signal": 2.67,
-    "histogram": 2.29,
+    "oscillator": 3.68,
+    "signal": 2.87,
+    "histogram": 0.81,
     "extreme": "none",
-    "last_pct_above_ma20": 48.8
+    "last_pct_above_ma20": 27.5
   },
   "zweig_breadth_thrust": {
     "available": true,
     "current_observation_available": true,
-    "state": "expired",
-    "date": "29/10/2026",
-    "ratio": 0.307947,
-    "ema10": 0.427954,
-    "armed_date": "14/10/2026",
+    "state": "armed",
+    "date": "30/10/2026",
+    "ratio": 0.214744,
+    "ema10": 0.389188,
+    "armed_date": "30/10/2026",
     "confirmed_date": null,
-    "sessions_since_armed": null,
-    "sessions_remaining": null,
-    "progress_pct": null,
+    "sessions_since_armed": 0,
+    "sessions_remaining": 10,
+    "progress_pct": 0.0,
     "window_sessions": 10,
     "thresholds": {
       "lower": 0.4,
@@ -175,37 +175,42 @@
         "date": "29/10/2026",
         "kind": "expired",
         "ema10": 0.427954
+      },
+      {
+        "date": "30/10/2026",
+        "kind": "armed",
+        "ema10": 0.389188
       }
     ],
     "market": "HOSE",
     "ema_period": 10,
     "formula": "EMA10[Advances/(Advances+Declines)]",
-    "valid_sessions": 341
+    "valid_sessions": 342
   },
   "index": {
     "VNI": {
-      "close": 1755.61,
-      "ma20": 1736.5,
+      "close": 1741.62,
+      "ma20": 1736.69,
       "above_ma20": true,
-      "ma50": 1772.87,
+      "ma50": 1773.06,
       "above_ma50": false,
-      "ma200": 1795.63,
+      "ma200": 1795.06,
       "above_ma200": false,
-      "rsi": 51.3,
-      "macd_hist": 7.27,
+      "rsi": 47.1,
+      "macd_hist": 5.59,
       "macd_up": true
     },
     "HNXINDEX": {
-      "close": 256.61,
-      "ma20": 261.43,
+      "close": 252.74,
+      "ma20": 260.73,
       "above_ma20": false,
-      "ma50": 270.97,
+      "ma50": 270.38,
       "above_ma50": false,
-      "ma200": 270.91,
+      "ma200": 270.93,
       "above_ma200": false,
-      "rsi": 36.1,
-      "macd_hist": 0.28,
-      "macd_up": true
+      "rsi": 31.6,
+      "macd_hist": -0.05,
+      "macd_up": false
     }
   }
 }
