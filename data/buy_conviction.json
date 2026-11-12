@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-11T23:19:57.164562+07:00",
-  "date": "11/11/2026",
+  "generated_at": "2026-11-12T16:15:27.687061+07:00",
+  "date": "12/11/2026",
   "regime": {
-    "label": null,
+    "label": "Trung lập",
     "factor": 1.0
   },
   "tier_thresholds": {
@@ -13,8 +13,40 @@
   "counts": {
     "A": 0,
     "B": 0,
-    "C": 0,
+    "C": 1,
     "in_panel": 0
   },
-  "signals": []
+  "signals": [
+    {
+      "symbol": "NAB",
+      "base_score": 35,
+      "conviction": 35,
+      "tier": "C",
+      "eligible_for_a": true,
+      "in_panel": false,
+      "components": {
+        "base_score": 35,
+        "vol_bonus": false,
+        "adx_bonus": false,
+        "extension_penalty": false
+      },
+      "shadow": {
+        "consecutive_days": 0,
+        "streak_fatigue": false,
+        "atr_pct": 2.3,
+        "atr_band_over": false,
+        "w52_healthy": false,
+        "rs_vs_vni": null
+      },
+      "dist_ma20": 3.75,
+      "vol_ratio": 1.93,
+      "adx14": 10.8,
+      "last_price": 13000.0,
+      "confirm_sources": [
+        "ensemble"
+      ],
+      "trade_plan": null,
+      "rank_in_day": 1
+    }
+  ]
 }
