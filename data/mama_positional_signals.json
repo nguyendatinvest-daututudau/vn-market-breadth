@@ -1,6 +1,6 @@
 {
   "mode": "ehlers_mama_positional",
-  "generated_at": "2026-11-20T15:33:11.695215+07:00",
+  "generated_at": "2026-11-21T00:08:23.378069+07:00",
   "date": "20/11/2026",
   "fast_limit": 0.5,
   "slow_limit": 0.05,
@@ -9,34 +9,10 @@
   "min_history": 80,
   "total_symbols_analyzed": 666,
   "total_signals": 6,
-  "buy_count": 1,
-  "sell_count": 5,
+  "buy_count": 0,
+  "sell_count": 6,
   "skipped_missing_ohlc": 0,
-  "buy": [
-    {
-      "symbol": "DBC",
-      "status": "BUY",
-      "signal_type": "mama_positional_buy",
-      "score": 100,
-      "mama_buy": true,
-      "mama_sell": false,
-      "mama": 15947.26,
-      "fama": 15887.34,
-      "period": 17.31,
-      "alpha": 0.05,
-      "buy_setup_value": 16250.0,
-      "sell_setup_value": 15200.0,
-      "bprice": 16400.0,
-      "sprice": 23250.0,
-      "buy_price": 16400.0,
-      "sell_price": null,
-      "last_price": 16400.0,
-      "last_volume": 4210800.0,
-      "strategies": [
-        "mama_positional_buy"
-      ]
-    }
-  ],
+  "buy": [],
   "sell": [
     {
       "symbol": "VIB",
@@ -57,6 +33,29 @@
       "sell_price": 13350.0,
       "last_price": 13350.0,
       "last_volume": 5422600.0,
+      "strategies": [
+        "mama_positional_sell"
+      ]
+    },
+    {
+      "symbol": "NRC",
+      "status": "SELL",
+      "signal_type": "mama_positional_sell",
+      "score": 100,
+      "mama_buy": false,
+      "mama_sell": true,
+      "mama": 4484.18,
+      "fama": 4561.33,
+      "period": 19.35,
+      "alpha": 0.5,
+      "buy_setup_value": 4800.0,
+      "sell_setup_value": 4400.0,
+      "bprice": 4900.0,
+      "sprice": 4200.0,
+      "buy_price": null,
+      "sell_price": 4200.0,
+      "last_price": 4200.0,
+      "last_volume": 4742700.0,
       "strategies": [
         "mama_positional_sell"
       ]
@@ -156,29 +155,6 @@
   ],
   "all_signals": [
     {
-      "symbol": "DBC",
-      "status": "BUY",
-      "signal_type": "mama_positional_buy",
-      "score": 100,
-      "mama_buy": true,
-      "mama_sell": false,
-      "mama": 15947.26,
-      "fama": 15887.34,
-      "period": 17.31,
-      "alpha": 0.05,
-      "buy_setup_value": 16250.0,
-      "sell_setup_value": 15200.0,
-      "bprice": 16400.0,
-      "sprice": 23250.0,
-      "buy_price": 16400.0,
-      "sell_price": null,
-      "last_price": 16400.0,
-      "last_volume": 4210800.0,
-      "strategies": [
-        "mama_positional_buy"
-      ]
-    },
-    {
       "symbol": "VIB",
       "status": "SELL",
       "signal_type": "mama_positional_sell",
@@ -197,6 +173,29 @@
       "sell_price": 13350.0,
       "last_price": 13350.0,
       "last_volume": 5422600.0,
+      "strategies": [
+        "mama_positional_sell"
+      ]
+    },
+    {
+      "symbol": "NRC",
+      "status": "SELL",
+      "signal_type": "mama_positional_sell",
+      "score": 100,
+      "mama_buy": false,
+      "mama_sell": true,
+      "mama": 4484.18,
+      "fama": 4561.33,
+      "period": 19.35,
+      "alpha": 0.5,
+      "buy_setup_value": 4800.0,
+      "sell_setup_value": 4400.0,
+      "bprice": 4900.0,
+      "sprice": 4200.0,
+      "buy_price": null,
+      "sell_price": 4200.0,
+      "last_price": 4200.0,
+      "last_volume": 4742700.0,
       "strategies": [
         "mama_positional_sell"
       ]
@@ -454,7 +453,7 @@
     },
     {
       "symbol": "ABT",
-      "rows": 598,
+      "rows": 602,
       "columns": [
         "TradingDate",
         "Open",
@@ -465,9 +464,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 58900.0,
-      "last_volume": 6200.0
+      "last_date": "20/11/2026",
+      "last_close": 58700.0,
+      "last_volume": 7000.0
     },
     {
       "symbol": "ACB",
@@ -550,7 +549,7 @@
     },
     {
       "symbol": "ACL",
-      "rows": 579,
+      "rows": 581,
       "columns": [
         "TradingDate",
         "Open",
@@ -561,9 +560,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "13/11/2026",
-      "last_close": 11300.0,
-      "last_volume": 2500.0
+      "last_date": "19/11/2026",
+      "last_close": 10900.0,
+      "last_volume": 2300.0
     },
     {
       "symbol": "ADC",
@@ -822,7 +821,7 @@
       "last_volume": 139100.0,
       "mama": 1064.1585236805022,
       "fama": 1093.5216819064033,
-      "period": 16.723889535916694,
+      "period": 16.723889535916683,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -963,7 +962,7 @@
       "last_volume": 66700.0,
       "mama": 3735.3759370063563,
       "fama": 3967.910270319344,
-      "period": 23.357954686694075,
+      "period": 23.35795468669407,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -1339,7 +1338,7 @@
     },
     {
       "symbol": "BFC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -1350,21 +1349,21 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 55500.0,
-      "last_volume": 76900.0,
-      "mama": 56885.229776924316,
-      "fama": 56565.31480444265,
-      "period": 23.630485781496297,
+      "last_date": "20/11/2026",
+      "last_close": 59000.0,
+      "last_volume": 82500.0,
+      "mama": 56198.71193999524,
+      "fama": 56274.26377599297,
+      "period": 21.877692868654737,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
-      "longa": true,
-      "shrta": false,
+      "longa": false,
+      "shrta": true,
       "buy": false,
       "sell": false,
       "buy_setup_value": 51200.0,
-      "sell_setup_value": 55500.0,
+      "sell_setup_value": 54600.0,
       "bprice": 53900.0,
       "sprice": 55400.0
     },
@@ -1420,7 +1419,7 @@
       "last_volume": 3895200.0,
       "mama": 30875.358761109346,
       "fama": 31801.605241015997,
-      "period": 18.9593030849065,
+      "period": 18.959303084906495,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -1719,7 +1718,7 @@
     },
     {
       "symbol": "BTP",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -1730,9 +1729,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 6550.0,
-      "last_volume": 12200.0
+      "last_date": "20/11/2026",
+      "last_close": 6480.0,
+      "last_volume": 10300.0
     },
     {
       "symbol": "BTS",
@@ -1994,7 +1993,7 @@
     },
     {
       "symbol": "CCC",
-      "rows": 366,
+      "rows": 369,
       "columns": [
         "TradingDate",
         "Open",
@@ -2005,9 +2004,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 5680.0,
-      "last_volume": 100.0
+      "last_date": "20/11/2026",
+      "last_close": 5670.0,
+      "last_volume": 5300.0
     },
     {
       "symbol": "CCI",
@@ -2317,7 +2316,7 @@
     },
     {
       "symbol": "CLH",
-      "rows": 593,
+      "rows": 597,
       "columns": [
         "TradingDate",
         "Open",
@@ -2328,9 +2327,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 23200.0,
-      "last_volume": 1800.0
+      "last_date": "20/11/2026",
+      "last_close": 20800.0,
+      "last_volume": 3500.0
     },
     {
       "symbol": "CLL",
@@ -2400,7 +2399,7 @@
     },
     {
       "symbol": "CMG",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -2411,12 +2410,12 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 17600.0,
-      "last_volume": 164900.0,
-      "mama": 17752.85178072938,
-      "fama": 18347.618329269477,
-      "period": 20.71343518078355,
+      "last_date": "20/11/2026",
+      "last_close": 16200.0,
+      "last_volume": 247100.0,
+      "mama": 17021.23853497381,
+      "fama": 17775.780895143023,
+      "period": 21.043839752351346,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -2513,7 +2512,7 @@
     },
     {
       "symbol": "COM",
-      "rows": 317,
+      "rows": 321,
       "columns": [
         "TradingDate",
         "Open",
@@ -2524,9 +2523,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "12/11/2026",
-      "last_close": 27400.0,
-      "last_volume": 300.0
+      "last_date": "20/11/2026",
+      "last_close": 30000.0,
+      "last_volume": 500.0
     },
     {
       "symbol": "CPC",
@@ -2770,7 +2769,7 @@
       "mama": 70651.77988407915,
       "fama": 68784.56783320998,
       "period": 17.676413247341095,
-      "alpha": 0.06735368084441948,
+      "alpha": 0.06735368084441949,
       "buysetup": false,
       "sellsetup": false,
       "longa": true,
@@ -3084,7 +3083,7 @@
     },
     {
       "symbol": "DAT",
-      "rows": 493,
+      "rows": 495,
       "columns": [
         "TradingDate",
         "Open",
@@ -3095,13 +3094,13 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "13/11/2026",
-      "last_close": 8030.0,
-      "last_volume": 1000.0
+      "last_date": "20/11/2026",
+      "last_close": 7600.0,
+      "last_volume": 1500.0
     },
     {
       "symbol": "DBC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -3111,19 +3110,19 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "buy_signal",
-      "last_date": "16/11/2026",
-      "last_close": 16400.0,
-      "last_volume": 4210800.0,
-      "mama": 15947.257946483844,
-      "fama": 15887.340761414069,
-      "period": 17.313466759443934,
-      "alpha": 0.05,
+      "reason": "no_confirmed_signal",
+      "last_date": "20/11/2026",
+      "last_close": 16300.0,
+      "last_volume": 2692800.0,
+      "mama": 16086.693197252647,
+      "fama": 15966.060200333664,
+      "period": 15.690667534372194,
+      "alpha": 0.056809927855942126,
       "buysetup": false,
       "sellsetup": false,
       "longa": true,
       "shrta": false,
-      "buy": true,
+      "buy": false,
       "sell": false,
       "buy_setup_value": 16250.0,
       "sell_setup_value": 15200.0,
@@ -3500,7 +3499,7 @@
     },
     {
       "symbol": "DMC",
-      "rows": 552,
+      "rows": 556,
       "columns": [
         "TradingDate",
         "Open",
@@ -3511,9 +3510,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 53300.0,
-      "last_volume": 500.0
+      "last_date": "20/11/2026",
+      "last_close": 52000.0,
+      "last_volume": 700.0
     },
     {
       "symbol": "DNC",
@@ -3707,7 +3706,7 @@
     },
     {
       "symbol": "DRL",
-      "rows": 605,
+      "rows": 609,
       "columns": [
         "TradingDate",
         "Open",
@@ -3718,9 +3717,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 40700.0,
-      "last_volume": 1300.0
+      "last_date": "20/11/2026",
+      "last_close": 40600.0,
+      "last_volume": 2500.0
     },
     {
       "symbol": "DSC",
@@ -4407,7 +4406,7 @@
       "last_volume": 529900.0,
       "mama": 10766.341358178139,
       "fama": 10817.826263660065,
-      "period": 16.199984626430822,
+      "period": 16.19998462643082,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": true,
@@ -5218,7 +5217,7 @@
     },
     {
       "symbol": "HAX",
-      "rows": 610,
+      "rows": 606,
       "columns": [
         "TradingDate",
         "Open",
@@ -5229,13 +5228,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "20/11/2026",
-      "last_close": 7940.0,
-      "last_volume": 34600.0,
-      "mama": 8108.1718517180425,
-      "fama": 8236.532203591663,
-      "period": 18.81004325269846,
-      "alpha": 0.10766987618929776,
+      "last_date": "16/11/2026",
+      "last_close": 8160.0,
+      "last_volume": 66100.0,
+      "mama": 8252.794820939436,
+      "fama": 8344.276184413371,
+      "period": 17.50613652199967,
+      "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
       "longa": false,
@@ -5405,7 +5404,7 @@
     },
     {
       "symbol": "HDC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -5416,13 +5415,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 12550.0,
-      "last_volume": 4050000.0,
-      "mama": 12764.124912164,
-      "fama": 12209.450650218876,
-      "period": 21.658502377995614,
-      "alpha": 0.05,
+      "last_date": "20/11/2026",
+      "last_close": 12850.0,
+      "last_volume": 3399200.0,
+      "mama": 12676.989504603447,
+      "fama": 12344.494239410242,
+      "period": 18.517900272908086,
+      "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
       "longa": true,
@@ -5644,7 +5643,7 @@
       "last_volume": 113400.0,
       "mama": 7360.790271227697,
       "fama": 7804.398272774797,
-      "period": 21.72502396393605,
+      "period": 21.72502396393606,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -5659,7 +5658,7 @@
     },
     {
       "symbol": "HIO",
-      "rows": 736,
+      "rows": 740,
       "columns": [
         "TradingDate",
         "Open",
@@ -5670,21 +5669,21 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 10400.0,
-      "last_volume": 270500.0,
-      "mama": 12058.156622755825,
-      "fama": 10877.02616818622,
-      "period": 31.17285821554053,
-      "alpha": 0.07336328802580099,
+      "last_date": "20/11/2026",
+      "last_close": 8370.0,
+      "last_volume": 45500.0,
+      "mama": 10296.173111890252,
+      "fama": 10312.20253760811,
+      "period": 29.682983689885106,
+      "alpha": 0.052506531461872334,
       "buysetup": false,
-      "sellsetup": false,
-      "longa": true,
-      "shrta": false,
+      "sellsetup": true,
+      "longa": false,
+      "shrta": true,
       "buy": false,
       "sell": false,
       "buy_setup_value": 7500.0,
-      "sell_setup_value": 6600.0,
+      "sell_setup_value": 8370.0,
       "bprice": 7600.0,
       "sprice": 7500.0
     },
@@ -5723,7 +5722,7 @@
       "last_volume": 22400.0,
       "mama": 13608.56631514724,
       "fama": 13825.121250312946,
-      "period": 31.881514147448065,
+      "period": 31.88151414744806,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -5820,7 +5819,7 @@
     },
     {
       "symbol": "HMR",
-      "rows": 587,
+      "rows": 589,
       "columns": [
         "TradingDate",
         "Open",
@@ -5831,9 +5830,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 8700.0,
-      "last_volume": 2000.0
+      "last_date": "20/11/2026",
+      "last_close": 8100.0,
+      "last_volume": 7900.0
     },
     {
       "symbol": "HNA",
@@ -6094,7 +6093,7 @@
     },
     {
       "symbol": "HTI",
-      "rows": 605,
+      "rows": 609,
       "columns": [
         "TradingDate",
         "Open",
@@ -6105,9 +6104,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 18300.0,
-      "last_volume": 10100.0
+      "last_date": "20/11/2026",
+      "last_close": 18200.0,
+      "last_volume": 20000.0
     },
     {
       "symbol": "HTL",
@@ -6685,7 +6684,7 @@
     },
     {
       "symbol": "JVC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -6696,13 +6695,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 2500.0,
-      "last_volume": 127400.0,
-      "mama": 2582.6053567641748,
-      "fama": 2661.7193534932344,
-      "period": 20.739556888787877,
-      "alpha": 0.5,
+      "last_date": "20/11/2026",
+      "last_close": 2460.0,
+      "last_volume": 117600.0,
+      "mama": 2568.0119856178994,
+      "fama": 2646.5756202596644,
+      "period": 22.520180569196036,
+      "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
       "longa": false,
@@ -6924,7 +6923,7 @@
       "last_volume": 119500.0,
       "mama": 10280.120656558336,
       "fama": 10480.698869502061,
-      "period": 19.367402117570506,
+      "period": 19.36740211757051,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -7243,7 +7242,7 @@
     },
     {
       "symbol": "LCG",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -7254,12 +7253,12 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 6530.0,
-      "last_volume": 551000.0,
-      "mama": 6660.293047415976,
-      "fama": 6615.676715973399,
-      "period": 20.015003235259048,
+      "last_date": "20/11/2026",
+      "last_close": 6200.0,
+      "last_volume": 1042000.0,
+      "mama": 6604.784776199723,
+      "fama": 6591.874948732918,
+      "period": 17.20266056148918,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -7321,7 +7320,7 @@
       "last_volume": 338500.0,
       "mama": 7633.372812050604,
       "fama": 7639.965211854396,
-      "period": 15.348756030242079,
+      "period": 15.348756030242075,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": true,
@@ -8178,7 +8177,7 @@
       "last_volume": 254800.0,
       "mama": 47966.74045275095,
       "fama": 47949.74815698598,
-      "period": 22.27115389225915,
+      "period": 22.271153892259154,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -8359,7 +8358,7 @@
       "last_volume": 111100.0,
       "mama": 7523.220603520442,
       "fama": 7564.944121368101,
-      "period": 17.02015219787314,
+      "period": 17.020152197873138,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -8598,7 +8597,7 @@
     },
     {
       "symbol": "NRC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -8608,24 +8607,24 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 4800.0,
-      "last_volume": 766100.0,
-      "mama": 4666.327486237792,
-      "fama": 4647.791801589837,
-      "period": 18.41252748622642,
-      "alpha": 0.05,
+      "reason": "sell_signal",
+      "last_date": "20/11/2026",
+      "last_close": 4200.0,
+      "last_volume": 4742700.0,
+      "mama": 4484.183889082402,
+      "fama": 4561.327030154815,
+      "period": 19.346887774373016,
+      "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
-      "longa": true,
-      "shrta": false,
+      "longa": false,
+      "shrta": true,
       "buy": false,
-      "sell": false,
+      "sell": true,
       "buy_setup_value": 4800.0,
-      "sell_setup_value": 4500.0,
-      "bprice": 6700.0,
-      "sprice": 5900.0
+      "sell_setup_value": 4400.0,
+      "bprice": 4900.0,
+      "sprice": 4200.0
     },
     {
       "symbol": "NSC",
@@ -8852,7 +8851,7 @@
     },
     {
       "symbol": "NVT",
-      "rows": 490,
+      "rows": 493,
       "columns": [
         "TradingDate",
         "Open",
@@ -8863,9 +8862,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 7790.0,
-      "last_volume": 400.0
+      "last_date": "20/11/2026",
+      "last_close": 7660.0,
+      "last_volume": 100.0
     },
     {
       "symbol": "OCB",
@@ -8885,7 +8884,7 @@
       "last_volume": 2636000.0,
       "mama": 10630.56470374383,
       "fama": 10630.2503310049,
-      "period": 18.73950971199202,
+      "period": 18.739509711992014,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -9203,7 +9202,7 @@
     },
     {
       "symbol": "PDN",
-      "rows": 560,
+      "rows": 564,
       "columns": [
         "TradingDate",
         "Open",
@@ -9214,9 +9213,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 78200.0,
-      "last_volume": 8200.0
+      "last_date": "20/11/2026",
+      "last_close": 75000.0,
+      "last_volume": 11000.0
     },
     {
       "symbol": "PDR",
@@ -9314,7 +9313,7 @@
     },
     {
       "symbol": "PGC",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -9325,9 +9324,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 13950.0,
-      "last_volume": 3800.0
+      "last_date": "20/11/2026",
+      "last_close": 14300.0,
+      "last_volume": 4200.0
     },
     {
       "symbol": "PGD",
@@ -9449,7 +9448,7 @@
       "last_volume": 48600.0,
       "mama": 3629.5629040410568,
       "fama": 3640.638304774299,
-      "period": 17.253421350948095,
+      "period": 17.253421350948102,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -10695,8 +10694,8 @@
       "last_date": "20/11/2026",
       "last_close": 6960.0,
       "last_volume": 236700.0,
-      "mama": 7474.37880811962,
-      "fama": 7664.714493357609,
+      "mama": 7474.378808119619,
+      "fama": 7664.71449335761,
       "period": 17.473671880964684,
       "alpha": 0.11594070205507784,
       "buysetup": false,
@@ -10760,7 +10759,7 @@
     },
     {
       "symbol": "SAM",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -10771,13 +10770,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 6160.0,
-      "last_volume": 54200.0,
-      "mama": 6164.590568473654,
-      "fama": 6150.197393959077,
-      "period": 22.852267895221907,
-      "alpha": 0.5,
+      "last_date": "20/11/2026",
+      "last_close": 6150.0,
+      "last_volume": 47800.0,
+      "mama": 6158.037238018959,
+      "fama": 6148.2894845128185,
+      "period": 22.38712658481248,
+      "alpha": 0.06663496943207282,
       "buysetup": false,
       "sellsetup": false,
       "longa": true,
@@ -10983,7 +10982,7 @@
     },
     {
       "symbol": "SCS",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -10994,13 +10993,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 39900.0,
-      "last_volume": 78400.0,
-      "mama": 40033.85675849455,
-      "fama": 40329.0159218608,
-      "period": 18.876723444661625,
-      "alpha": 0.5,
+      "last_date": "20/11/2026",
+      "last_close": 39250.0,
+      "last_volume": 104400.0,
+      "mama": 39685.84053165713,
+      "fama": 40054.58852111946,
+      "period": 17.501690407155937,
+      "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
       "longa": false,
@@ -11161,7 +11160,7 @@
     },
     {
       "symbol": "SFI",
-      "rows": 520,
+      "rows": 524,
       "columns": [
         "TradingDate",
         "Open",
@@ -11172,9 +11171,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "13/11/2026",
-      "last_close": 23100.0,
-      "last_volume": 1300.0
+      "last_date": "20/11/2026",
+      "last_close": 24000.0,
+      "last_volume": 400.0
     },
     {
       "symbol": "SFN",
@@ -11261,7 +11260,7 @@
     },
     {
       "symbol": "SGR",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -11271,24 +11270,10 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 9490.0,
-      "last_volume": 84800.0,
-      "mama": 9662.231113140902,
-      "fama": 9774.970704854306,
-      "period": 17.362384298519586,
-      "alpha": 0.05,
-      "buysetup": false,
-      "sellsetup": false,
-      "longa": false,
-      "shrta": true,
-      "buy": false,
-      "sell": false,
-      "buy_setup_value": 10400.0,
-      "sell_setup_value": 9770.0,
-      "bprice": 10500.0,
-      "sprice": 9700.0
+      "reason": "volume_filter",
+      "last_date": "20/11/2026",
+      "last_close": 9330.0,
+      "last_volume": 10400.0
     },
     {
       "symbol": "SGT",
@@ -11577,7 +11562,7 @@
     },
     {
       "symbol": "SJS",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -11588,9 +11573,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 53000.0,
-      "last_volume": 1200.0
+      "last_date": "20/11/2026",
+      "last_close": 52000.0,
+      "last_volume": 7700.0
     },
     {
       "symbol": "SKG",
@@ -12767,7 +12752,7 @@
     },
     {
       "symbol": "THG",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -12778,9 +12763,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
+      "last_date": "20/11/2026",
       "last_close": 25350.0,
-      "last_volume": 8100.0
+      "last_volume": 7900.0
     },
     {
       "symbol": "THT",
@@ -12863,7 +12848,7 @@
     },
     {
       "symbol": "TIX",
-      "rows": 271,
+      "rows": 272,
       "columns": [
         "TradingDate",
         "Open",
@@ -12874,9 +12859,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 39000.0,
-      "last_volume": 100.0
+      "last_date": "19/11/2026",
+      "last_close": 36749.8,
+      "last_volume": 600.0
     },
     {
       "symbol": "TJC",
@@ -12914,7 +12899,7 @@
     },
     {
       "symbol": "TLD",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -12925,9 +12910,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 7840.0,
-      "last_volume": 1100.0
+      "last_date": "20/11/2026",
+      "last_close": 7640.0,
+      "last_volume": 14100.0
     },
     {
       "symbol": "TLG",
@@ -13061,7 +13046,7 @@
     },
     {
       "symbol": "TMT",
-      "rows": 604,
+      "rows": 607,
       "columns": [
         "TradingDate",
         "Open",
@@ -13072,9 +13057,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 10000.0,
-      "last_volume": 1100.0
+      "last_date": "20/11/2026",
+      "last_close": 9250.0,
+      "last_volume": 900.0
     },
     {
       "symbol": "TMX",
@@ -13348,7 +13333,7 @@
       "last_close": 18300.0,
       "last_volume": 134000.0,
       "mama": 19109.435358874565,
-      "fama": 19997.57200743262,
+      "fama": 19997.572007432616,
       "period": 31.23840749694377,
       "alpha": 0.5,
       "buysetup": false,
@@ -13735,7 +13720,7 @@
     },
     {
       "symbol": "UIC",
-      "rows": 512,
+      "rows": 516,
       "columns": [
         "TradingDate",
         "Open",
@@ -13746,9 +13731,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "13/11/2026",
-      "last_close": 55000.0,
-      "last_volume": 2200.0
+      "last_date": "20/11/2026",
+      "last_close": 53500.0,
+      "last_volume": 3900.0
     },
     {
       "symbol": "UNI",
@@ -13962,7 +13947,7 @@
     },
     {
       "symbol": "VCI",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -13973,21 +13958,21 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 19250.0,
-      "last_volume": 6854600.0,
-      "mama": 19692.461317118614,
-      "fama": 19499.648863703347,
-      "period": 17.220016610261716,
+      "last_date": "20/11/2026",
+      "last_close": 18700.0,
+      "last_volume": 6661800.0,
+      "mama": 19306.417878093147,
+      "fama": 19355.041330640695,
+      "period": 14.844638354660026,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
-      "longa": true,
-      "shrta": false,
+      "longa": false,
+      "shrta": true,
       "buy": false,
       "sell": false,
       "buy_setup_value": 20400.0,
-      "sell_setup_value": 20000.0,
+      "sell_setup_value": 18800.0,
       "bprice": 26364.0,
       "sprice": 26250.0
     },
@@ -14075,7 +14060,7 @@
     },
     {
       "symbol": "VDP",
-      "rows": 521,
+      "rows": 524,
       "columns": [
         "TradingDate",
         "Open",
@@ -14086,9 +14071,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
+      "last_date": "19/11/2026",
       "last_close": 31950.0,
-      "last_volume": 1000.0
+      "last_volume": 1100.0
     },
     {
       "symbol": "VDS",
@@ -14140,7 +14125,7 @@
     },
     {
       "symbol": "VFS",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -14151,13 +14136,13 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 9600.0,
-      "last_volume": 296900.0,
-      "mama": 9581.59868826768,
-      "fama": 9611.071739016266,
-      "period": 20.393704530226625,
-      "alpha": 0.05,
+      "last_date": "20/11/2026",
+      "last_close": 9100.0,
+      "last_volume": 1005100.0,
+      "mama": 9183.598204040394,
+      "fama": 9382.287540445066,
+      "period": 17.138586389907296,
+      "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
       "longa": false,
@@ -14359,7 +14344,7 @@
       "last_volume": 6228300.0,
       "mama": 61360.35788734473,
       "fama": 62337.41698735625,
-      "period": 16.949179635440533,
+      "period": 16.949179635440544,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -14484,7 +14469,7 @@
     },
     {
       "symbol": "VIG",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -14495,12 +14480,12 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 3700.0,
-      "last_volume": 41900.0,
-      "mama": 3789.5852087245257,
-      "fama": 3868.1645359426852,
-      "period": 20.615621013648877,
+      "last_date": "20/11/2026",
+      "last_close": 3600.0,
+      "last_volume": 29900.0,
+      "mama": 3734.897809165095,
+      "fama": 3814.1787356357518,
+      "period": 18.385263402495113,
       "alpha": 0.5,
       "buysetup": false,
       "sellsetup": false,
@@ -14838,7 +14823,7 @@
     },
     {
       "symbol": "VNM",
-      "rows": 606,
+      "rows": 610,
       "columns": [
         "TradingDate",
         "Open",
@@ -14849,12 +14834,12 @@
       ],
       "has_ohlcv": true,
       "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 53600.0,
-      "last_volume": 1961200.0,
-      "mama": 55367.06878551468,
-      "fama": 56323.14056549995,
-      "period": 22.490370308256722,
+      "last_date": "20/11/2026",
+      "last_close": 51400.0,
+      "last_volume": 2082200.0,
+      "mama": 53001.017965375315,
+      "fama": 54520.257252964744,
+      "period": 19.93618949010917,
       "alpha": 0.05,
       "buysetup": false,
       "sellsetup": false,
@@ -14996,7 +14981,7 @@
     },
     {
       "symbol": "VPD",
-      "rows": 604,
+      "rows": 608,
       "columns": [
         "TradingDate",
         "Open",
@@ -15007,9 +14992,9 @@
       ],
       "has_ohlcv": true,
       "reason": "volume_filter",
-      "last_date": "16/11/2026",
-      "last_close": 20500.0,
-      "last_volume": 600.0
+      "last_date": "20/11/2026",
+      "last_close": 20400.0,
+      "last_volume": 2300.0
     },
     {
       "symbol": "VPG",
@@ -15137,7 +15122,7 @@
     },
     {
       "symbol": "VPS",
-      "rows": 575,
+      "rows": 579,
       "columns": [
         "TradingDate",
         "Open",
@@ -15147,24 +15132,10 @@
         "Volume"
       ],
       "has_ohlcv": true,
-      "reason": "no_confirmed_signal",
-      "last_date": "16/11/2026",
-      "last_close": 8370.0,
-      "last_volume": 40600.0,
-      "mama": 8320.679290117008,
-      "fama": 8303.202386449033,
-      "period": 15.094494354860812,
-      "alpha": 0.5,
-      "buysetup": true,
-      "sellsetup": false,
-      "longa": true,
-      "shrta": false,
-      "buy": false,
-      "sell": false,
-      "buy_setup_value": 8380.0,
-      "sell_setup_value": 8500.0,
-      "bprice": 9000.0,
-      "sprice": 8310.0
+      "reason": "volume_filter",
+      "last_date": "20/11/2026",
+      "last_close": 8360.0,
+      "last_volume": 600.0
     },
     {
       "symbol": "VPX",
