@@ -191360,6 +191360,33 @@
           "last_volume": 4749700.0
         },
         {
+          "symbol": "NAB",
+          "status": "WATCHLIST",
+          "signal_type": "watch",
+          "score": 33,
+          "buy_score": 0,
+          "sell_score": 2,
+          "luc_mach_buy": false,
+          "luc_mach_sell": false,
+          "diep_filter": true,
+          "min_volume": 20000,
+          "threshold": 3,
+          "tplus_buy": false,
+          "tplus_sell": false,
+          "tplus_state": 1,
+          "vudd_buy_periods": [],
+          "vudd_sell_periods": [
+            55,
+            65
+          ],
+          "strategies": [
+            "vudd55_sell",
+            "vudd65_sell"
+          ],
+          "last_price": 12600.0,
+          "last_volume": 1881000.0
+        },
+        {
           "symbol": "PVS",
           "status": "WATCHLIST",
           "signal_type": "watch",
@@ -191561,22 +191588,6 @@
     "khung4_tplus": {
       "date": "27/11/2026",
       "all_signals": [
-        {
-          "symbol": "NAB",
-          "status": "BUY",
-          "signal_type": "khung4_tplus_buy",
-          "score": 100,
-          "khung4_tplus_buy": true,
-          "khung4_tplus_sell": false,
-          "khung4_tplus_state": 1,
-          "khung4_tplus_d": 12350.0,
-          "buy_price": 13200.0,
-          "last_price": 13200.0,
-          "last_volume": 4115500.0,
-          "strategies": [
-            "khung4_tplus_buy"
-          ]
-        },
         {
           "symbol": "GAS",
           "status": "BUY",
@@ -191859,30 +191870,6 @@
           "last_sell_price": 5530.0,
           "last_price": 4370.0,
           "last_volume": 165500.0,
-          "strategies": [
-            "advanced_trailstop_buy"
-          ]
-        },
-        {
-          "symbol": "GIL",
-          "status": "BUY",
-          "signal_type": "advanced_trailstop_buy",
-          "score": 100,
-          "ats_buy": true,
-          "ats_sell": false,
-          "ats_cover": true,
-          "ats_short": false,
-          "ats_long": true,
-          "ats_shrt": false,
-          "bs": 8618.23,
-          "atr": 327.67,
-          "atrvalue": 655.35,
-          "buy_price": 8700.0,
-          "sell_price": null,
-          "last_buy_price": 8700.0,
-          "last_sell_price": 8560.0,
-          "last_price": 8700.0,
-          "last_volume": 45700.0,
           "strategies": [
             "advanced_trailstop_buy"
           ]
